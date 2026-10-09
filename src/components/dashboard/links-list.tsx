@@ -24,8 +24,11 @@ import {
 } from "@dnd-kit/sortable";
 import { useRouter } from "next/navigation";
 
+import { usePageDraft } from "./PageDraftProvider";
+
 export function LinksList({ initialLinks }: { initialLinks: LinkBlock[] }) {
-  const [links, setLinks] = useState(initialLinks);
+  const { draft, updateBlocks } = usePageDraft();
+  const links = draft.blocks;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLink, setEditingLink] = useState<LinkBlock | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -58,13 +61,13 @@ export function LinksList({ initialLinks }: { initialLinks: LinkBlock[] }) {
       const newIndex = links.findIndex((link) => link.id === over.id);
 
       const newLinks = arrayMove(links, oldIndex, newIndex);
-      setLinks(newLinks); // Optimistic update
+      updateBlocks(newLinks); // Optimistic update
 
       startTransition(async () => {
         const res = await reorderBlocksAction(newLinks.map((l) => l.id));
         if (!res.ok) {
           // Revert on error
-          setLinks(links);
+          updateBlocks(links);
           if ((res as { code?: string }).code === "stale") {
             alert("Your list was out of date. Refreshed.");
             router.refresh();
@@ -79,12 +82,12 @@ export function LinksList({ initialLinks }: { initialLinks: LinkBlock[] }) {
   const handleToggleVisibility = (id: string, isVisible: boolean) => {
     const oldLinks = [...links];
     const newLinks = links.map(l => l.id === id ? { ...l, isVisible } : l);
-    setLinks(newLinks); // Optimistic update
+    updateBlocks(newLinks); // Optimistic update
 
     startTransition(async () => {
       const res = await setBlockVisibilityAction(id, isVisible);
       if (!res.ok) {
-        setLinks(oldLinks); // Revert on error
+        updateBlocks(oldLinks); // Revert on error
         alert(res.message || "Failed to change visibility");
       }
     });
@@ -152,12 +155,8 @@ export function LinksList({ initialLinks }: { initialLinks: LinkBlock[] }) {
     });
   };
 
-  // Sync state if server data changes (e.g., via actions revalidating path)
-  // We use initialLinks only as initial state, but if initialLinks changes, we should update local state unless we are in the middle of a transition
-  if (!isPending && JSON.stringify(initialLinks) !== JSON.stringify(links)) {
-     setLinks(initialLinks);
-  }
-
+  // The PageDraftProvider now handles syncing from server when initialLinks update,
+  // so we don't need the manual sync effect here anymore.
   return (
     <>
       <div className="mt-8 flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">

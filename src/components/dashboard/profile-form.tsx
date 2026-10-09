@@ -11,6 +11,8 @@ import { updateProfile, removeAvatar } from "@/server/actions/profile";
 import { profileSchema } from "@/lib/validators/profile";
 import { useRouter } from "next/navigation";
 
+import { usePageDraft } from "./PageDraftProvider";
+
 interface ProfileFormProps {
   initialData: {
     displayName: string | null;
@@ -22,6 +24,8 @@ interface ProfileFormProps {
 
 export function ProfileForm({ initialData }: ProfileFormProps) {
   const router = useRouter();
+  const { updateProfile: updateDraftProfile } = usePageDraft();
+  
   const [displayName, setDisplayName] = useState(initialData.displayName || "");
   const [bio, setBio] = useState(initialData.bio || "");
   const [isSaving, setIsSaving] = useState(false);
@@ -75,6 +79,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
     setBio(initialData.bio || "");
     setFieldErrors({});
     setGeneralError(null);
+    updateDraftProfile({ displayName: initialData.displayName || "", bio: initialData.bio || "" });
   };
 
   const handleSave = async () => {
@@ -168,6 +173,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
           });
           const data = await res.json();
           if (data.ok) {
+            updateDraftProfile({ avatarUrl: data.url });
             router.refresh();
           } else {
             setAvatarError(data.message || "Failed to upload avatar.");
@@ -194,6 +200,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
     setIsRemoving(false);
     
     if (res.ok) {
+      updateDraftProfile({ avatarUrl: null });
       router.refresh();
     } else {
       setAvatarError(res.message || "Failed to remove avatar.");
@@ -276,7 +283,10 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
             >
               <Input
                 value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
+                onChange={(e) => {
+                  setDisplayName(e.target.value);
+                  updateDraftProfile({ displayName: e.target.value });
+                }}
                 placeholder="Your name"
                 disabled={isSaving}
                 maxLength={50}
@@ -291,7 +301,10 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
               <div className="relative">
                 <Textarea
                   value={bio}
-                  onChange={(e) => setBio(e.target.value)}
+                  onChange={(e) => {
+                    setBio(e.target.value);
+                    updateDraftProfile({ bio: e.target.value });
+                  }}
                   placeholder="A short bio about yourself..."
                   disabled={isSaving}
                   rows={3}

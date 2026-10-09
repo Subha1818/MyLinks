@@ -1,0 +1,105 @@
+import { resolveTheme } from "@/lib/theme";
+import { Avatar } from "@/components/ui/avatar";
+import { isSafeHttpUrl } from "@/lib/safe-url";
+import { siteConfig } from "@/lib/site";
+
+type ProfileViewProps = {
+  displayName: string;
+  bio: string | null;
+  avatarUrl: string | null;
+  links: { id: string; title: string; url: string }[];
+  theme?: unknown;
+  mode: "preview" | "public";
+};
+
+export function ProfileView({
+  displayName,
+  bio,
+  avatarUrl,
+  links,
+  theme,
+  mode,
+}: ProfileViewProps) {
+  const resolvedTheme = resolveTheme(theme);
+
+  const style = {
+    "--theme-bg": resolvedTheme.background.value,
+    "--theme-text": resolvedTheme.textColor,
+    "--theme-btn-fill": resolvedTheme.button.fill,
+    "--theme-btn-text": resolvedTheme.button.textColor,
+  } as React.CSSProperties;
+
+  const fontClass =
+    resolvedTheme.font === "dm-sans" ? "font-sans" : "font-heading";
+
+  const buttonRadiusClass =
+    resolvedTheme.button.shape === "pill"
+      ? "rounded-full"
+      : resolvedTheme.button.shape === "rounded"
+      ? "rounded-xl"
+      : "rounded-none";
+
+  return (
+    <div
+      style={style}
+      className={`min-h-full w-full bg-[var(--theme-bg)] text-[var(--theme-text)] flex flex-col items-center px-4 py-12 ${fontClass}`}
+    >
+      <div className="w-full max-w-[480px] flex flex-col items-center">
+        <Avatar
+          src={avatarUrl || undefined}
+          fallback={displayName.slice(0, 2).toUpperCase() || "??"}
+          size="lg"
+          className="mb-4 shadow-sm"
+        />
+        <h1 className="text-xl font-bold text-center mb-2">{displayName}</h1>
+        {bio && (
+          <p className="text-center text-sm mb-8 opacity-90 whitespace-pre-wrap">
+            {bio}
+          </p>
+        )}
+
+        <div className="w-full flex flex-col gap-4">
+          {links.length === 0 ? (
+            <div className="text-center text-sm font-bold opacity-70 py-8">
+              Your links will appear here
+            </div>
+          ) : (
+            links.map((link) => {
+              const safeUrl = isSafeHttpUrl(link.url) ? link.url : undefined;
+              
+              const btnClass = `block w-full text-center px-6 py-4 font-bold transition-transform hover:scale-[1.02] bg-[var(--theme-btn-fill)] text-[var(--theme-btn-text)] shadow-sm ${buttonRadiusClass} truncate`;
+
+              if (mode === "preview" || !safeUrl) {
+                return (
+                  <div
+                    key={link.id}
+                    className={btnClass}
+                    aria-disabled="true"
+                  >
+                    {link.title}
+                  </div>
+                );
+              }
+
+              return (
+                <a
+                  key={link.id}
+                  href={safeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow ugc"
+                  className={btnClass}
+                >
+                  {link.title}
+                </a>
+              );
+            })
+          )}
+        </div>
+        
+        <div className="mt-12 text-xs font-bold opacity-60 uppercase tracking-widest">
+          Made with {siteConfig.name}
+        </div>
+      </div>
+    </div>
+  );
+}

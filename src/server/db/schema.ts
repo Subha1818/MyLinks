@@ -6,6 +6,8 @@ import {
   jsonb,
   index,
   uniqueIndex,
+  uuid,
+  integer,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
@@ -96,18 +98,17 @@ export const pages = pgTable(
 export const blocks = pgTable(
   "blocks",
   {
-    id: text("id").primaryKey(),
+    id: uuid("id").primaryKey().defaultRandom(),
     pageId: text("page_id")
       .notNull()
       .references(() => pages.id, { onDelete: "cascade" }),
     type: text("type").default("link").notNull(),
     title: text("title").notNull(),
     url: text("url").notNull(),
-    icon: text("icon"),
-    position: text("position").notNull(), // fractional index string
+    position: integer("position").notNull(),
     isVisible: boolean("is_visible").default(true).notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
     index("blocks_page_position_idx").on(table.pageId, table.position),
@@ -121,7 +122,7 @@ export const clickEvents = pgTable(
   "click_events",
   {
     id: text("id").primaryKey(),
-    blockId: text("block_id")
+    blockId: uuid("block_id")
       .notNull()
       .references(() => blocks.id, { onDelete: "cascade" }),
     pageId: text("page_id")

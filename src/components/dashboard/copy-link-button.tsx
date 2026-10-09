@@ -8,7 +8,8 @@ export function CopyLinkButton({ username }: { username: string }) {
 
   const handleCopy = async () => {
     try {
-      const url = `${window.location.origin}/${username}`;
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+      const url = `${baseUrl}/${username}`;
       await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);

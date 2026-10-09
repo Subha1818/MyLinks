@@ -2,6 +2,7 @@ import { resolveTheme } from "@/lib/theme";
 import { Avatar } from "@/components/ui/avatar";
 import { isSafeHttpUrl } from "@/lib/safe-url";
 import { siteConfig } from "@/lib/site";
+import Link from "next/link";
 
 type ProfileViewProps = {
   displayName: string;
@@ -42,7 +43,7 @@ export function ProfileView({
   return (
     <div
       style={style}
-      className={`min-h-full w-full bg-[var(--theme-bg)] text-[var(--theme-text)] flex flex-col items-center px-4 py-12 ${fontClass}`}
+      className={`flex-1 min-h-full w-full bg-[var(--theme-bg)] text-[var(--theme-text)] flex flex-col items-center px-4 py-12 ${fontClass}`}
     >
       <div className="w-full max-w-[480px] flex flex-col items-center">
         <Avatar
@@ -67,9 +68,23 @@ export function ProfileView({
             links.map((link) => {
               const safeUrl = isSafeHttpUrl(link.url) ? link.url : undefined;
               
-              const btnClass = `block w-full text-center px-6 py-4 font-bold transition-transform hover:scale-[1.02] bg-[var(--theme-btn-fill)] text-[var(--theme-btn-text)] shadow-sm ${buttonRadiusClass} truncate`;
+              const btnClass = `block w-full text-center px-6 py-4 font-bold transition-transform hover:scale-[1.02] bg-[var(--theme-btn-fill)] text-[var(--theme-btn-text)] shadow-sm ${buttonRadiusClass} truncate focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2`;
 
-              if (mode === "preview" || !safeUrl) {
+              if (!safeUrl) {
+                if (mode === "public") return null;
+                // In preview mode, render as disabled
+                return (
+                  <div
+                    key={link.id}
+                    className={btnClass}
+                    aria-disabled="true"
+                  >
+                    {link.title}
+                  </div>
+                );
+              }
+
+              if (mode === "preview") {
                 return (
                   <div
                     key={link.id}
@@ -97,7 +112,9 @@ export function ProfileView({
         </div>
         
         <div className="mt-12 text-xs font-bold opacity-60 uppercase tracking-widest">
-          Made with {siteConfig.name}
+          <Link href="/" className="hover:underline">
+            Made with {siteConfig.name}
+          </Link>
         </div>
       </div>
     </div>

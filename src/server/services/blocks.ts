@@ -111,13 +111,14 @@ export async function reorderBlocks(pageId: string, orderedIds: string[]) {
   if (orderedIds.length === 0) return { ok: true } as const;
 
   const cases = orderedIds.map((id, index) => {
-    return sql`WHEN id = ${id} THEN ${1024 * (index + 1)}`;
+    return sql`WHEN id = ${id} THEN (${1024 * (index + 1)})::integer`;
   });
 
   const query = sql`
     UPDATE ${blocks}
     SET position = CASE
       ${sql.join(cases, sql` `)}
+      ELSE position
       END,
       updated_at = ${new Date()}
     WHERE page_id = ${pageId}

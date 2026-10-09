@@ -24,6 +24,7 @@ export default async function LinksPage() {
     title: b.title,
     url: b.url,
     position: b.position,
+    isVisible: b.isVisible,
   }));
 
   return (

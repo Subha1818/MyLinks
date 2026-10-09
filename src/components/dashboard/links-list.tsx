@@ -1,20 +1,31 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Plus, Link2, Pencil, Trash2, X, Loader2 } from "lucide-react";
+import { useState, useTransition, useId } from "react";
+import { Plus, Link2, X, Loader2 } from "lucide-react";
 import { Card } from "./card";
 import { EmptyState } from "./empty-state";
-import { addBlockAction, editBlockAction, removeBlockAction } from "@/server/actions/blocks";
+import { addBlockAction, editBlockAction, removeBlockAction, reorderBlocksAction, setBlockVisibilityAction } from "@/server/actions/blocks";
 import { MAX_LINKS_PER_PAGE } from "@/lib/limits";
-
-type LinkBlock = {
-  id: string;
-  title: string;
-  url: string;
-  position: number;
-};
+import { LinkRow, type LinkBlock } from "./link-row";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { useRouter } from "next/navigation";
 
 export function LinksList({ initialLinks }: { initialLinks: LinkBlock[] }) {
+  const [links, setLinks] = useState(initialLinks);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLink, setEditingLink] = useState<LinkBlock | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -25,6 +36,59 @@ export function LinksList({ initialLinks }: { initialLinks: LinkBlock[] }) {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+  const dndId = useId();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = links.findIndex((link) => link.id === active.id);
+      const newIndex = links.findIndex((link) => link.id === over.id);
+
+      const newLinks = arrayMove(links, oldIndex, newIndex);
+      setLinks(newLinks); // Optimistic update
+
+      startTransition(async () => {
+        const res = await reorderBlocksAction(newLinks.map((l) => l.id));
+        if (!res.ok) {
+          // Revert on error
+          setLinks(links);
+          if ((res as { code?: string }).code === "stale") {
+            alert("Your list was out of date. Refreshed.");
+            router.refresh();
+          } else {
+            alert(res.message || "Failed to reorder links");
+          }
+        }
+      });
+    }
+  };
+
+  const handleToggleVisibility = (id: string, isVisible: boolean) => {
+    const oldLinks = [...links];
+    const newLinks = links.map(l => l.id === id ? { ...l, isVisible } : l);
+    setLinks(newLinks); // Optimistic update
+
+    startTransition(async () => {
+      const res = await setBlockVisibilityAction(id, isVisible);
+      if (!res.ok) {
+        setLinks(oldLinks); // Revert on error
+        alert(res.message || "Failed to change visibility");
+      }
+    });
+  };
 
   const handleOpenModal = (link?: LinkBlock) => {
     if (link) {
@@ -83,33 +147,37 @@ export function LinksList({ initialLinks }: { initialLinks: LinkBlock[] }) {
       if (res.ok) {
         setDeleteId(null);
       } else {
-        alert(res.message);
+        alert(res.message || "Failed to delete link");
       }
     });
   };
 
+  // Sync state if server data changes (e.g., via actions revalidating path)
+  // We use initialLinks only as initial state, but if initialLinks changes, we should update local state unless we are in the middle of a transition
+  if (!isPending && JSON.stringify(initialLinks) !== JSON.stringify(links)) {
+     setLinks(initialLinks);
+  }
+
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4 -mt-[5.5rem] relative z-10 pointer-events-none">
-        <div className="flex-1"></div>
-        <button
-          onClick={() => handleOpenModal()}
-          disabled={isPending || initialLinks.length >= MAX_LINKS_PER_PAGE}
-          className="inline-flex items-center justify-center gap-2 bg-ink text-cream hover:bg-ink/90 font-bold text-sm sm:text-base py-3 px-6 rounded-full transition-colors mb-1 pointer-events-auto disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Plus className="w-5 h-5" />
-          <span>Add link</span>
-        </button>
-      </div>
-
-      <div className="mt-12 flex justify-between items-center mb-4">
+      <div className="mt-8 flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
         <h2 className="font-heading font-bold text-xl text-ink">Links</h2>
-        <div className="text-sm font-bold text-ink/60">
-          {initialLinks.length} / {MAX_LINKS_PER_PAGE} links
+        <div className="flex items-center gap-4">
+          <div className="text-sm font-bold text-ink/60">
+            {links.length} / {MAX_LINKS_PER_PAGE} links
+          </div>
+          <button
+            onClick={() => handleOpenModal()}
+            disabled={isPending || links.length >= MAX_LINKS_PER_PAGE}
+            className="inline-flex items-center justify-center gap-2 bg-ink text-cream hover:bg-ink/90 font-bold text-sm py-2 px-4 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add link</span>
+          </button>
         </div>
       </div>
       
-      {initialLinks.length === 0 ? (
+      {links.length === 0 ? (
         <EmptyState
           icon={Link2}
           title="No links yet"
@@ -120,32 +188,30 @@ export function LinksList({ initialLinks }: { initialLinks: LinkBlock[] }) {
           }}
         />
       ) : (
-        <div className="space-y-4">
-          {initialLinks.map((link) => (
-            <Card key={link.id} className="p-4 sm:p-5 flex items-center justify-between gap-4 group">
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-ink truncate text-sm sm:text-base">{link.title}</p>
-                <p className="text-ink/60 text-xs sm:text-sm truncate">{link.url}</p>
-              </div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <button
-                  onClick={() => handleOpenModal(link)}
-                  className="p-2 text-ink/50 hover:text-ink hover:bg-ink/5 rounded-lg transition-colors"
-                  aria-label={`Edit ${link.title}`}
-                >
-                  <Pencil className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setDeleteId(link.id)}
-                  className="p-2 text-ink/50 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                  aria-label={`Delete ${link.title}`}
-                >
-                  <Trash2 className="w-5 h-5" />
-                </button>
-              </div>
-            </Card>
-          ))}
-        </div>
+        <DndContext
+          id={dndId}
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={links.map((link) => link.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-4">
+              {links.map((link) => (
+                <LinkRow
+                  key={link.id}
+                  link={link}
+                  onEdit={handleOpenModal}
+                  onDelete={setDeleteId}
+                  onToggleVisibility={handleToggleVisibility}
+                  isDragDisabled={isPending || links.length < 2}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
       )}
 
       {/* Delete Confirm Modal */}

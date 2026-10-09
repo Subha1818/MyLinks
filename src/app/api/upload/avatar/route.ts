@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireUser } from "@/server/session";
+import { getSession } from "@/server/session";
 import { rateLimit } from "@/lib/rate-limit";
 import { uploadAvatar, deleteAvatarIfOwned } from "@/server/storage";
 import { getPageByUserId, updatePageAvatar } from "@/server/services/pages";
@@ -10,7 +10,10 @@ const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await requireUser();
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
+    }
     const userId = session.user.id;
 
     // Rate limit: 10 uploads per hour per user
@@ -86,6 +89,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, url });
   } catch (error) {
     console.error("[uploadAvatarRoute] Error:", error);
-    return NextResponse.json({ ok: false, message: "An unexpected error occurred" }, { status: 500 });
+    const msg = error instanceof Error ? error.message : "An unexpected error occurred";
+    return NextResponse.json({ ok: false, message: msg }, { status: 500 });
   }
 }

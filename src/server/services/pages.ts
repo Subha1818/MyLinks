@@ -109,3 +109,21 @@ export async function updatePageProfile(userId: string, data: UpdateProfileInput
 
   return updated ?? null;
 }
+
+/**
+ * Update a user's avatar URL.
+ */
+export async function updatePageAvatar(userId: string, avatarUrl: string | null) {
+  const [updated] = await db
+    .update(pages)
+    .set({
+      avatarUrl,
+      updatedAt: new Date(),
+    })
+    .where(eq(pages.userId, userId))
+    .returning();
+
+  return updated ?? null;
+}
+
+

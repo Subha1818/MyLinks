@@ -50,3 +50,35 @@ export async function updateProfile(data: ProfileInput): Promise<UpdateProfileRe
     return { ok: false, message: "An unexpected error occurred while saving." };
   }
 }
+
+export async function removeAvatar() {
+  const session = await requireUser();
+  const userId = session.user.id;
+
+  try {
+    const { getPageByUserId, updatePageAvatar } = await import("@/server/services/pages");
+    const { deleteAvatarIfOwned } = await import("@/server/storage");
+    
+    const page = await getPageByUserId(userId);
+    if (!page || !page.avatarUrl) {
+      return { ok: false, message: "No avatar to remove." };
+    }
+
+    const oldAvatarUrl = page.avatarUrl;
+    
+    // Clear in DB first
+    await updatePageAvatar(userId, null);
+    
+    // Delete blob if owned
+    await deleteAvatarIfOwned({ userId, url: oldAvatarUrl });
+
+    // Revalidate
+    revalidatePath("/dashboard", "layout");
+    revalidatePath(`/${page.username}`);
+
+    return { ok: true };
+  } catch (error) {
+    console.error("[removeAvatar] Error:", error);
+    return { ok: false, message: "An unexpected error occurred." };
+  }
+}

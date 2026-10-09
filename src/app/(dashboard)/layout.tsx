@@ -26,10 +26,10 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-cream lg:flex text-ink">
-      <Sidebar user={session.user} username={page.username} />
+      <Sidebar page={page} />
       
       <div className="flex-1 lg:ml-64 flex flex-col min-h-screen pb-20 lg:pb-0">
-        <TopBar user={session.user} username={page.username} />
+        <TopBar page={page} />
         
         <main className="flex-1 w-full max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-0">
           {children}

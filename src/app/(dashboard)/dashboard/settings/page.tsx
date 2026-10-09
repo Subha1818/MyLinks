@@ -6,6 +6,7 @@ import { requireUser } from "@/server/session";
 import { getPageByUserId } from "@/server/services/pages";
 import { redirect } from "next/navigation";
 import { siteConfig } from "@/lib/site";
+import { Avatar } from "@/components/ui/avatar";
 
 export const metadata = {
   title: "Settings | Dashboard",
@@ -35,17 +36,11 @@ export default async function SettingsPage() {
           </h2>
           <div className="flex flex-col sm:flex-row gap-6 items-start">
             <div className="flex-shrink-0">
-              {session.user.image ? (
-                <img
-                  src={session.user.image}
-                  alt={session.user.name || "User"}
-                  className="w-20 h-20 rounded-full border-2 border-ink/10 object-cover"
-                />
-              ) : (
-                <div className="w-20 h-20 rounded-full bg-lime text-forest flex items-center justify-center font-bold text-2xl border-2 border-ink/10">
-                  {session.user.name?.[0]?.toUpperCase() || page.username[0].toUpperCase()}
-                </div>
-              )}
+              <Avatar
+                src={page.avatarUrl || session.user.image}
+                fallback={page.displayName || session.user.name || page.username}
+                size="xl"
+              />
             </div>
             
             <div className="flex-1 space-y-4 w-full">

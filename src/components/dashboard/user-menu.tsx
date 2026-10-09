@@ -6,13 +6,12 @@ import Link from "next/link";
 import { signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { siteConfig } from "@/lib/site";
+import { Avatar } from "@/components/ui/avatar";
 
 export function UserMenu({
-  user,
-  username,
+  page,
 }: {
-  user: { name?: string | null; image?: string | null; email?: string };
-  username: string;
+  page: { displayName: string | null; username: string; avatarUrl: string | null };
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -47,28 +46,28 @@ export function UserMenu({
     });
   };
 
+  const nameToDisplay = page.displayName || page.username;
+
   return (
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-9 h-9 rounded-full overflow-hidden border border-ink/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest"
+        className="rounded-full overflow-hidden border border-ink/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest"
         aria-label="Open user menu"
         aria-expanded={isOpen}
       >
-        {user.image ? (
-          <img src={user.image} alt="User avatar" className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full bg-lime text-forest flex items-center justify-center font-bold text-sm">
-            {user.name?.[0]?.toUpperCase() || username[0].toUpperCase()}
-          </div>
-        )}
+        <Avatar
+          src={page.avatarUrl}
+          fallback={nameToDisplay}
+          size="sm"
+        />
       </button>
 
       {isOpen && (
         <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-ink/10 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
           <div className="px-4 py-3 border-b border-ink/5">
-            <p className="font-bold text-sm text-ink truncate">{user.name || username}</p>
-            <p className="text-xs text-ink/60 truncate mt-0.5">{siteConfig.name.toLowerCase()}.com/{username}</p>
+            <p className="font-bold text-sm text-ink truncate">{nameToDisplay}</p>
+            <p className="text-xs text-ink/60 truncate mt-0.5">{siteConfig.name.toLowerCase()}.com/{page.username}</p>
           </div>
           <div className="py-2 flex flex-col">
             <Link

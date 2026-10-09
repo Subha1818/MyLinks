@@ -2,6 +2,9 @@ export const instant = false;
 import { redirect } from "next/navigation";
 import { getSession } from "@/server/session";
 import { getPageByUserId } from "@/server/services/pages";
+import { Sidebar } from "@/components/dashboard/sidebar";
+import { TopBar } from "@/components/dashboard/top-bar";
+import { MobileNav } from "@/components/dashboard/mobile-nav";
 
 export default async function DashboardLayout({
   children,
@@ -22,23 +25,18 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-cream">
-      {/* 
-        This is just the dashboard shell layout for Phase 2.
-        Navigation and real UI will be added in Phase 3.
-      */}
-      <nav className="bg-white border-b-2 border-ink/10 px-6 py-4 flex items-center justify-between">
-        <div className="font-heading font-extrabold text-xl">MyLinks</div>
-        <div className="flex items-center gap-4">
-          <div className="text-sm font-semibold text-ink/70">
-            {session.user.email}
-          </div>
-          <a href="/api/auth/signout" className="text-sm font-bold text-coral hover:underline">
-            Logout
-          </a>
-        </div>
-      </nav>
-      <main className="max-w-4xl mx-auto p-6">{children}</main>
+    <div className="min-h-screen bg-cream lg:flex text-ink">
+      <Sidebar user={session.user} username={page.username} />
+      
+      <div className="flex-1 lg:ml-64 flex flex-col min-h-screen pb-20 lg:pb-0">
+        <TopBar user={session.user} username={page.username} />
+        
+        <main className="flex-1 w-full max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-0">
+          {children}
+        </main>
+      </div>
+
+      <MobileNav />
     </div>
   );
 }

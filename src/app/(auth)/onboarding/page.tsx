@@ -25,13 +25,17 @@ export default function OnboardingPage() {
   // Check username when debounced value changes
   useEffect(() => {
     if (!debouncedUsername) {
-      setStatus("idle");
-      setMessage("");
+      setTimeout(() => {
+        setStatus("idle");
+        setMessage("");
+      }, 0);
       return;
     }
 
     let isMounted = true;
-    setStatus("loading");
+    setTimeout(() => {
+      if (isMounted) setStatus("loading");
+    }, 0);
 
     checkUsername(debouncedUsername).then((res) => {
       if (!isMounted) return;

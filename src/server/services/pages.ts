@@ -87,3 +87,25 @@ function isUniqueViolation(err: unknown): boolean {
     (err as { code: string }).code === "23505"
   );
 }
+
+export type UpdateProfileInput = {
+  displayName: string;
+  bio: string | null;
+};
+
+/**
+ * Update a user's page profile fields (display name and bio).
+ */
+export async function updatePageProfile(userId: string, data: UpdateProfileInput) {
+  const [updated] = await db
+    .update(pages)
+    .set({
+      displayName: data.displayName,
+      bio: data.bio,
+      updatedAt: new Date(),
+    })
+    .where(eq(pages.userId, userId))
+    .returning();
+
+  return updated ?? null;
+}

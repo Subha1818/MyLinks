@@ -16,6 +16,7 @@ export async function uploadAvatar({
   const blob = await put(filename, data, {
     access: "public",
     contentType,
+    token: process.env.BLOB_READ_WRITE_TOKEN,
   });
 
   return { url: blob.url };
@@ -37,7 +38,7 @@ export async function deleteAvatarIfOwned({
       
       // Safety check: only allow deleting from this user's avatar folder
       if (path.startsWith(`avatars/${userId}/`)) {
-        await del(url);
+        await del(url, { token: process.env.BLOB_READ_WRITE_TOKEN });
       }
     }
   } catch (error) {

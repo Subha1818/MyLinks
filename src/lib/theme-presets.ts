@@ -20,6 +20,7 @@ export const THEME_PRESETS: ThemePreset[] = [
         textColor: "#14181F",
       },
       font: "bricolage",
+      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
     },
   },
   {
@@ -35,6 +36,7 @@ export const THEME_PRESETS: ThemePreset[] = [
         textColor: "#14181F",
       },
       font: "bricolage",
+      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
     },
   },
   {
@@ -50,6 +52,7 @@ export const THEME_PRESETS: ThemePreset[] = [
         textColor: "#3B0A14",
       },
       font: "bricolage",
+      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
     },
   },
   {
@@ -65,6 +68,7 @@ export const THEME_PRESETS: ThemePreset[] = [
         textColor: "#FFFFFF",
       },
       font: "dm-sans",
+      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
     },
   },
   {
@@ -80,6 +84,7 @@ export const THEME_PRESETS: ThemePreset[] = [
         textColor: "#FFF4D6",
       },
       font: "bricolage",
+      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
     },
   },
   {
@@ -95,6 +100,7 @@ export const THEME_PRESETS: ThemePreset[] = [
         textColor: "#14181F",
       },
       font: "dm-sans",
+      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
     },
   },
   {
@@ -110,6 +116,7 @@ export const THEME_PRESETS: ThemePreset[] = [
         textColor: "#1F4D1A",
       },
       font: "bricolage",
+      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
     },
   },
   {
@@ -125,6 +132,7 @@ export const THEME_PRESETS: ThemePreset[] = [
         textColor: "#14181F",
       },
       font: "bricolage",
+      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
     },
   },
   {
@@ -140,6 +148,7 @@ export const THEME_PRESETS: ThemePreset[] = [
         textColor: "#FFFFFF",
       },
       font: "dm-sans",
+      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
     },
   },
   {
@@ -155,6 +164,95 @@ export const THEME_PRESETS: ThemePreset[] = [
         textColor: "#14181F",
       },
       font: "bricolage",
+      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
+    },
+  },
+  // Step 5C new presets:
+  {
+    id: "polka",
+    name: "Polka",
+    theme: {
+      background: {
+        type: "pattern",
+        base: "#BFEBD6",
+        color: "#0F3D2E",
+        kind: "dots",
+        size: "medium",
+      },
+      textColor: "#0F3D2E",
+      button: {
+        shape: "rounded",
+        style: "solid",
+        fill: "#0F3D2E",
+        textColor: "#FFFFFF",
+      },
+      font: "dm-sans",
+      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
+    },
+  },
+  {
+    id: "stripes",
+    name: "Stripes",
+    theme: {
+      background: {
+        type: "pattern",
+        base: "#1D4ED8",
+        color: "#FFFFFF",
+        kind: "stripes",
+        size: "medium",
+      },
+      textColor: "#FFFFFF",
+      button: {
+        shape: "pill",
+        style: "hard-shadow",
+        fill: "#FFFFFF",
+        textColor: "#14181F",
+      },
+      font: "archivo",
+      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
+    },
+  },
+  {
+    id: "grid",
+    name: "Grid",
+    theme: {
+      background: {
+        type: "pattern",
+        base: "#F5F4EF",
+        color: "#14181F",
+        kind: "grid",
+        size: "small",
+      },
+      textColor: "#14181F",
+      button: {
+        shape: "rounded",
+        style: "outline",
+        fill: "#14181F",
+        textColor: "#14181F",
+      },
+      font: "dm-mono",
+      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
+    },
+  },
+  {
+    id: "sunrise",
+    name: "Sunrise",
+    theme: {
+      background: {
+        type: "gradient",
+        from: "#FFD84D",
+        to: "#FF5A36",
+        direction: "diagonal",
+      },
+      textColor: "#14181F",
+      button: {
+        shape: "pill",
+        style: "solid",
+        fill: "#FFFFFF",
+        textColor: "#14181F",
+      },
+      font: "bricolage",
+      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
     },
   },
 ];

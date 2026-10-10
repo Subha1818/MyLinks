@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 import { getCachedPublicPage } from "@/server/services/public-page";
-import { resolveTheme } from "@/lib/theme";
+import { resolveTheme, getThemeOgBackground } from "@/lib/theme";
 import fs from "fs";
 import path from "path";
 
@@ -113,7 +113,7 @@ export default async function Image({ params }: { params: Promise<{ username: st
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: theme.background.value,
+          backgroundColor: getThemeOgBackground(theme.background),
           color: theme.textColor,
           padding: 80,
           textAlign: "center",

@@ -8,6 +8,7 @@ interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
   alt?: string;
   fallback: string;
   size?: "sm" | "md" | "lg" | "xl";
+  shape?: "circle" | "rounded" | "square";
 }
 
 const sizeClasses = {
@@ -17,11 +18,18 @@ const sizeClasses = {
   xl: "w-20 h-20 text-2xl",
 };
 
+const shapeClasses = {
+  circle: "rounded-full",
+  rounded: "rounded-2xl",
+  square: "rounded-none",
+};
+
 export function Avatar({
   src,
   alt = "Avatar",
   fallback,
   size = "md",
+  shape = "circle",
   className,
   ...props
 }: AvatarProps) {
@@ -33,8 +41,9 @@ export function Avatar({
   return (
     <div
       className={cn(
-        "relative rounded-full overflow-hidden flex-shrink-0 border border-ink/10 bg-cream",
+        "relative overflow-hidden flex-shrink-0 border border-ink/10 bg-cream",
         sizeClasses[size],
+        shapeClasses[shape],
         className
       )}
       {...props}

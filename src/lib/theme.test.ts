@@ -1,6 +1,12 @@
 import test from "node:test";
 import assert from "node:assert";
-import { resolveTheme, DEFAULT_THEME, ThemeConfig, ThemeSchema } from "./theme";
+import {
+  resolveTheme,
+  DEFAULT_THEME,
+  DEFAULT_LAYOUT,
+  ThemeSchema,
+  getThemeBackgroundStyle,
+} from "./theme";
 
 test("resolveTheme: returns DEFAULT_THEME for empty object", () => {
   const result = resolveTheme({});
@@ -74,26 +80,27 @@ test("ThemeSchema: rejects invalid hex color strings", () => {
   );
 });
 
-test("ThemeSchema: parses old theme without button.style and defaults to solid", () => {
-  const oldThemeWithoutStyle = {
+test("ThemeSchema: parses old theme without layout and defaults layout properties", () => {
+  const oldThemeWithoutLayout = {
     background: { type: "solid", value: "#D4E83A" },
     textColor: "#1F4D1A",
     button: {
       shape: "pill",
+      style: "solid",
       fill: "#FFFFFF",
       textColor: "#14181F",
     },
     font: "bricolage",
   };
-  const parsed = ThemeSchema.safeParse(oldThemeWithoutStyle);
+  const parsed = ThemeSchema.safeParse(oldThemeWithoutLayout);
   assert.strictEqual(parsed.success, true);
   if (parsed.success) {
-    assert.strictEqual(parsed.data.button.style, "solid");
+    assert.deepStrictEqual(parsed.data.layout, DEFAULT_LAYOUT);
   }
 });
 
-test("resolveTheme: backwards-compatible with old theme without button.style", () => {
-  const oldThemeWithoutStyle = {
+test("resolveTheme: backwards-compatible with old theme without layout and without button.style", () => {
+  const oldTheme = {
     background: { type: "solid", value: "#D4E83A" },
     textColor: "#1F4D1A",
     button: {
@@ -103,22 +110,65 @@ test("resolveTheme: backwards-compatible with old theme without button.style", (
     },
     font: "bricolage",
   };
-  const result = resolveTheme(oldThemeWithoutStyle);
+  const result = resolveTheme(oldTheme);
   assert.deepStrictEqual(result, DEFAULT_THEME);
 });
 
-test("resolveTheme: correctly parses valid theme with all properties", () => {
-  const validTheme: ThemeConfig = {
-    background: { type: "solid", value: "#000000" },
-    textColor: "#FFFFFF",
-    button: {
-      shape: "square",
-      style: "hard-shadow",
-      fill: "#111111",
-      textColor: "#EEEEEE",
+test("ThemeSchema: parses gradient background", () => {
+  const gradientTheme = {
+    ...DEFAULT_THEME,
+    background: {
+      type: "gradient",
+      from: "#FFD84D",
+      to: "#FF5A36",
+      direction: "diagonal",
     },
-    font: "dm-sans",
   };
-  const result = resolveTheme(validTheme);
-  assert.deepStrictEqual(result, validTheme);
+  const parsed = ThemeSchema.safeParse(gradientTheme);
+  assert.strictEqual(parsed.success, true);
+  if (parsed.success) {
+    assert.strictEqual(parsed.data.background.type, "gradient");
+  }
+});
+
+test("ThemeSchema: parses pattern background", () => {
+  const patternTheme = {
+    ...DEFAULT_THEME,
+    background: {
+      type: "pattern",
+      base: "#BFEBD6",
+      color: "#0F3D2E",
+      kind: "dots",
+      size: "medium",
+    },
+  };
+  const parsed = ThemeSchema.safeParse(patternTheme);
+  assert.strictEqual(parsed.success, true);
+  if (parsed.success) {
+    assert.strictEqual(parsed.data.background.type, "pattern");
+  }
+});
+
+test("getThemeBackgroundStyle: produces correct CSS styles", () => {
+  const solidStyle = getThemeBackgroundStyle({ type: "solid", value: "#D4E83A" });
+  assert.strictEqual(solidStyle.backgroundColor, "#D4E83A");
+
+  const gradientStyle = getThemeBackgroundStyle({
+    type: "gradient",
+    from: "#FFD84D",
+    to: "#FF5A36",
+    direction: "diagonal",
+  });
+  assert.ok(gradientStyle.backgroundImage?.includes("135deg"));
+
+  const patternStyle = getThemeBackgroundStyle({
+    type: "pattern",
+    base: "#BFEBD6",
+    color: "#0F3D2E",
+    kind: "dots",
+    size: "medium",
+  });
+  assert.strictEqual(patternStyle.backgroundColor, "#BFEBD6");
+  assert.ok(patternStyle.backgroundImage?.includes("radial-gradient"));
+  assert.strictEqual(patternStyle.backgroundSize, "28px 28px");
 });

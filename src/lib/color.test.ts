@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert";
-import { normalizeHex, readableTextOn, getThemeReadabilityIssues } from "./color";
+import { normalizeHex, readableTextOn, readableTextOnBackground, blendColors, getThemeReadabilityIssues } from "./color";
 import { DEFAULT_THEME, ThemeConfig } from "./theme";
 
 test("normalizeHex: accepts 3-digit hex with or without # and whitespace", () => {
@@ -30,6 +30,11 @@ test("readableTextOn: returns high contrast color #14181F or #FFFFFF", () => {
   assert.strictEqual(readableTextOn("#000000"), "#FFFFFF");
   assert.strictEqual(readableTextOn("#D4E83A"), "#14181F"); // Lime bg -> dark text
   assert.strictEqual(readableTextOn("#14181F"), "#FFFFFF"); // Dark ink bg -> light text
+});
+
+test("blendColors: blends 18% pattern color over base color", () => {
+  // 18% black over pure white: round(255 * 0.82 + 0 * 0.18) = 209 = #D1D1D1
+  assert.strictEqual(blendColors("#FFFFFF", "#000000", 0.18), "#D1D1D1");
 });
 
 test("getThemeReadabilityIssues: returns empty array for DEFAULT_THEME", () => {
@@ -96,4 +101,61 @@ test("getThemeReadabilityIssues: checks button text against page background for 
   assert.ok(buttonIssue);
   assert.strictEqual(buttonIssue?.level, "error");
   assert.ok(buttonIssue?.message.includes("background color"));
+});
+
+test("getThemeReadabilityIssues: gradient checks text against both color stops and reports worse ratio", () => {
+  // Gradient from white to black with white text -> worse ratio is 1:1 on the white stop
+  const badGradientTheme: ThemeConfig = {
+    ...DEFAULT_THEME,
+    background: {
+      type: "gradient",
+      from: "#FFFFFF",
+      to: "#000000",
+      direction: "diagonal",
+    },
+    textColor: "#FFFFFF",
+  };
+  const issues = getThemeReadabilityIssues(badGradientTheme);
+  const pageIssue = issues.find((i) => i.pair === "page");
+  assert.ok(pageIssue);
+  assert.strictEqual(pageIssue?.level, "error");
+  assert.strictEqual(pageIssue?.ratio, 1);
+});
+
+test("getThemeReadabilityIssues: pattern checks text against base and 18% blended color", () => {
+  // Pattern with base #FFFFFF, pattern color #FFFFFF, text #FFFFFF -> worse ratio is 1:1
+  const badPatternTheme: ThemeConfig = {
+    ...DEFAULT_THEME,
+    background: {
+      type: "pattern",
+      base: "#FFFFFF",
+      color: "#FFFFFF",
+      kind: "dots",
+      size: "medium",
+    },
+    textColor: "#FFFFFF",
+  };
+  const issues = getThemeReadabilityIssues(badPatternTheme);
+  const pageIssue = issues.find((i) => i.pair === "page");
+  assert.ok(pageIssue);
+  assert.strictEqual(pageIssue?.level, "error");
+});
+
+test("readableTextOnBackground: returns readable text for gradients and patterns", () => {
+  const sunriseBg = {
+    type: "gradient" as const,
+    from: "#FFD84D",
+    to: "#FF5A36",
+    direction: "diagonal" as const,
+  };
+  assert.strictEqual(readableTextOnBackground(sunriseBg), "#14181F");
+
+  const darkPatternBg = {
+    type: "pattern" as const,
+    base: "#14181F",
+    color: "#FFFFFF",
+    kind: "dots" as const,
+    size: "medium" as const,
+  };
+  assert.strictEqual(readableTextOnBackground(darkPatternBg), "#FFFFFF");
 });

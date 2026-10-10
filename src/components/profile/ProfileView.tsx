@@ -1,4 +1,4 @@
-import { resolveTheme, FontOption } from "@/lib/theme";
+import { resolveTheme, FontOption, getThemeBackgroundStyle } from "@/lib/theme";
 import { Avatar } from "@/components/ui/avatar";
 import { isSafeHttpUrl } from "@/lib/safe-url";
 import { siteConfig } from "@/lib/site";
@@ -42,14 +42,22 @@ export function ProfileView({
   mode,
 }: ProfileViewProps) {
   const resolvedTheme = resolveTheme(theme);
+  const bgStyle = getThemeBackgroundStyle(resolvedTheme.background);
 
-  const containerStyle = {
-    "--theme-bg": resolvedTheme.background.value,
-    "--theme-text": resolvedTheme.textColor,
-    "--theme-btn-fill": resolvedTheme.button.fill,
-    "--theme-btn-text": resolvedTheme.button.textColor,
+  const containerStyle: React.CSSProperties = {
+    ...bgStyle,
+    color: resolvedTheme.textColor,
     fontFamily: getFontFamily(resolvedTheme.font),
-  } as React.CSSProperties;
+  };
+
+  const isLeftAlign = resolvedTheme.layout.align === "left";
+  const avatarShape = resolvedTheme.layout.avatarShape;
+  const spacingClass =
+    resolvedTheme.layout.spacing === "compact"
+      ? "gap-2.5"
+      : resolvedTheme.layout.spacing === "relaxed"
+      ? "gap-6"
+      : "gap-4";
 
   const buttonRadiusClass =
     resolvedTheme.button.shape === "pill"
@@ -88,25 +96,38 @@ export function ProfileView({
   return (
     <div
       style={containerStyle}
-      className="flex-1 min-h-full w-full bg-[var(--theme-bg)] text-[var(--theme-text)] flex flex-col items-center px-4 py-12"
+      className="flex-1 min-h-full w-full flex flex-col items-center px-4 py-12"
     >
-      <div className="w-full max-w-[480px] flex flex-col items-center">
+      <div
+        className={`w-full max-w-[480px] flex flex-col ${
+          isLeftAlign ? "items-start text-left" : "items-center text-center"
+        }`}
+      >
         <Avatar
           src={avatarUrl || undefined}
           fallback={displayName.slice(0, 2).toUpperCase() || "??"}
           size="lg"
+          shape={avatarShape}
           className="mb-4 shadow-sm"
         />
-        <h1 className="text-xl font-bold text-center mb-2 max-w-full break-words">
+        <h1
+          className={`text-xl font-bold mb-2 max-w-full break-words ${
+            isLeftAlign ? "text-left" : "text-center"
+          }`}
+        >
           {displayName}
         </h1>
         {bio && (
-          <p className="text-center text-sm mb-8 opacity-90 whitespace-pre-wrap max-w-full break-words">
+          <p
+            className={`text-sm mb-8 opacity-90 whitespace-pre-wrap max-w-full break-words ${
+              isLeftAlign ? "text-left" : "text-center"
+            }`}
+          >
             {bio}
           </p>
         )}
 
-        <div className="w-full flex flex-col gap-4">
+        <div className={`w-full flex flex-col ${spacingClass}`}>
           {links.length === 0 ? (
             <div className="text-center text-sm font-bold opacity-70 py-8">
               Your links will appear here

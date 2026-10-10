@@ -12,16 +12,24 @@ import {
   FontOption,
   ButtonShape,
   ButtonStyle,
+  GradientDirection,
+  PatternKind,
+  PatternSize,
+  LayoutAlign,
+  AvatarShape,
+  Spacing,
+  getThemeBackgroundStyle,
 } from "@/lib/theme";
 import {
   normalizeHex,
   readableTextOn,
+  readableTextOnBackground,
   getThemeReadabilityIssues,
   ReadabilityIssue,
 } from "@/lib/color";
 import { getFontFamily } from "@/components/profile/ProfileView";
 import { updateTheme as updateThemeAction } from "@/server/actions/theme";
-import { Check, Loader2, AlertTriangle, AlertCircle, Wand2 } from "lucide-react";
+import { Check, Loader2, AlertCircle, Wand2 } from "lucide-react";
 
 const BRAND_PALETTE = [
   "#D4E83A", // Lime
@@ -38,16 +46,47 @@ const BRAND_PALETTE = [
 ];
 
 function isThemeEqual(a: ThemeConfig, b: ThemeConfig): boolean {
-  return (
-    a.background.type === b.background.type &&
-    a.background.value.toLowerCase() === b.background.value.toLowerCase() &&
-    a.textColor.toLowerCase() === b.textColor.toLowerCase() &&
-    a.button.shape === b.button.shape &&
-    a.button.style === b.button.style &&
-    a.button.fill.toLowerCase() === b.button.fill.toLowerCase() &&
-    a.button.textColor.toLowerCase() === b.button.textColor.toLowerCase() &&
-    a.font === b.font
-  );
+  // Check background
+  if (a.background.type !== b.background.type) return false;
+  if (a.background.type === "solid" && b.background.type === "solid") {
+    if (a.background.value.toLowerCase() !== b.background.value.toLowerCase()) return false;
+  } else if (a.background.type === "gradient" && b.background.type === "gradient") {
+    if (
+      a.background.from.toLowerCase() !== b.background.from.toLowerCase() ||
+      a.background.to.toLowerCase() !== b.background.to.toLowerCase() ||
+      a.background.direction !== b.background.direction
+    ) {
+      return false;
+    }
+  } else if (a.background.type === "pattern" && b.background.type === "pattern") {
+    if (
+      a.background.base.toLowerCase() !== b.background.base.toLowerCase() ||
+      a.background.color.toLowerCase() !== b.background.color.toLowerCase() ||
+      a.background.kind !== b.background.kind ||
+      a.background.size !== b.background.size
+    ) {
+      return false;
+    }
+  }
+
+  // Check text, button, font
+  if (a.textColor.toLowerCase() !== b.textColor.toLowerCase()) return false;
+  if (a.button.shape !== b.button.shape) return false;
+  if (a.button.style !== b.button.style) return false;
+  if (a.button.fill.toLowerCase() !== b.button.fill.toLowerCase()) return false;
+  if (a.button.textColor.toLowerCase() !== b.button.textColor.toLowerCase()) return false;
+  if (a.font !== b.font) return false;
+
+  // Check layout
+  if (
+    a.layout.align !== b.layout.align ||
+    a.layout.avatarShape !== b.layout.avatarShape ||
+    a.layout.spacing !== b.layout.spacing
+  ) {
+    return false;
+  }
+
+  return true;
 }
 
 // ---------------------------------------------------------------------------
@@ -70,7 +109,6 @@ function ColorControl({
   issue,
   onFix,
 }: ColorControlProps) {
-  // Only track typed text while actively editing an uncommitted input
   const [typedText, setTypedText] = useState<string | null>(null);
   const colorInputRef = useRef<HTMLInputElement>(null);
 
@@ -102,74 +140,74 @@ function ColorControl({
     onChange(newHex);
   };
 
-  const handlePalettePick = (hex: string) => {
+  const handleSwatchClick = (hex: string) => {
     setTypedText(null);
     onChange(hex);
   };
 
   return (
-    <div className="flex flex-col gap-2 p-4 rounded-2xl bg-ink/[0.02] border border-ink/5">
+    <div className="flex flex-col gap-2 p-3.5 rounded-2xl bg-cream border border-ink/10">
       <div className="flex items-center justify-between">
-        <label htmlFor={id} className="text-sm font-bold text-ink">
+        <label htmlFor={id} className="text-xs font-bold text-ink/70">
           {label}
         </label>
-        {!isValidHex && (
-          <span className="text-xs font-semibold text-coral animate-pulse">
-            Invalid hex
-          </span>
+        {issue && onFix && (
+          <button
+            type="button"
+            onClick={onFix}
+            title="Auto-fix contrast"
+            className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-forest text-cream hover:bg-forest/90 transition-colors cursor-pointer"
+          >
+            <Wand2 className="w-3 h-3" />
+            <span>Fix</span>
+          </button>
         )}
       </div>
 
-      <div className="flex items-center gap-3">
-        {/* Hidden native color picker */}
-        <input
-          ref={colorInputRef}
-          type="color"
-          id={id}
-          value={normalizeHex(value) || "#FFFFFF"}
-          onChange={handleNativeColorChange}
-          className="sr-only"
-          tabIndex={-1}
-          aria-hidden="true"
-        />
-
-        {/* Visual Swatch button */}
+      <div className="flex items-center gap-2">
         <button
           type="button"
           onClick={() => colorInputRef.current?.click()}
           aria-label={`Open color picker for ${label}`}
-          className="w-10 h-10 rounded-xl border border-ink/15 shadow-xs flex-shrink-0 cursor-pointer transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest"
-          style={{ backgroundColor: normalizeHex(value) || value }}
+          className="w-10 h-10 rounded-xl border border-ink/20 flex-shrink-0 cursor-pointer shadow-xs transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest"
+          style={{ backgroundColor: normalizeHex(displayHex) || "#FFFFFF" }}
+        />
+        <input
+          ref={colorInputRef}
+          type="color"
+          tabIndex={-1}
+          value={normalizeHex(displayHex) || "#FFFFFF"}
+          onChange={handleNativeColorChange}
+          className="sr-only"
         />
 
-        {/* Hex Text input */}
-        <input
-          type="text"
-          value={displayHex}
-          onChange={handleInputChange}
-          onBlur={handleInputBlur}
-          placeholder="#000000"
-          maxLength={7}
-          className={`flex-1 font-mono text-sm px-3.5 py-2 rounded-xl bg-white border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${
-            isValidHex ? "border-ink/10 text-ink" : "border-coral text-coral"
-          }`}
-        />
+        <div className="relative flex-1">
+          <input
+            id={id}
+            type="text"
+            value={displayHex}
+            onChange={handleInputChange}
+            onBlur={handleInputBlur}
+            maxLength={7}
+            placeholder="#000000"
+            className={`w-full font-mono text-xs font-bold px-3 py-2 rounded-xl bg-white border ${
+              isValidHex ? "border-ink/20 focus:border-forest" : "border-coral text-coral"
+            } text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest transition-colors`}
+          />
+        </div>
       </div>
 
-      {/* Quick-pick brand color palette */}
-      <div className="flex flex-wrap items-center gap-1.5 pt-1">
+      <div className="flex flex-wrap gap-1.5 pt-1">
         {BRAND_PALETTE.map((hex) => {
-          const isSelected = hex.toLowerCase() === value.toLowerCase();
+          const isSelected = value.toUpperCase() === hex.toUpperCase();
           return (
             <button
               key={hex}
               type="button"
-              onClick={() => handlePalettePick(hex)}
-              aria-label={`Select color ${hex}`}
-              className={`w-6 h-6 rounded-md border transition-transform hover:scale-115 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${
-                isSelected
-                  ? "ring-2 ring-forest ring-offset-1 scale-110 border-forest"
-                  : "border-ink/15 hover:border-ink/40"
+              onClick={() => handleSwatchClick(hex)}
+              aria-label={`Select ${hex} for ${label}`}
+              className={`w-5 h-5 rounded-md border cursor-pointer transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-forest ${
+                isSelected ? "border-ink ring-2 ring-forest ring-offset-1" : "border-ink/20"
               }`}
               style={{ backgroundColor: hex }}
             />
@@ -177,35 +215,14 @@ function ColorControl({
         })}
       </div>
 
-      {/* Inline contrast message if issue exists */}
       {issue && (
         <div
-          className={`flex items-start sm:items-center justify-between gap-2 p-2.5 mt-1 rounded-xl text-xs font-medium ${
-            issue.level === "error"
-              ? "bg-coral/10 border border-coral/20 text-coral"
-              : "bg-amber-500/10 border border-amber-500/20 text-amber-900"
+          className={`flex items-start gap-1.5 text-[11px] font-bold mt-1 ${
+            issue.level === "error" ? "text-coral" : "text-amber-700"
           }`}
-          aria-live="polite"
         >
-          <div className="flex items-center gap-1.5">
-            {issue.level === "error" ? (
-              <AlertCircle className="w-4 h-4 flex-shrink-0 text-coral" />
-            ) : (
-              <AlertTriangle className="w-4 h-4 flex-shrink-0 text-amber-600" />
-            )}
-            <span>{issue.message}</span>
-          </div>
-
-          {onFix && (
-            <button
-              type="button"
-              onClick={onFix}
-              className="inline-flex items-center gap-1 font-bold underline cursor-pointer hover:opacity-80 flex-shrink-0 ml-1"
-            >
-              <Wand2 className="w-3 h-3" />
-              <span>Fix</span>
-            </button>
-          )}
+          <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+          <span>{issue.message}</span>
         </div>
       )}
     </div>
@@ -213,15 +230,19 @@ function ColorControl({
 }
 
 // ---------------------------------------------------------------------------
-// Main ThemeSelector Component
+// Main Theme Selector Component
 // ---------------------------------------------------------------------------
-export function ThemeSelector({ initialTheme }: { initialTheme: unknown }) {
+interface ThemeSelectorProps {
+  initialTheme: unknown;
+}
+
+export function ThemeSelector({ initialTheme }: ThemeSelectorProps) {
   const router = useRouter();
   const { draft, updateTheme } = usePageDraft();
 
-  const [savedTheme, setSavedTheme] = useState<ThemeConfig>(() =>
-    resolveTheme(initialTheme)
-  );
+  const savedTheme = resolveTheme(initialTheme);
+  const resolvedDraftTheme = resolveTheme(draft.theme);
+
   const [isSaving, setIsSaving] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [generalError, setGeneralError] = useState<string | null>(null);
@@ -229,14 +250,10 @@ export function ThemeSelector({ initialTheme }: { initialTheme: unknown }) {
   const presetCardsRef = useRef<(HTMLButtonElement | null)[]>([]);
   const fontCardsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
-  const resolvedDraftTheme = resolveTheme(draft.theme);
-
-  // Check matching preset
   const matchingPreset = THEME_PRESETS.find((p) =>
     isThemeEqual(p.theme, resolvedDraftTheme)
   );
-  const selectedPresetId = matchingPreset?.id ?? null;
-  const isCustomTheme = selectedPresetId === null;
+  const selectedPresetId = matchingPreset ? matchingPreset.id : null;
 
   // Contrast readability checks
   const readabilityIssues = getThemeReadabilityIssues(resolvedDraftTheme);
@@ -258,25 +275,134 @@ export function ThemeSelector({ initialTheme }: { initialTheme: unknown }) {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [hasChanges]);
 
-  // Handlers for theme adjustments
+  // Handlers for preset and theme adjustments
   const handleSelectPreset = (preset: ThemePreset) => {
     setIsSuccess(false);
     setGeneralError(null);
     updateTheme(preset.theme);
   };
 
+  // Background type switching with sensible defaults
+  const handleUpdateBackgroundType = (type: "solid" | "gradient" | "pattern") => {
+    setIsSuccess(false);
+    setGeneralError(null);
+    const current = resolvedDraftTheme.background;
+
+    if (type === "solid") {
+      const val = current.type === "solid" ? current.value : current.type === "gradient" ? current.from : current.base;
+      updateTheme({
+        ...resolvedDraftTheme,
+        background: { type: "solid", value: val },
+      });
+    } else if (type === "gradient") {
+      const from = current.type === "solid" ? current.value : current.type === "gradient" ? current.from : current.base;
+      const to = current.type === "gradient" ? current.to : current.type === "pattern" ? current.color : readableTextOn(from) === "#FFFFFF" ? "#14181F" : "#FFFFFF";
+      updateTheme({
+        ...resolvedDraftTheme,
+        background: {
+          type: "gradient",
+          from,
+          to,
+          direction: current.type === "gradient" ? current.direction : "diagonal",
+        },
+      });
+    } else if (type === "pattern") {
+      const base = current.type === "solid" ? current.value : current.type === "gradient" ? current.from : current.base;
+      const color = current.type === "pattern" ? current.color : current.type === "gradient" ? current.to : readableTextOn(base);
+      updateTheme({
+        ...resolvedDraftTheme,
+        background: {
+          type: "pattern",
+          base,
+          color,
+          kind: current.type === "pattern" ? current.kind : "dots",
+          size: current.type === "pattern" ? current.size : "medium",
+        },
+      });
+    }
+  };
+
+  const handleUpdateSolidBackground = (hex: string) => {
+    setIsSuccess(false);
+    setGeneralError(null);
+    updateTheme({
+      ...resolvedDraftTheme,
+      background: { type: "solid", value: hex },
+    });
+  };
+
+  const handleUpdateGradient = (key: "from" | "to", hex: string) => {
+    setIsSuccess(false);
+    setGeneralError(null);
+    if (resolvedDraftTheme.background.type !== "gradient") return;
+    updateTheme({
+      ...resolvedDraftTheme,
+      background: {
+        ...resolvedDraftTheme.background,
+        [key]: hex,
+      },
+    });
+  };
+
+  const handleUpdateGradientDirection = (direction: GradientDirection) => {
+    setIsSuccess(false);
+    setGeneralError(null);
+    if (resolvedDraftTheme.background.type !== "gradient") return;
+    updateTheme({
+      ...resolvedDraftTheme,
+      background: {
+        ...resolvedDraftTheme.background,
+        direction,
+      },
+    });
+  };
+
+  const handleUpdatePatternColor = (key: "base" | "color", hex: string) => {
+    setIsSuccess(false);
+    setGeneralError(null);
+    if (resolvedDraftTheme.background.type !== "pattern") return;
+    updateTheme({
+      ...resolvedDraftTheme,
+      background: {
+        ...resolvedDraftTheme.background,
+        [key]: hex,
+      },
+    });
+  };
+
+  const handleUpdatePatternKind = (kind: PatternKind) => {
+    setIsSuccess(false);
+    setGeneralError(null);
+    if (resolvedDraftTheme.background.type !== "pattern") return;
+    updateTheme({
+      ...resolvedDraftTheme,
+      background: {
+        ...resolvedDraftTheme.background,
+        kind,
+      },
+    });
+  };
+
+  const handleUpdatePatternSize = (size: PatternSize) => {
+    setIsSuccess(false);
+    setGeneralError(null);
+    if (resolvedDraftTheme.background.type !== "pattern") return;
+    updateTheme({
+      ...resolvedDraftTheme,
+      background: {
+        ...resolvedDraftTheme.background,
+        size,
+      },
+    });
+  };
+
   const handleUpdateColor = (
-    key: "background" | "textColor" | "buttonFill" | "buttonTextColor",
+    key: "textColor" | "buttonFill" | "buttonTextColor",
     value: string
   ) => {
     setIsSuccess(false);
     setGeneralError(null);
-    if (key === "background") {
-      updateTheme({
-        ...resolvedDraftTheme,
-        background: { type: "solid", value },
-      });
-    } else if (key === "textColor") {
+    if (key === "textColor") {
       updateTheme({
         ...resolvedDraftTheme,
         textColor: value,
@@ -324,6 +450,42 @@ export function ThemeSelector({ initialTheme }: { initialTheme: unknown }) {
     });
   };
 
+  const handleUpdateLayoutAlign = (align: LayoutAlign) => {
+    setIsSuccess(false);
+    setGeneralError(null);
+    updateTheme({
+      ...resolvedDraftTheme,
+      layout: {
+        ...resolvedDraftTheme.layout,
+        align,
+      },
+    });
+  };
+
+  const handleUpdateAvatarShape = (avatarShape: AvatarShape) => {
+    setIsSuccess(false);
+    setGeneralError(null);
+    updateTheme({
+      ...resolvedDraftTheme,
+      layout: {
+        ...resolvedDraftTheme.layout,
+        avatarShape,
+      },
+    });
+  };
+
+  const handleUpdateSpacing = (spacing: Spacing) => {
+    setIsSuccess(false);
+    setGeneralError(null);
+    updateTheme({
+      ...resolvedDraftTheme,
+      layout: {
+        ...resolvedDraftTheme.layout,
+        spacing,
+      },
+    });
+  };
+
   const handleUpdateFont = (font: FontOption) => {
     setIsSuccess(false);
     setGeneralError(null);
@@ -335,22 +497,21 @@ export function ThemeSelector({ initialTheme }: { initialTheme: unknown }) {
 
   // Auto-fix contrast handlers
   const handleFixPageContrast = () => {
-    const optimalColor = readableTextOn(resolvedDraftTheme.background.value);
+    const optimalColor = readableTextOnBackground(resolvedDraftTheme.background);
     handleUpdateColor("textColor", optimalColor);
   };
 
   const handleFixButtonContrast = () => {
     const isOutline = resolvedDraftTheme.button.style === "outline";
-    const bg = isOutline
-      ? resolvedDraftTheme.background.value
-      : resolvedDraftTheme.button.fill;
-    const optimalColor = readableTextOn(bg);
+    const optimalColor = isOutline
+      ? readableTextOnBackground(resolvedDraftTheme.background)
+      : readableTextOn(resolvedDraftTheme.button.fill);
     handleUpdateColor("buttonTextColor", optimalColor);
   };
 
-  // Keyboard navigation for Presets
+  // Keyboard navigation for radio groups
   const handlePresetKeyDown = (e: React.KeyboardEvent, index: number) => {
-    let nextIndex: number | null = null;
+    let nextIndex = index;
     if (e.key === "ArrowRight" || e.key === "ArrowDown") {
       e.preventDefault();
       nextIndex = (index + 1) % THEME_PRESETS.length;
@@ -365,15 +526,14 @@ export function ThemeSelector({ initialTheme }: { initialTheme: unknown }) {
       nextIndex = THEME_PRESETS.length - 1;
     }
 
-    if (nextIndex !== null) {
+    if (nextIndex !== index) {
       handleSelectPreset(THEME_PRESETS[nextIndex]);
       presetCardsRef.current[nextIndex]?.focus();
     }
   };
 
-  // Keyboard navigation for Fonts
   const handleFontKeyDown = (e: React.KeyboardEvent, index: number) => {
-    let nextIndex: number | null = null;
+    let nextIndex = index;
     if (e.key === "ArrowRight" || e.key === "ArrowDown") {
       e.preventDefault();
       nextIndex = (index + 1) % FONT_OPTIONS.length;
@@ -382,29 +542,33 @@ export function ThemeSelector({ initialTheme }: { initialTheme: unknown }) {
       nextIndex = (index - 1 + FONT_OPTIONS.length) % FONT_OPTIONS.length;
     }
 
-    if (nextIndex !== null) {
+    if (nextIndex !== index) {
       handleUpdateFont(FONT_OPTIONS[nextIndex].id);
       fontCardsRef.current[nextIndex]?.focus();
     }
   };
 
+  // Save and reset actions
   const handleSave = async () => {
-    if (!hasChanges || isSaving || hasErrorIssues) return;
+    if (hasErrorIssues) {
+      setGeneralError("Please fix contrast issues before saving.");
+      return;
+    }
+
     setIsSaving(true);
-    setIsSuccess(false);
     setGeneralError(null);
+    setIsSuccess(false);
 
     try {
       const res = await updateThemeAction(resolvedDraftTheme);
       if (res.ok) {
-        setSavedTheme(res.theme);
         setIsSuccess(true);
         router.refresh();
       } else {
-        setGeneralError(res.message || "Failed to save theme.");
+        setGeneralError(res.message);
       }
     } catch {
-      setGeneralError("Network error. Please try again.");
+      setGeneralError("An unexpected error occurred while saving.");
     } finally {
       setIsSaving(false);
     }
@@ -416,25 +580,19 @@ export function ThemeSelector({ initialTheme }: { initialTheme: unknown }) {
     updateTheme(savedTheme);
   };
 
+  const bg = resolvedDraftTheme.background;
+
   return (
     <div className="space-y-8">
       {/* ----------------------------------------------------------------- */}
       {/* 1. Presets Card                                                   */}
       {/* ----------------------------------------------------------------- */}
       <Card>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-ink/5 gap-3">
-          <div>
-            <h2 className="font-heading font-black text-xl text-ink">Presets</h2>
-            <p className="text-sm text-ink/60 font-medium mt-1">
-              Choose from curated, high-contrast brand themes.
-            </p>
-          </div>
-
-          {isCustomTheme && (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-forest/10 border border-forest/20 text-xs font-bold text-forest self-start sm:self-auto">
-              <span>Custom theme active</span>
-            </div>
-          )}
+        <div className="pb-6 border-b border-ink/5">
+          <h2 className="font-heading font-black text-xl text-ink">Presets</h2>
+          <p className="text-sm text-ink/60 font-medium mt-1">
+            Pick a designer-curated palette or customize individual options below.
+          </p>
         </div>
 
         {/* Preset Cards Grid with RadioGroup accessibility */}
@@ -447,6 +605,20 @@ export function ThemeSelector({ initialTheme }: { initialTheme: unknown }) {
             const isSelected = selectedPresetId === preset.id;
             const tabIndex =
               isSelected || (selectedPresetId === null && index === 0) ? 0 : -1;
+
+            const swatchGap =
+              preset.theme.layout.spacing === "compact"
+                ? "gap-1"
+                : preset.theme.layout.spacing === "relaxed"
+                ? "gap-2"
+                : "gap-1.5";
+
+            const swatchAvatarShape =
+              preset.theme.layout.avatarShape === "rounded"
+                ? "rounded-md"
+                : preset.theme.layout.avatarShape === "square"
+                ? "rounded-none"
+                : "rounded-full";
 
             return (
               <button
@@ -467,10 +639,10 @@ export function ThemeSelector({ initialTheme }: { initialTheme: unknown }) {
                     : "hover:bg-ink/5"
                 }`}
               >
-                {/* Mini phone-shaped swatch */}
+                {/* Mini phone-shaped swatch with real background rendering */}
                 <div
                   className="w-full aspect-[9/14] rounded-xl p-2.5 flex flex-col items-center justify-between shadow-xs relative overflow-hidden border border-ink/10 transition-transform group-hover:scale-[1.02]"
-                  style={{ backgroundColor: preset.theme.background.value }}
+                  style={getThemeBackgroundStyle(preset.theme.background)}
                 >
                   {/* Selected Checkmark Badge */}
                   {isSelected && (
@@ -479,9 +651,9 @@ export function ThemeSelector({ initialTheme }: { initialTheme: unknown }) {
                     </div>
                   )}
 
-                  {/* Tiny avatar circle */}
+                  {/* Tiny avatar */}
                   <div
-                    className="w-5 h-5 rounded-full flex-shrink-0 mt-2 shadow-xs"
+                    className={`w-5 h-5 flex-shrink-0 mt-2 shadow-xs ${swatchAvatarShape}`}
                     style={{
                       backgroundColor: preset.theme.button.fill,
                       border:
@@ -492,7 +664,7 @@ export function ThemeSelector({ initialTheme }: { initialTheme: unknown }) {
                   />
 
                   {/* Three small buttons drawn with the preset's real shape/style/colors */}
-                  <div className="w-full flex flex-col gap-1.5 mb-2 px-1">
+                  <div className={`w-full flex flex-col ${swatchGap} mb-2 px-1`}>
                     {[0, 1, 2].map((i) => {
                       const shapeClass =
                         preset.theme.button.shape === "pill"
@@ -558,13 +730,230 @@ export function ThemeSelector({ initialTheme }: { initialTheme: unknown }) {
         <div className="pb-6 border-b border-ink/5">
           <h2 className="font-heading font-black text-xl text-ink">Customize</h2>
           <p className="text-sm text-ink/60 font-medium mt-1">
-            Fine-tune colors, button styles, and typography.
+            Fine-tune backgrounds, colors, layout, and typography.
           </p>
         </div>
 
         <div className="space-y-8 pt-6">
+          {/* Background Section */}
+          <section aria-labelledby="bg-heading" className="space-y-4">
+            <h3 id="bg-heading" className="text-base font-heading font-bold text-ink">
+              Background
+            </h3>
+
+            {/* Background Type Segmented Control */}
+            <div className="space-y-2">
+              <span id="bg-type-label" className="text-xs font-bold uppercase tracking-wider text-ink/60">
+                Type
+              </span>
+              <div
+                role="radiogroup"
+                aria-labelledby="bg-type-label"
+                className="grid grid-cols-3 gap-2 p-1.5 rounded-2xl bg-ink/[0.04] border border-ink/5"
+              >
+                {(
+                  [
+                    { id: "solid", label: "Solid" },
+                    { id: "gradient", label: "Gradient" },
+                    { id: "pattern", label: "Pattern" },
+                  ] as const
+                ).map((opt) => {
+                  const isSelected = bg.type === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      onClick={() => handleUpdateBackgroundType(opt.id)}
+                      className={`py-2 px-3 rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${
+                        isSelected
+                          ? "bg-white text-ink shadow-xs"
+                          : "text-ink/60 hover:text-ink"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Conditional Background Controls */}
+            {bg.type === "solid" && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <ColorControl
+                  id="solid-bg-color"
+                  label="Background color"
+                  value={bg.value}
+                  onChange={handleUpdateSolidBackground}
+                  issue={pageIssue}
+                  onFix={pageIssue ? handleFixPageContrast : undefined}
+                />
+              </div>
+            )}
+
+            {bg.type === "gradient" && (
+              <div className="space-y-4 pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <ColorControl
+                    id="grad-from"
+                    label="From color"
+                    value={bg.from}
+                    onChange={(hex) => handleUpdateGradient("from", hex)}
+                    issue={pageIssue}
+                    onFix={pageIssue ? handleFixPageContrast : undefined}
+                  />
+                  <ColorControl
+                    id="grad-to"
+                    label="To color"
+                    value={bg.to}
+                    onChange={(hex) => handleUpdateGradient("to", hex)}
+                    issue={pageIssue}
+                    onFix={pageIssue ? handleFixPageContrast : undefined}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <span id="grad-dir-label" className="text-xs font-bold uppercase tracking-wider text-ink/60">
+                    Direction
+                  </span>
+                  <div
+                    role="radiogroup"
+                    aria-labelledby="grad-dir-label"
+                    className="grid grid-cols-3 gap-2 p-1.5 rounded-2xl bg-ink/[0.04] border border-ink/5"
+                  >
+                    {(
+                      [
+                        { id: "vertical", label: "Vertical" },
+                        { id: "diagonal", label: "Diagonal" },
+                        { id: "horizontal", label: "Horizontal" },
+                      ] as const
+                    ).map((opt) => {
+                      const isSelected = bg.direction === opt.id;
+                      return (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          role="radio"
+                          aria-checked={isSelected}
+                          onClick={() => handleUpdateGradientDirection(opt.id)}
+                          className={`py-2 px-3 rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${
+                            isSelected
+                              ? "bg-white text-ink shadow-xs"
+                              : "text-ink/60 hover:text-ink"
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {bg.type === "pattern" && (
+              <div className="space-y-4 pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <ColorControl
+                    id="pat-base"
+                    label="Base color"
+                    value={bg.base}
+                    onChange={(hex) => handleUpdatePatternColor("base", hex)}
+                    issue={pageIssue}
+                    onFix={pageIssue ? handleFixPageContrast : undefined}
+                  />
+                  <ColorControl
+                    id="pat-color"
+                    label="Pattern color (18% opacity)"
+                    value={bg.color}
+                    onChange={(hex) => handleUpdatePatternColor("color", hex)}
+                    issue={pageIssue}
+                    onFix={pageIssue ? handleFixPageContrast : undefined}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <span id="pat-kind-label" className="text-xs font-bold uppercase tracking-wider text-ink/60">
+                    Pattern kind
+                  </span>
+                  <div
+                    role="radiogroup"
+                    aria-labelledby="pat-kind-label"
+                    className="grid grid-cols-4 gap-2 p-1.5 rounded-2xl bg-ink/[0.04] border border-ink/5"
+                  >
+                    {(
+                      [
+                        { id: "dots", label: "Dots" },
+                        { id: "stripes", label: "Stripes" },
+                        { id: "grid", label: "Grid" },
+                        { id: "checks", label: "Checks" },
+                      ] as const
+                    ).map((opt) => {
+                      const isSelected = bg.kind === opt.id;
+                      return (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          role="radio"
+                          aria-checked={isSelected}
+                          onClick={() => handleUpdatePatternKind(opt.id)}
+                          className={`py-2 px-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${
+                            isSelected
+                              ? "bg-white text-ink shadow-xs"
+                              : "text-ink/60 hover:text-ink"
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <span id="pat-size-label" className="text-xs font-bold uppercase tracking-wider text-ink/60">
+                    Pattern size
+                  </span>
+                  <div
+                    role="radiogroup"
+                    aria-labelledby="pat-size-label"
+                    className="grid grid-cols-3 gap-2 p-1.5 rounded-2xl bg-ink/[0.04] border border-ink/5"
+                  >
+                    {(
+                      [
+                        { id: "small", label: "Small (16px)" },
+                        { id: "medium", label: "Medium (28px)" },
+                        { id: "large", label: "Large (44px)" },
+                      ] as const
+                    ).map((opt) => {
+                      const isSelected = bg.size === opt.id;
+                      return (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          role="radio"
+                          aria-checked={isSelected}
+                          onClick={() => handleUpdatePatternSize(opt.id)}
+                          className={`py-2 px-3 rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${
+                            isSelected
+                              ? "bg-white text-ink shadow-xs"
+                              : "text-ink/60 hover:text-ink"
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+
           {/* Colors Section */}
-          <section aria-labelledby="colors-heading" className="space-y-4">
+          <section aria-labelledby="colors-heading" className="space-y-4 pt-4 border-t border-ink/5">
             <h3
               id="colors-heading"
               className="text-base font-heading font-bold text-ink"
@@ -573,16 +962,8 @@ export function ThemeSelector({ initialTheme }: { initialTheme: unknown }) {
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <ColorControl
-                id="bg-color"
-                label="Page background"
-                value={resolvedDraftTheme.background.value}
-                onChange={(hex) => handleUpdateColor("background", hex)}
-                issue={pageIssue}
-                onFix={pageIssue ? handleFixPageContrast : undefined}
-              />
-              <ColorControl
                 id="text-color"
-                label="Text color"
+                label="Page text color"
                 value={resolvedDraftTheme.textColor}
                 onChange={(hex) => handleUpdateColor("textColor", hex)}
                 issue={pageIssue}
@@ -604,6 +985,126 @@ export function ThemeSelector({ initialTheme }: { initialTheme: unknown }) {
                 issue={buttonIssue}
                 onFix={buttonIssue ? handleFixButtonContrast : undefined}
               />
+            </div>
+          </section>
+
+          {/* Layout Section */}
+          <section aria-labelledby="layout-heading" className="space-y-6 pt-4 border-t border-ink/5">
+            <h3 id="layout-heading" className="text-base font-heading font-bold text-ink">
+              Layout
+            </h3>
+
+            {/* Alignment */}
+            <div className="space-y-2">
+              <span id="align-label" className="text-xs font-bold uppercase tracking-wider text-ink/60">
+                Alignment
+              </span>
+              <div
+                role="radiogroup"
+                aria-labelledby="align-label"
+                className="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-ink/[0.04] border border-ink/5"
+              >
+                {(
+                  [
+                    { id: "center", label: "Center" },
+                    { id: "left", label: "Left" },
+                  ] as const
+                ).map((opt) => {
+                  const isSelected = resolvedDraftTheme.layout.align === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      onClick={() => handleUpdateLayoutAlign(opt.id)}
+                      className={`py-2.5 px-3 rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${
+                        isSelected
+                          ? "bg-white text-ink shadow-xs"
+                          : "text-ink/60 hover:text-ink"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Avatar Shape */}
+            <div className="space-y-2">
+              <span id="avatar-shape-label" className="text-xs font-bold uppercase tracking-wider text-ink/60">
+                Avatar shape
+              </span>
+              <div
+                role="radiogroup"
+                aria-labelledby="avatar-shape-label"
+                className="grid grid-cols-3 gap-2 p-1.5 rounded-2xl bg-ink/[0.04] border border-ink/5"
+              >
+                {(
+                  [
+                    { id: "circle", label: "Circle" },
+                    { id: "rounded", label: "Rounded" },
+                    { id: "square", label: "Square" },
+                  ] as const
+                ).map((opt) => {
+                  const isSelected = resolvedDraftTheme.layout.avatarShape === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      onClick={() => handleUpdateAvatarShape(opt.id)}
+                      className={`py-2.5 px-3 rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${
+                        isSelected
+                          ? "bg-white text-ink shadow-xs"
+                          : "text-ink/60 hover:text-ink"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Spacing */}
+            <div className="space-y-2">
+              <span id="spacing-label" className="text-xs font-bold uppercase tracking-wider text-ink/60">
+                Button spacing
+              </span>
+              <div
+                role="radiogroup"
+                aria-labelledby="spacing-label"
+                className="grid grid-cols-3 gap-2 p-1.5 rounded-2xl bg-ink/[0.04] border border-ink/5"
+              >
+                {(
+                  [
+                    { id: "compact", label: "Compact" },
+                    { id: "normal", label: "Normal" },
+                    { id: "relaxed", label: "Relaxed" },
+                  ] as const
+                ).map((opt) => {
+                  const isSelected = resolvedDraftTheme.layout.spacing === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      onClick={() => handleUpdateSpacing(opt.id)}
+                      className={`py-2.5 px-3 rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${
+                        isSelected
+                          ? "bg-white text-ink shadow-xs"
+                          : "text-ink/60 hover:text-ink"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </section>
 
@@ -729,7 +1230,6 @@ export function ThemeSelector({ initialTheme }: { initialTheme: unknown }) {
                         : "border-ink/10 hover:border-ink/25 bg-white"
                     }`}
                   >
-                    {/* Sample preview text rendered in this exact font */}
                     <span
                       className="text-lg font-bold text-ink mb-1 truncate w-full"
                       style={{ fontFamily: getFontFamily(opt.id) }}
@@ -781,7 +1281,7 @@ export function ThemeSelector({ initialTheme }: { initialTheme: unknown }) {
             type="button"
             onClick={handleSave}
             disabled={!hasChanges || isSaving || hasErrorIssues}
-            className="inline-flex items-center justify-center min-w-[140px] gap-2 bg-ink text-cream font-bold py-3 px-6 rounded-full transition-all hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center min-w-[140px] gap-2 bg-ink text-cream font-bold py-3 px-6 rounded-full transition-all hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             {isSaving ? (
               <Loader2 className="w-4 h-4 animate-spin" />

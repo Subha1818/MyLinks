@@ -1,6 +1,7 @@
-import { getPublicPageByUsername } from "@/server/services/public-page";
+import { getCachedPublicPage } from "@/server/services/public-page";
 import { notFound, permanentRedirect } from "next/navigation";
 import { ProfileView } from "@/components/profile/ProfileView";
+import { ReportButton } from "./ReportButton";
 
 type PageProps = {
   params: Promise<{ username: string }>;
@@ -19,7 +20,7 @@ export const instant = false;
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { username } = await params;
   const cleanUsername = username.toLowerCase();
-  const page = await getPublicPageByUsername(cleanUsername);
+  const page = await getCachedPublicPage(cleanUsername);
 
   if (!page) {
     return {
@@ -76,7 +77,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
     permanentRedirect(`/${username.toLowerCase()}`);
   }
 
-  const page = await getPublicPageByUsername(username);
+  const page = await getCachedPublicPage(username);
 
   if (!page) {
     notFound();
@@ -84,7 +85,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
 
   // We wrap ProfileView in a container that acts as the "screen"
   return (
-    <main className="min-h-dvh flex flex-col items-stretch">
+    <main className="min-h-dvh flex flex-col items-stretch relative">
       <ProfileView
         mode="public"
         displayName={page.displayName || ""}
@@ -93,6 +94,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
         links={page.links}
         theme={page.theme}
       />
+      <ReportButton username={username} />
     </main>
   );
 }

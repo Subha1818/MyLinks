@@ -2,7 +2,7 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Pencil, Trash2 } from "lucide-react";
+import { GripVertical, Pencil, Trash2, MousePointerClick } from "lucide-react";
 import { Card } from "./card";
 
 export type LinkBlock = {
@@ -11,6 +11,7 @@ export type LinkBlock = {
   url: string;
   position: number;
   isVisible: boolean;
+  clickCount?: number;
 };
 
 interface LinkRowProps {
@@ -68,7 +69,13 @@ export function LinkRow({ link, onEdit, onDelete, onToggleVisibility, isDragDisa
             </span>
           )}
         </div>
-        <p className="text-ink/60 text-xs sm:text-sm truncate mt-0.5">{link.url}</p>
+        <div className="flex items-center gap-3 mt-0.5">
+          <p className="text-ink/60 text-xs sm:text-sm truncate max-w-[200px] sm:max-w-[300px]">{link.url}</p>
+          <div className="flex items-center gap-1 text-ink/50 text-xs font-medium">
+            <MousePointerClick className="w-3.5 h-3.5" />
+            <span>{link.clickCount === 1 ? "1 click" : `${link.clickCount || 0} clicks`}</span>
+          </div>
+        </div>
       </div>
 
       <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">

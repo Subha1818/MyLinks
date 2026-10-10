@@ -51,5 +51,9 @@ export async function submitOnboarding(formData: FormData) {
     return { error: "Failed to create page" };
   }
 
+  // Next.js requires importing revalidateTag
+  const { revalidateTag } = await import("next/cache");
+  revalidateTag(`page:${formatCheck.username.toLowerCase()}`, { expire: 0 });
+
   redirect("/dashboard");
 }

@@ -2,9 +2,33 @@ import { db } from "@/server/db";
 import { pages, blocks } from "@/server/db/schema";
 import { eq, and, sql, asc } from "drizzle-orm";
 import { usernameSchema } from "@/lib/validators/username";
-import { cache } from "react";
+import { unstable_cache } from "next/cache";
 
-export const getPublicPageByUsername = cache(async (username: string) => {
+export const getPublicPageByUsername = unstable_cache(
+  async (username: string) => {
+    console.log(`[Cache Miss] Fetching public page for: ${username}`);
+    return getPublicPageByUsernameUncached(username);
+  },
+  ["public-page"],
+  {
+    tags: ["page-data"], // We will invalidate this tag dynamically with the username
+  }
+);
+
+// We wrap it in a helper to dynamically pass the username tag because unstable_cache 
+// doesn't support dynamic tags inside the function signature natively without wrapper.
+export async function getCachedPublicPage(username: string) {
+  const cleanUsername = username.trim().toLowerCase();
+  return unstable_cache(
+    async () => {
+      return getPublicPageByUsernameUncached(cleanUsername);
+    },
+    [`public-page-${cleanUsername}`],
+    { tags: [`page:${cleanUsername}`] }
+  )();
+}
+
+export async function getPublicPageByUsernameUncached(username: string) {
   const cleanUsername = username.trim().toLowerCase();
   
   // Validate before DB hit
@@ -50,4 +74,4 @@ export const getPublicPageByUsername = cache(async (username: string) => {
     theme: page.theme,
     links: pageBlocks,
   };
-});
+}

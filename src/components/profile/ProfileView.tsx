@@ -99,7 +99,7 @@ export function ProfileView({
               return (
                 <a
                   key={link.id}
-                  href={safeUrl}
+                  href={`/api/click/${link.id}`}
                   target="_blank"
                   rel="noopener noreferrer nofollow ugc"
                   className={btnClass}

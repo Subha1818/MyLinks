@@ -4,7 +4,7 @@ import { requireUser } from "@/server/session";
 import { updatePageProfile } from "@/server/services/pages";
 import { profileSchema, ProfileInput, ProfileOutput } from "@/lib/validators/profile";
 import { rateLimit } from "@/lib/rate-limit";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export type UpdateProfileResult = 
   | { ok: true; profile: ProfileOutput }
@@ -42,7 +42,8 @@ export async function updateProfile(data: ProfileInput): Promise<UpdateProfileRe
 
     // Revalidate dashboard and public page
     revalidatePath("/dashboard", "layout");
-    revalidatePath(`/${updated.username}`);
+    revalidatePath(`/${updated.username}`, "page");
+    revalidateTag(`page:${updated.username.toLowerCase()}`, { expire: 0 });
 
     return { ok: true, profile: result.data };
   } catch (error) {
@@ -74,7 +75,8 @@ export async function removeAvatar() {
 
     // Revalidate
     revalidatePath("/dashboard", "layout");
-    revalidatePath(`/${page.username}`);
+    revalidatePath(`/${page.username}`, "page");
+    revalidateTag(`page:${page.username.toLowerCase()}`, { expire: 0 });
 
     return { ok: true };
   } catch (error) {

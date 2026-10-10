@@ -1,6 +1,6 @@
 import { db } from "../db";
 import { blocks } from "../db/schema";
-import { eq, and, asc, count, sql } from "drizzle-orm";
+import { eq, and, asc, count, sql, desc } from "drizzle-orm";
 import { MAX_LINKS_PER_PAGE } from "@/lib/limits";
 
 export async function listBlocks(pageId: string) {
@@ -9,6 +9,30 @@ export async function listBlocks(pageId: string) {
     .from(blocks)
     .where(eq(blocks.pageId, pageId))
     .orderBy(asc(blocks.position), asc(blocks.createdAt));
+}
+
+export async function getBlocksWithClicks(pageId: string) {
+  // Use sql to count clicks from click_events joined to blocks
+  const result = await db
+    .execute(sql`
+      SELECT 
+        b.*,
+        COUNT(c.id) as click_count
+      FROM blocks b
+      LEFT JOIN click_events c ON b.id = c.block_id
+      WHERE b.page_id = ${pageId}
+      GROUP BY b.id
+      ORDER BY b.position ASC, b.created_at ASC
+    `);
+  
+  return result.rows.map(row => ({
+    id: row.id as string,
+    title: row.title as string,
+    url: row.url as string,
+    position: row.position as number,
+    isVisible: row.is_visible as boolean,
+    clickCount: Number(row.click_count || 0)
+  }));
 }
 
 export async function countBlocks(pageId: string) {

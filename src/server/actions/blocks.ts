@@ -7,7 +7,7 @@ import { BlockSchema, type BlockInput } from "@/lib/validators/block";
 import { z } from "zod";
 import { MAX_LINKS_PER_PAGE } from "@/lib/limits";
 import { rateLimit } from "@/lib/rate-limit";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export async function addBlockAction(data: BlockInput) {
   try {
@@ -42,7 +42,8 @@ export async function addBlockAction(data: BlockInput) {
     await createBlock(page.id, parsed.data);
 
     revalidatePath("/dashboard", "layout");
-    revalidatePath(`/${page.username}`);
+    revalidatePath(`/${page.username}`, "page");
+    revalidateTag(`page:${page.username.toLowerCase()}`, { expire: 0 });
 
     return { ok: true };
   } catch (err) {
@@ -90,7 +91,8 @@ export async function editBlockAction(blockId: string, data: BlockInput) {
     }
 
     revalidatePath("/dashboard", "layout");
-    revalidatePath(`/${page.username}`);
+    revalidatePath(`/${page.username}`, "page");
+    revalidateTag(`page:${page.username.toLowerCase()}`, { expire: 0 });
 
     return { ok: true };
   } catch (err) {
@@ -125,7 +127,8 @@ export async function removeBlockAction(blockId: string) {
     }
 
     revalidatePath("/dashboard", "layout");
-    revalidatePath(`/${page.username}`);
+    revalidatePath(`/${page.username}`, "page");
+    revalidateTag(`page:${page.username.toLowerCase()}`, { expire: 0 });
 
     return { ok: true };
   } catch (err) {
@@ -158,7 +161,8 @@ export async function setBlockVisibilityAction(blockId: string, isVisible: boole
     }
 
     revalidatePath("/dashboard", "layout");
-    revalidatePath(`/${page.username}`);
+    revalidatePath(`/${page.username}`, "page");
+    revalidateTag(`page:${page.username.toLowerCase()}`, { expire: 0 });
 
     return { ok: true };
   } catch (err) {
@@ -202,7 +206,8 @@ export async function reorderBlocksAction(orderedIds: string[]) {
     }
 
     revalidatePath("/dashboard", "layout");
-    revalidatePath(`/${page.username}`);
+    revalidatePath(`/${page.username}`, "page");
+    revalidateTag(`page:${page.username.toLowerCase()}`, { expire: 0 });
 
     return { ok: true };
   } catch (err) {

@@ -5,7 +5,7 @@ import { PhonePreview } from "@/components/dashboard/PhonePreview";
 import { PageDraftProvider } from "@/components/dashboard/PageDraftProvider";
 import { requireUser } from "@/server/session";
 import { getPageByUserId } from "@/server/services/pages";
-import { listBlocks } from "@/server/services/blocks";
+import { listBlocks, getBlocksWithClicks } from "@/server/services/blocks";
 import { redirect } from "next/navigation";
 
 export const metadata = {
@@ -20,13 +20,14 @@ export default async function LinksPage() {
     redirect("/onboarding");
   }
 
-  const blocks = await listBlocks(page.id);
+  const blocks = await getBlocksWithClicks(page.id);
   const formattedBlocks = blocks.map((b) => ({
     id: b.id,
     title: b.title,
     url: b.url,
     position: b.position,
     isVisible: b.isVisible,
+    clickCount: b.clickCount,
   }));
 
   const draftState = {

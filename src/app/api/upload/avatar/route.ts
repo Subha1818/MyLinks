@@ -3,7 +3,7 @@ import { getSession } from "@/server/session";
 import { rateLimit } from "@/lib/rate-limit";
 import { uploadAvatar, deleteAvatarIfOwned } from "@/server/storage";
 import { getPageByUserId, updatePageAvatar } from "@/server/services/pages";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import sharp from "sharp";
 
 const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
@@ -78,7 +78,8 @@ export async function POST(req: NextRequest) {
 
       // Revalidate paths
       revalidatePath("/dashboard", "layout");
-      revalidatePath(`/${page.username}`);
+      revalidatePath(`/${page.username}`, "page");
+      revalidateTag(`page:${page.username.toLowerCase()}`, { expire: 0 });
       
     } catch (dbErr) {
       // If DB update fails, clean up the new upload

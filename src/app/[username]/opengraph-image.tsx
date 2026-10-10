@@ -1,9 +1,10 @@
 import { ImageResponse } from "next/og";
-import { getPublicPageByUsername } from "@/server/services/public-page";
+import { getCachedPublicPage } from "@/server/services/public-page";
 import { resolveTheme } from "@/lib/theme";
-import { siteConfig } from "@/lib/site";
 import fs from "fs";
 import path from "path";
+
+import sharp from "sharp";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -16,16 +17,48 @@ const ALLOWED_AVATAR_HOSTS = [
 
 export default async function Image({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
-  const page = await getPublicPageByUsername(username.toLowerCase());
+  const page = await getCachedPublicPage(username.toLowerCase());
+
+  // Load font if it exists
+  let fontData: ArrayBuffer | null = null;
+  try {
+    const fontPath = path.join(process.cwd(), "src/assets/fonts/BricolageGrotesque-Bold.ttf");
+    if (fs.existsSync(fontPath)) {
+      const buffer = fs.readFileSync(fontPath);
+      fontData = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer;
+    }
+  } catch (err) {
+    // ignore
+  }
 
   if (!page) {
-    return new Response("Not Found", { status: 404 });
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#14181F",
+            color: "#FFFFFF",
+            fontSize: 48,
+            fontWeight: 700,
+          }}
+        >
+          <div style={{ display: "flex", marginBottom: 16 }}>MyLinks</div>
+          <div style={{ display: "flex", fontSize: 28, opacity: 0.7 }}>User not found</div>
+        </div>
+      ),
+      { ...size }
+    );
   }
 
   const theme = resolveTheme(page.theme);
   const displayName = page.displayName || page.username;
 
-  // Truncate bio to ~90 chars
   let bio = "";
   if (page.bio) {
     const plain = page.bio.replace(/[\x00-\x09\x0B-\x1F\x7F-\x9F]/g, "").replace(/\s+/g, " ").trim();
@@ -36,38 +69,39 @@ export default async function Image({ params }: { params: Promise<{ username: st
     }
   }
 
-  // Determine avatar safety
-  let safeAvatarUrl: string | null = null;
+  let finalAvatarDataUri: string | null = null;
   if (page.avatarUrl) {
     try {
       const url = new URL(page.avatarUrl);
-      // Check if hostname is directly allowed or ends with allowed blob domain
       if (
         ALLOWED_AVATAR_HOSTS.includes(url.hostname) ||
         url.hostname.endsWith(".public.blob.vercel-storage.com")
       ) {
-        safeAvatarUrl = page.avatarUrl;
+        // Fetch the avatar on the server with 3s timeout and 1MB size cap
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        
+        const response = await fetch(page.avatarUrl, {
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          const arrayBuffer = await response.arrayBuffer();
+          if (arrayBuffer.byteLength <= 1024 * 1024) { // 1MB cap
+            // Convert to PNG with sharp
+            const pngBuffer = await sharp(Buffer.from(arrayBuffer))
+              .resize(160, 160)
+              .png()
+              .toBuffer();
+            finalAvatarDataUri = `data:image/png;base64,${pngBuffer.toString("base64")}`;
+          }
+        }
       }
-    } catch {
-      // Invalid URL
+    } catch (e) {
+      // Fallback to initials if anything fails
     }
   }
-
-  // Load font
-  let bricolageFont: ArrayBuffer | null = null;
-  try {
-    const fontData = fs.readFileSync(
-      path.join(process.cwd(), "src/assets/fonts/BricolageGrotesque-Bold.ttf")
-    );
-    bricolageFont = fontData.buffer.slice(
-      fontData.byteOffset,
-      fontData.byteOffset + fontData.byteLength
-    ) as ArrayBuffer;
-  } catch (_e) {
-    // Fall back to sans-serif
-  }
-
-  const initials = displayName.slice(0, 2).toUpperCase();
 
   return new ImageResponse(
     (
@@ -81,103 +115,102 @@ export default async function Image({ params }: { params: Promise<{ username: st
           justifyContent: "center",
           backgroundColor: theme.background.value,
           color: theme.textColor,
-          padding: "80px",
-          fontFamily: bricolageFont ? "Bricolage" : "sans-serif",
+          padding: 80,
           textAlign: "center",
-          position: "relative",
+          fontFamily: fontData ? '"Bricolage"' : "sans-serif",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "200px",
-            height: "200px",
-            borderRadius: "100px",
-            backgroundColor: theme.button.fill,
-            color: theme.button.textColor,
-            fontSize: "72px",
-            fontWeight: "bold",
-            marginBottom: "40px",
-            overflow: "hidden",
-          }}
-        >
-          {safeAvatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={safeAvatarUrl}
-              width="200"
-              height="200"
-              alt={displayName}
-              style={{ objectFit: "cover" }}
-            />
-          ) : (
-            initials
-          )}
-        </div>
-
-        <div
-          style={{
-            fontSize: "72px",
-            fontWeight: "900",
-            letterSpacing: "-0.03em",
-            lineHeight: 1.1,
-            marginBottom: "16px",
-          }}
-        >
-          {displayName}
-        </div>
-
-        <div
-          style={{
-            fontSize: "36px",
-            fontWeight: "500",
-            opacity: 0.8,
-            marginBottom: bio ? "32px" : "0",
-          }}
-        >
-          @{page.username}
-        </div>
-
-        {bio && (
+        {finalAvatarDataUri ? (
+          <img
+            src={finalAvatarDataUri}
+            alt=""
+            width="160"
+            height="160"
+            style={{
+              width: 160,
+              height: 160,
+              borderRadius: 80,
+              marginBottom: 24,
+            }}
+          />
+        ) : (
           <div
             style={{
-              fontSize: "32px",
-              lineHeight: 1.4,
-              opacity: 0.9,
-              maxWidth: "800px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 160,
+              height: 160,
+              borderRadius: 80,
+              backgroundColor: theme.button.fill,
+              color: theme.button.textColor,
+              fontSize: 64,
+              fontWeight: 700,
+              marginBottom: 24,
             }}
           >
-            {bio}
+            {(displayName || username).slice(0, 2).toUpperCase()}
           </div>
         )}
 
         <div
           style={{
-            position: "absolute",
-            bottom: "40px",
-            right: "40px",
-            fontSize: "24px",
-            fontWeight: "bold",
-            opacity: 0.5,
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
+            display: "flex",
+            fontSize: 64,
+            fontWeight: 700,
+            marginBottom: 8,
           }}
         >
-          {siteConfig.name}
+          {page?.displayName || username}
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            fontSize: 32,
+            opacity: 0.8,
+            marginBottom: 16,
+          }}
+        >
+          @{page?.username || username}
+        </div>
+
+        {page?.bio ? (
+          <div
+            style={{
+              display: "flex",
+              fontSize: 28,
+              opacity: 0.9,
+              maxWidth: 800,
+            }}
+          >
+            {page.bio}
+          </div>
+        ) : null}
+
+        <div
+          style={{
+            display: "flex",
+            marginTop: 40,
+            fontSize: 22,
+            fontWeight: 700,
+            opacity: 0.5,
+            letterSpacing: 2,
+          }}
+        >
+          MYLINKS
         </div>
       </div>
     ),
     {
       ...size,
-      fonts: bricolageFont
+      fonts: fontData
         ? [
             {
               name: "Bricolage",
-              data: bricolageFont,
-              style: "normal",
+              data: fontData,
               weight: 700,
+              style: "normal",
             },
           ]
         : undefined,

@@ -8,6 +8,8 @@ import {
   uniqueIndex,
   uuid,
   integer,
+  bigint,
+  check,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
@@ -113,28 +115,47 @@ export const blocks = pgTable(
   (table) => [
     index("blocks_page_position_idx").on(table.pageId, table.position),
   ]
-);
-
-// -------------------------------------------------------------
+);// -------------------------------------------------------------
 // Click Events table (Analytics tracking)
 // -------------------------------------------------------------
 export const clickEvents = pgTable(
   "click_events",
   {
-    id: text("id").primaryKey(),
+    id: bigint("id", { mode: "number" }).primaryKey().generatedByDefaultAsIdentity(),
     blockId: uuid("block_id")
       .notNull()
       .references(() => blocks.id, { onDelete: "cascade" }),
     pageId: text("page_id")
       .notNull()
       .references(() => pages.id, { onDelete: "cascade" }),
-    referrer: text("referrer"),
     country: text("country"),
-    device: text("device"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
+    device: text("device").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
     index("click_events_block_created_idx").on(table.blockId, table.createdAt),
     index("click_events_page_created_idx").on(table.pageId, table.createdAt),
+    check("device_check", sql`device IN ('mobile', 'tablet', 'desktop', 'unknown')`),
+  ]
+);
+
+export const reports = pgTable(
+  "reports",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    pageId: text("page_id")
+      .notNull()
+      .references(() => pages.id, { onDelete: "cascade" }),
+    reason: text("reason").notNull(),
+    details: text("details"),
+    status: text("status").notNull().default("open"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("reports_page_created_idx").on(table.pageId, table.createdAt),
+    index("reports_status_idx").on(table.status),
+    check("reason_check", sql`reason IN ('spam', 'phishing_or_malware', 'impersonation', 'inappropriate', 'other')`),
+    check("status_check", sql`status IN ('open', 'reviewed', 'dismissed', 'actioned')`),
+    check("details_check", sql`details IS NULL OR length(details) <= 500`),
   ]
 );

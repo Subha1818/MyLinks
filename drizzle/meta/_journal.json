@@ -15,6 +15,20 @@
       "when": 1791577697031,
       "tag": "0001_sweet_crusher_hogan",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791617121817,
+      "tag": "0002_lively_miss_america",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791623794593,
+      "tag": "0003_happy_junta",
+      "breakpoints": true
     }
   ]
 }

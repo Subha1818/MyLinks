@@ -1,3 +1,4 @@
+export const instant = false;
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ProfileForm } from "@/components/dashboard/profile-form";
 import { LinksList } from "@/components/dashboard/links-list";

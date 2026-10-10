@@ -7,6 +7,7 @@ import { Sidebar } from "@/components/dashboard/sidebar";
 import { TopBar } from "@/components/dashboard/top-bar";
 import { MobileNav } from "@/components/dashboard/mobile-nav";
 import { PageDraftProvider } from "@/components/dashboard/PageDraftProvider";
+import { SessionRefresher } from "@/components/dashboard/session-refresher";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -52,6 +53,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-cream lg:flex text-ink">
+      <SessionRefresher />
       <Sidebar page={page} />
       
       <div className="flex-1 lg:ml-64 flex flex-col min-h-screen pb-20 lg:pb-0">

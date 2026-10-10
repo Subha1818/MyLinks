@@ -48,6 +48,13 @@ User reports (spam, inappropriate, etc.) are stored in the `reports` table. Sinc
    - Revert your `.env.local` to the local development database URL immediately.
 3. **Google OAuth**: Add your production redirect URI (e.g., `https://mylinks.vercel.app/api/auth/callback/google`) to your Google Cloud Console OAuth 2.0 Web Client authorized redirect URIs.
 
+## Authentication & Sessions
+
+- **`BETTER_AUTH_SECRET` Stability:** `BETTER_AUTH_SECRET` is used to cryptographically sign session cookies. It must **never** be changed within a running environment; changing it invalidates the signatures on all issued session cookies, immediately logging out every user.
+- **Environment Isolation:** Development and production environments must each use distinct, randomly generated `BETTER_AUTH_SECRET` values.
+- **Database Session Storage:** Sessions are stored directly in the PostgreSQL database (`sessions` table). Therefore, switching databases or connecting to a different database instance will invalidate active sessions and log users out.
+- **Session Duration & Sliding Refresh:** Sessions persist for 30 days (`expiresIn`). A sliding refresh window of 1 day (`updateAge`) automatically extends the session whenever the user active on the application.
+
 ## Known Limitations
 
 - **Rate Limiting**: The current rate limiters (for username checks, uploads, mutations, clicks, and reports) use an in-memory `Map`. On serverless platforms like Vercel, this state is isolated per serverless instance and lost when the instance spins down. For a true global rate limit in production, these should be moved to a centralized store like Redis or Upstash.

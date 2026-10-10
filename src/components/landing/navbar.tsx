@@ -5,9 +5,12 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/landing/logo";
 import { Button } from "@/components/ui/button";
+import { useSession } from "@/lib/auth-client";
 
-export function Navbar() {
+export function Navbar({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { data: session } = useSession();
+  const loggedIn = session ? !!session : isLoggedIn;
 
   return (
     <header className="sticky top-4 z-50 px-4 sm:px-6 w-full max-w-5xl mx-auto">
@@ -44,24 +47,40 @@ export function Navbar() {
 
         {/* Desktop CTA actions */}
         <div className="hidden md:flex items-center gap-3">
-          <Link
-            href="/login"
-            className="text-sm font-semibold text-ink/80 hover:text-ink px-3 py-2 transition-colors"
-          >
-            Log in
-          </Link>
-          <Link href="/login">
-            <Button variant="dark" size="sm">
-              Sign up free
-            </Button>
-          </Link>
+          {loggedIn ? (
+            <Link href="/dashboard">
+              <Button variant="dark" size="sm">
+                Dashboard
+              </Button>
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="text-sm font-semibold text-ink/80 hover:text-ink px-3 py-2 transition-colors"
+              >
+                Log in
+              </Link>
+              <Link href="/login">
+                <Button variant="dark" size="sm">
+                  Sign up free
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Hamburger Button */}
         <div className="flex md:hidden items-center gap-2">
-          <Link href="/login" className="text-xs font-semibold text-ink px-2 py-1">
-            Log in
-          </Link>
+          {loggedIn ? (
+            <Link href="/dashboard" className="text-xs font-semibold text-ink px-2 py-1">
+              Dashboard
+            </Link>
+          ) : (
+            <Link href="/login" className="text-xs font-semibold text-ink px-2 py-1">
+              Log in
+            </Link>
+          )}
           <button
             type="button"
             onClick={() => setMobileMenuOpen((prev) => !prev)}
@@ -99,22 +118,36 @@ export function Navbar() {
             Themes
           </a>
           <div className="pt-2 border-t border-ink/10 flex flex-col gap-2">
-            <Link
-              href="/login"
-              onClick={() => setMobileMenuOpen(false)}
-              className="w-full text-center py-2.5 text-sm font-semibold text-ink rounded-full border border-ink/15 hover:bg-cream"
-            >
-              Log in
-            </Link>
-            <Link
-              href="/login"
-              onClick={() => setMobileMenuOpen(false)}
-              className="w-full"
-            >
-              <Button variant="dark" size="sm" className="w-full">
-                Sign up free
-              </Button>
-            </Link>
+            {loggedIn ? (
+              <Link
+                href="/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full"
+              >
+                <Button variant="dark" size="sm" className="w-full">
+                  Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full text-center py-2.5 text-sm font-semibold text-ink rounded-full border border-ink/15 hover:bg-cream"
+                >
+                  Log in
+                </Link>
+                <Link
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full"
+                >
+                  <Button variant="dark" size="sm" className="w-full">
+                    Sign up free
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

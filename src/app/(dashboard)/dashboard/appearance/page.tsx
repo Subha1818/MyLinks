@@ -1,3 +1,4 @@
+export const instant = false;
 import { PageHeader } from "@/components/dashboard/page-header";
 import { PhonePreview } from "@/components/dashboard/PhonePreview";
 import { ThemeSelector } from "@/components/dashboard/appearance/theme-selector";

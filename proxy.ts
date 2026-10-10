@@ -7,15 +7,29 @@ export async function proxy(request: NextRequest) {
   
   // Only protect /dashboard and /onboarding
   if (pathname.startsWith("/dashboard") || pathname.startsWith("/onboarding")) {
-    const session = await auth.api.getSession({
+    const sessionRes = await auth.api.getSession({
       headers: request.headers,
+      returnHeaders: true,
     });
+    
+    const session = sessionRes?.response;
     
     if (!session) {
       const url = new URL("/login", request.url);
       url.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(url);
     }
+
+    const response = NextResponse.next();
+    if (sessionRes?.headers) {
+      const setCookies = sessionRes.headers.getSetCookie
+        ? sessionRes.headers.getSetCookie()
+        : [sessionRes.headers.get("set-cookie")].filter(Boolean) as string[];
+      for (const cookie of setCookies) {
+        response.headers.append("set-cookie", cookie);
+      }
+    }
+    return response;
   }
 
   return NextResponse.next();

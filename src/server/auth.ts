@@ -31,9 +31,19 @@ export const auth = betterAuth({
 
   // Cookie session only – never store tokens in localStorage
   session: {
+    expiresIn: 60 * 60 * 24 * 30, // 30 days in seconds
+    updateAge: 60 * 60 * 24, // 1 day sliding refresh window
     cookieCache: {
       enabled: true,
       maxAge: 60 * 5, // 5-minute cache in cookie
+    },
+  },
+
+  advanced: {
+    defaultCookieAttributes: {
+      sameSite: "lax",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
     },
   },
 

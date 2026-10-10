@@ -1,11 +1,11 @@
+export const instant = false;
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Card } from "@/components/dashboard/card";
-import { SignOutButton } from "@/components/dashboard/sign-out-button";
+import { SignOutButton, SignOutAllButton } from "@/components/dashboard/sign-out-button";
 import { CopyLinkButton } from "@/components/dashboard/copy-link-button";
 import { requireUser } from "@/server/session";
 import { getPageByUserId } from "@/server/services/pages";
 import { redirect } from "next/navigation";
-import { siteConfig } from "@/lib/site";
 import { Avatar } from "@/components/ui/avatar";
 
 export const metadata = {
@@ -94,11 +94,19 @@ export default async function SettingsPage() {
           </div>
         </Card>
 
-        <div className="pt-4 border-t border-ink/10">
-          <h2 className="font-heading font-bold text-xl text-ink mb-4">
-            Danger Zone
-          </h2>
-          <SignOutButton />
+        <div className="pt-4 border-t border-ink/10 space-y-4">
+          <div>
+            <h2 className="font-heading font-bold text-xl text-ink">
+              Session & Security
+            </h2>
+            <p className="mt-1 text-sm text-ink/70 font-medium">
+              You stay signed in on this device for 30 days of activity.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <SignOutButton />
+            <SignOutAllButton />
+          </div>
         </div>
       </div>
     </div>

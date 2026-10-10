@@ -1,9 +1,37 @@
 import type { NextConfig } from "next";
 
+const requiredEnvs = [
+  "DATABASE_URL",
+  "BETTER_AUTH_SECRET",
+  "BETTER_AUTH_URL",
+  "GOOGLE_CLIENT_ID",
+  "GOOGLE_CLIENT_SECRET",
+  "BLOB_READ_WRITE_TOKEN",
+  "NEXT_PUBLIC_APP_URL",
+];
+
+for (const env of requiredEnvs) {
+  if (!process.env[env]) {
+    throw new Error(`❌ Missing required environment variable: ${env}`);
+  }
+}
+
 const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "*.public.blob.vercel-storage.com",
+      },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+    ],
+  },
   turbopack: {
     rules: {
       "*.css": {

@@ -11,7 +11,62 @@ type PageProps = {
 // The root layout usually just has <html> and <body> and maybe some shared providers.
 // Let's assume the root layout is fine (it usually is).
 
+import { Metadata } from "next";
+import { siteConfig } from "@/lib/site";
+
 export const instant = false;
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { username } = await params;
+  const cleanUsername = username.toLowerCase();
+  const page = await getPublicPageByUsername(cleanUsername);
+
+  if (!page) {
+    return {
+      title: "Page not found",
+      robots: { index: false },
+    };
+  }
+
+  const displayName = page.displayName || cleanUsername;
+  const title = `${displayName} (@${cleanUsername})`;
+  
+  let description = `Check out ${displayName}'s links on ${siteConfig.name}.`;
+  if (page.bio) {
+    const plain = page.bio.replace(/[\x00-\x09\x0B-\x1F\x7F-\x9F]/g, "").replace(/\s+/g, " ").trim();
+    if (plain.length > 155) {
+      description = plain.slice(0, 154).trim() + "…";
+    } else {
+      description = plain;
+    }
+  }
+
+  const url = `/${cleanUsername}`;
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      type: "profile",
+      title,
+      description,
+      url,
+      siteName: siteConfig.name,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
 
 export default async function PublicProfilePage({ params }: PageProps) {
   const { username } = await params;

@@ -2,8 +2,9 @@ import { db } from "@/server/db";
 import { pages, blocks } from "@/server/db/schema";
 import { eq, and, sql, asc } from "drizzle-orm";
 import { usernameSchema } from "@/lib/validators/username";
+import { cache } from "react";
 
-export async function getPublicPageByUsername(username: string) {
+export const getPublicPageByUsername = cache(async (username: string) => {
   const cleanUsername = username.trim().toLowerCase();
   
   // Validate before DB hit
@@ -49,4 +50,4 @@ export async function getPublicPageByUsername(username: string) {
     theme: page.theme,
     links: pageBlocks,
   };
-}
+});

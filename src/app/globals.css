@@ -26,6 +26,37 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+@layer base {
+  a[href],
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="switch"],
+  [role="tab"],
+  [role="menuitem"],
+  summary,
+  select,
+  label[for],
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="file"],
+  input[type="submit"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+
+  .drag-handle {
+    cursor: grab;
+  }
+
+  .drag-handle:active {
+    cursor: grabbing;
+  }
+}
+
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   letter-spacing: -0.03em;

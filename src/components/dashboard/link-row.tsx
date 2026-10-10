@@ -49,8 +49,8 @@ export function LinkRow({ link, onEdit, onDelete, onToggleVisibility, isDragDisa
         {...attributes}
         {...listeners}
         disabled={isDragDisabled}
-        className={`p-2 -ml-2 text-ink/40 hover:text-ink transition-colors rounded-lg touch-none ${
-          isDragDisabled ? "hidden" : "cursor-grab active:cursor-grabbing"
+        className={`drag-handle p-2 -ml-2 text-ink/40 hover:text-ink transition-colors rounded-lg touch-none ${
+          isDragDisabled ? "hidden" : ""
         }`}
         aria-label={`Drag to reorder ${link.title}`}
       >

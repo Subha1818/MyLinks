@@ -5,6 +5,11 @@ import { getPageByUserId } from "@/server/services/pages";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { TopBar } from "@/components/dashboard/top-bar";
 import { MobileNav } from "@/components/dashboard/mobile-nav";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default async function DashboardLayout({
   children,

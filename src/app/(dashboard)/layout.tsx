@@ -2,9 +2,11 @@ export const instant = false;
 import { redirect } from "next/navigation";
 import { getSession } from "@/server/session";
 import { getPageByUserId } from "@/server/services/pages";
+import { getBlocksWithClicks } from "@/server/services/blocks";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { TopBar } from "@/components/dashboard/top-bar";
 import { MobileNav } from "@/components/dashboard/mobile-nav";
+import { PageDraftProvider } from "@/components/dashboard/PageDraftProvider";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -29,6 +31,25 @@ export default async function DashboardLayout({
     redirect("/onboarding");
   }
 
+  const blocks = await getBlocksWithClicks(page.id);
+  const formattedBlocks = blocks.map((b) => ({
+    id: b.id,
+    title: b.title,
+    url: b.url,
+    position: b.position,
+    isVisible: b.isVisible,
+    clickCount: b.clickCount,
+  }));
+
+  const draftState = {
+    displayName: page.displayName || "",
+    bio: page.bio,
+    avatarUrl: page.avatarUrl,
+    username: page.username,
+    theme: page.theme,
+    blocks: formattedBlocks,
+  };
+
   return (
     <div className="min-h-screen bg-cream lg:flex text-ink">
       <Sidebar page={page} />
@@ -37,7 +58,9 @@ export default async function DashboardLayout({
         <TopBar page={page} />
         
         <main className="flex-1 w-full max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-0">
-          {children}
+          <PageDraftProvider initialState={draftState}>
+            {children}
+          </PageDraftProvider>
         </main>
       </div>
 

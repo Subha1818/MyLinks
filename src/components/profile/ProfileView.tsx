@@ -3,6 +3,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { isSafeHttpUrl } from "@/lib/safe-url";
 import { siteConfig } from "@/lib/site";
 import Link from "next/link";
+import React from "react";
 
 type ProfileViewProps = {
   displayName: string;
@@ -23,7 +24,7 @@ export function ProfileView({
 }: ProfileViewProps) {
   const resolvedTheme = resolveTheme(theme);
 
-  const style = {
+  const containerStyle = {
     "--theme-bg": resolvedTheme.background.value,
     "--theme-text": resolvedTheme.textColor,
     "--theme-btn-fill": resolvedTheme.button.fill,
@@ -40,9 +41,36 @@ export function ProfileView({
       ? "rounded-xl"
       : "rounded-none";
 
+  const buttonStyleCSS: React.CSSProperties =
+    resolvedTheme.button.style === "outline"
+      ? {
+          backgroundColor: "transparent",
+          color: resolvedTheme.button.textColor,
+          borderWidth: "2px",
+          borderStyle: "solid",
+          borderColor: resolvedTheme.button.fill,
+        }
+      : resolvedTheme.button.style === "hard-shadow"
+      ? {
+          backgroundColor: resolvedTheme.button.fill,
+          color: resolvedTheme.button.textColor,
+          borderWidth: "2px",
+          borderStyle: "solid",
+          borderColor: resolvedTheme.button.textColor,
+          boxShadow: `4px 4px 0px ${resolvedTheme.button.textColor}`,
+        }
+      : {
+          backgroundColor: resolvedTheme.button.fill,
+          color: resolvedTheme.button.textColor,
+        };
+
+  const btnClass = `block w-full text-center px-6 py-4 font-bold transition-transform hover:scale-[1.02] ${
+    resolvedTheme.button.style === "solid" ? "shadow-sm" : ""
+  } ${buttonRadiusClass} truncate focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-2`;
+
   return (
     <div
-      style={style}
+      style={containerStyle}
       className={`flex-1 min-h-full w-full bg-[var(--theme-bg)] text-[var(--theme-text)] flex flex-col items-center px-4 py-12 ${fontClass}`}
     >
       <div className="w-full max-w-[480px] flex flex-col items-center">
@@ -67,8 +95,6 @@ export function ProfileView({
           ) : (
             links.map((link) => {
               const safeUrl = isSafeHttpUrl(link.url) ? link.url : undefined;
-              
-              const btnClass = `block w-full text-center px-6 py-4 font-bold transition-transform hover:scale-[1.02] bg-[var(--theme-btn-fill)] text-[var(--theme-btn-text)] shadow-sm ${buttonRadiusClass} truncate focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2`;
 
               if (!safeUrl) {
                 if (mode === "public") return null;
@@ -77,6 +103,7 @@ export function ProfileView({
                   <div
                     key={link.id}
                     className={btnClass}
+                    style={buttonStyleCSS}
                     aria-disabled="true"
                   >
                     {link.title}
@@ -89,6 +116,7 @@ export function ProfileView({
                   <div
                     key={link.id}
                     className={btnClass}
+                    style={buttonStyleCSS}
                     aria-disabled="true"
                   >
                     {link.title}
@@ -103,6 +131,7 @@ export function ProfileView({
                   target="_blank"
                   rel="noopener noreferrer nofollow ugc"
                   className={btnClass}
+                  style={buttonStyleCSS}
                 >
                   {link.title}
                 </a>
@@ -110,7 +139,7 @@ export function ProfileView({
             })
           )}
         </div>
-        
+
         <div className="mt-12 text-xs font-bold opacity-60 uppercase tracking-widest">
           <Link href="/" className="hover:underline">
             Made with {siteConfig.name}

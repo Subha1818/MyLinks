@@ -1,4 +1,4 @@
-# Project: Link-in-Bio SaaS (working name: `YourApp`)
+# Project: Link-in-Bio SaaS (working name: `MyLinks`)
 
 > This file is the source of truth for the project. Read it fully before writing any code.
 > Follow it strictly. If something here conflicts with a request, ask before deviating.

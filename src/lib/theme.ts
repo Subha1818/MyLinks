@@ -2,19 +2,35 @@ import { z } from "zod";
 
 const hexColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
 
-export const ThemeSchema = z.object({
-  background: z.object({
-    type: z.literal("solid"),
-    value: z.string().regex(hexColorRegex, "Invalid hex color"),
-  }),
-  textColor: z.string().regex(hexColorRegex, "Invalid hex color"),
-  button: z.object({
-    shape: z.enum(["pill", "rounded", "square"]),
-    fill: z.string().regex(hexColorRegex, "Invalid hex color"),
+export const ButtonStyleSchema = z.enum(["solid", "outline", "hard-shadow"]);
+export type ButtonStyle = z.infer<typeof ButtonStyleSchema>;
+
+export const ButtonShapeSchema = z.enum(["pill", "rounded", "square"]);
+export type ButtonShape = z.infer<typeof ButtonShapeSchema>;
+
+export const FontSchema = z.enum(["bricolage", "dm-sans"]);
+export type FontOption = z.infer<typeof FontSchema>;
+
+export const ThemeSchema = z
+  .object({
+    background: z
+      .object({
+        type: z.literal("solid"),
+        value: z.string().regex(hexColorRegex, "Invalid hex color"),
+      })
+      .strict(),
     textColor: z.string().regex(hexColorRegex, "Invalid hex color"),
-  }),
-  font: z.enum(["bricolage", "dm-sans"]),
-});
+    button: z
+      .object({
+        shape: ButtonShapeSchema,
+        style: ButtonStyleSchema.default("solid"),
+        fill: z.string().regex(hexColorRegex, "Invalid hex color"),
+        textColor: z.string().regex(hexColorRegex, "Invalid hex color"),
+      })
+      .strict(),
+    font: FontSchema,
+  })
+  .strict();
 
 export type ThemeConfig = z.infer<typeof ThemeSchema>;
 
@@ -23,6 +39,7 @@ export const DEFAULT_THEME: ThemeConfig = {
   textColor: "#1F4D1A",
   button: {
     shape: "pill",
+    style: "solid",
     fill: "#FFFFFF",
     textColor: "#14181F",
   },

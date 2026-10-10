@@ -117,7 +117,7 @@ export default async function Image({ params }: { params: Promise<{ username: st
           color: theme.textColor,
           padding: 80,
           textAlign: "center",
-          fontFamily: fontData ? '"Bricolage"' : "sans-serif",
+          fontFamily: fontData && theme.font === "bricolage" ? '"Bricolage"' : "sans-serif",
         }}
       >
         {finalAvatarDataUri ? (

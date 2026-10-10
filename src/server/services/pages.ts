@@ -126,4 +126,20 @@ export async function updatePageAvatar(userId: string, avatarUrl: string | null)
   return updated ?? null;
 }
 
+/**
+ * Update a user's page theme.
+ */
+export async function updatePageTheme(userId: string, theme: unknown) {
+  const [updated] = await db
+    .update(pages)
+    .set({
+      theme,
+      updatedAt: new Date(),
+    })
+    .where(eq(pages.userId, userId))
+    .returning();
+
+  return updated ?? null;
+}
+
 

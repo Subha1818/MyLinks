@@ -8,7 +8,23 @@ export type ButtonStyle = z.infer<typeof ButtonStyleSchema>;
 export const ButtonShapeSchema = z.enum(["pill", "rounded", "square"]);
 export type ButtonShape = z.infer<typeof ButtonShapeSchema>;
 
-export const FontSchema = z.enum(["bricolage", "dm-sans"]);
+export const FONT_OPTIONS = [
+  { id: "bricolage", label: "Bricolage Grotesque", description: "Bold display" },
+  { id: "dm-sans", label: "DM Sans", description: "Clean" },
+  { id: "fraunces", label: "Fraunces", description: "Soft serif" },
+  { id: "dm-mono", label: "DM Mono", description: "Mono" },
+  { id: "archivo", label: "Archivo", description: "Sturdy grotesque" },
+  { id: "caveat", label: "Caveat", description: "Handwritten" },
+] as const;
+
+export const FontSchema = z.enum([
+  "bricolage",
+  "dm-sans",
+  "fraunces",
+  "dm-mono",
+  "archivo",
+  "caveat",
+]);
 export type FontOption = z.infer<typeof FontSchema>;
 
 export const ThemeSchema = z

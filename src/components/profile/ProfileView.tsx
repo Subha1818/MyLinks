@@ -1,4 +1,4 @@
-import { resolveTheme } from "@/lib/theme";
+import { resolveTheme, FontOption } from "@/lib/theme";
 import { Avatar } from "@/components/ui/avatar";
 import { isSafeHttpUrl } from "@/lib/safe-url";
 import { siteConfig } from "@/lib/site";
@@ -13,6 +13,25 @@ type ProfileViewProps = {
   theme?: unknown;
   mode: "preview" | "public";
 };
+
+export function getFontFamily(font: FontOption): string {
+  switch (font) {
+    case "bricolage":
+      return "var(--font-bricolage), system-ui, sans-serif";
+    case "dm-sans":
+      return "var(--font-dm-sans), system-ui, sans-serif";
+    case "fraunces":
+      return "var(--font-fraunces), Georgia, serif";
+    case "dm-mono":
+      return "var(--font-dm-mono), Menlo, monospace";
+    case "archivo":
+      return "var(--font-archivo), system-ui, sans-serif";
+    case "caveat":
+      return "var(--font-caveat), cursive";
+    default:
+      return "var(--font-bricolage), system-ui, sans-serif";
+  }
+}
 
 export function ProfileView({
   displayName,
@@ -29,10 +48,8 @@ export function ProfileView({
     "--theme-text": resolvedTheme.textColor,
     "--theme-btn-fill": resolvedTheme.button.fill,
     "--theme-btn-text": resolvedTheme.button.textColor,
+    fontFamily: getFontFamily(resolvedTheme.font),
   } as React.CSSProperties;
-
-  const fontClass =
-    resolvedTheme.font === "dm-sans" ? "font-sans" : "font-heading";
 
   const buttonRadiusClass =
     resolvedTheme.button.shape === "pill"
@@ -71,7 +88,7 @@ export function ProfileView({
   return (
     <div
       style={containerStyle}
-      className={`flex-1 min-h-full w-full bg-[var(--theme-bg)] text-[var(--theme-text)] flex flex-col items-center px-4 py-12 ${fontClass}`}
+      className="flex-1 min-h-full w-full bg-[var(--theme-bg)] text-[var(--theme-text)] flex flex-col items-center px-4 py-12"
     >
       <div className="w-full max-w-[480px] flex flex-col items-center">
         <Avatar
@@ -80,9 +97,11 @@ export function ProfileView({
           size="lg"
           className="mb-4 shadow-sm"
         />
-        <h1 className="text-xl font-bold text-center mb-2">{displayName}</h1>
+        <h1 className="text-xl font-bold text-center mb-2 max-w-full break-words">
+          {displayName}
+        </h1>
         {bio && (
-          <p className="text-center text-sm mb-8 opacity-90 whitespace-pre-wrap">
+          <p className="text-center text-sm mb-8 opacity-90 whitespace-pre-wrap max-w-full break-words">
             {bio}
           </p>
         )}

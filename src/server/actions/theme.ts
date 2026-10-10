@@ -3,6 +3,7 @@
 import { requireUser } from "@/server/session";
 import { getPageByUserId, updatePageTheme } from "@/server/services/pages";
 import { ThemeSchema, ThemeConfig } from "@/lib/theme";
+import { getThemeReadabilityIssues } from "@/lib/color";
 import { rateLimit } from "@/lib/rate-limit";
 import { revalidatePath, revalidateTag } from "next/cache";
 
@@ -34,8 +35,18 @@ export async function updateTheme(input: unknown): Promise<UpdateThemeResult> {
   if (!result.success) {
     return {
       ok: false,
-      message: "Invalid theme data. Please select a valid theme preset.",
+      message: "Invalid theme data. Please check the theme settings and try again.",
       fieldErrors: result.error.flatten().fieldErrors,
+    };
+  }
+
+  // Reject saving if any contrast readability issue is an "error" (ratio < 3.0:1)
+  const issues = getThemeReadabilityIssues(result.data);
+  const errorIssue = issues.find((issue) => issue.level === "error");
+  if (errorIssue) {
+    return {
+      ok: false,
+      message: errorIssue.message,
     };
   }
 

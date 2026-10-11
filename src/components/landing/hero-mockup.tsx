@@ -72,8 +72,7 @@ export function HeroMockup() {
       {/* Decorative Phone Shell */}
       <div
         aria-hidden="true"
-        // @ts-expect-error React 19 inert attribute
-        inert=""
+        inert={true}
         className="relative w-[300px] sm:w-[320px] h-[600px] rounded-[48px] bg-ink border-[8px] border-ink shadow-2xl flex-shrink-0 overflow-hidden select-none rotate-1 hover:rotate-0 transition-transform duration-300"
       >
         {/* Dynamic Island / Speaker notch */}

@@ -3,8 +3,8 @@ import { siteConfig } from "@/lib/site";
 import { Navbar } from "@/components/landing/navbar";
 import { Hero } from "@/components/landing/hero";
 import { FeaturesBento } from "@/components/landing/features-bento";
-import { HowItWorks } from "@/components/landing/how-it-works";
-import { ThemeShowcase } from "@/components/landing/theme-showcase";
+import { StoryScroll } from "@/components/landing/story-scroll";
+import { ThemeTrack } from "@/components/landing/theme-track";
 import { PrivacyBand } from "@/components/landing/privacy-band";
 import { Faq } from "@/components/landing/faq";
 import { FinalCta } from "@/components/landing/final-cta";
@@ -57,11 +57,11 @@ export default function MarketingPage() {
         {/* Features Bento (Cream) */}
         <FeaturesBento />
 
-        {/* How It Works (Forest) */}
-        <HowItWorks />
+        {/* Story Scroll (Cream with Lime/Lilac/Mustard Scenes) */}
+        <StoryScroll />
 
-        {/* Theme Showcase (Cream) */}
-        <ThemeShowcase />
+        {/* Theme Track (Dynamic Track with 14 Themes) */}
+        <ThemeTrack />
 
         {/* Privacy Band (Cobalt) */}
         <PrivacyBand />

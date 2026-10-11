@@ -1,129 +1,143 @@
+"use client";
+
+import { useState, useRef } from "react";
+import { THEME_PRESETS, ThemePreset } from "@/lib/theme-presets";
+import { ProfileView } from "@/components/profile/ProfileView";
+import { SAMPLE_PROFILE } from "./sample-profile";
+import { Sparkles } from "lucide-react";
+
 export function ThemeShowcase() {
-  const themes = [
-    {
-      name: "Avocado & Forest",
-      tag: "Fresh & Energetic",
-      phoneBg: "bg-lime text-forest border-forest",
-      avatarBg: "bg-forest text-lime",
-      initials: "MS",
-      username: "@mateo_sound",
-      role: "Music Producer & DJ",
-      btnBg: "bg-forest text-lime",
-      links: ["🎵 Latest EP on Spotify", "⚡ Tour Tickets 2026", "🎧 Sound Packs"],
-    },
-    {
-      name: "Lilac & Maroon",
-      tag: "Playful & Vibrant",
-      phoneBg: "bg-lilac text-maroon border-maroon",
-      avatarBg: "bg-maroon text-lilac",
-      initials: "EB",
-      username: "@emily_bakes",
-      role: "Pastry Chef & Author",
-      btnBg: "bg-maroon text-lilac",
-      links: ["🍰 Weekend Pop-up Menu", "📖 Cookbook Pre-order", "💌 Recipe Club"],
-    },
-    {
-      name: "Cobalt & White",
-      tag: "Bold & Confident",
-      phoneBg: "bg-cobalt text-white border-white/40",
-      avatarBg: "bg-white text-cobalt",
-      initials: "MK",
-      username: "@marcus_builds",
-      role: "Indie Software Maker",
-      btnBg: "bg-white text-cobalt font-bold",
-      links: ["🚀 ShipFast Framework", "💻 GitHub Repos", "🎙️ Podcast Ep #14"],
-    },
-    {
-      name: "Mustard & Ink",
-      tag: "Warm & Editorial",
-      phoneBg: "bg-mustard text-ink border-ink",
-      avatarBg: "bg-ink text-mustard",
-      initials: "SZ",
-      username: "@studio_z",
-      role: "Ceramics & Goods",
-      btnBg: "bg-ink text-cream",
-      links: ["🏺 Summer Ceramic Drop", "🛒 Studio Catalog", "📍 Visit Our Store"],
-    },
-  ];
+  const [selectedPreset, setSelectedPreset] = useState<ThemePreset>(THEME_PRESETS[0]);
+  const chipRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
+    let nextIndex = index;
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      e.preventDefault();
+      nextIndex = (index + 1) % THEME_PRESETS.length;
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      e.preventDefault();
+      nextIndex = (index - 1 + THEME_PRESETS.length) % THEME_PRESETS.length;
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      nextIndex = 0;
+    } else if (e.key === "End") {
+      e.preventDefault();
+      nextIndex = THEME_PRESETS.length - 1;
+    }
+
+    if (nextIndex !== index) {
+      setSelectedPreset(THEME_PRESETS[nextIndex]);
+      chipRefs.current[nextIndex]?.focus();
+    }
+  };
+
+  const getSwatchColor = (preset: ThemePreset) => {
+    const bg = preset.theme.background;
+    if (bg.type === "solid") return bg.value;
+    if (bg.type === "gradient") return bg.from;
+    return bg.base;
+  };
 
   return (
     <section
       id="themes"
       aria-label="Theme Customization Showcase"
-      className="bg-cream py-24 sm:py-32 px-4 sm:px-6 lg:px-8 border-t border-ink/5"
+      className="bg-cream py-24 sm:py-32 px-4 sm:px-6 lg:px-8 border-t border-hairline"
     >
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16 sm:mb-20">
+        <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
           <div className="inline-flex items-center gap-2 bg-ink/5 text-ink text-xs sm:text-sm font-bold px-4 py-1.5 rounded-full mb-4 uppercase tracking-wider">
-            <span>Styling &amp; Personalization</span>
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Pick your look</span>
           </div>
           <h2 className="font-heading font-extrabold text-4xl sm:text-6xl text-ink tracking-tight">
-            Make it yours.
+            14 ready-made themes.
           </h2>
-          <p className="mt-4 text-base sm:text-xl text-ink/70 font-medium">
-            Express your unique vibe with curated solid-color themes that always stand out.
+          <p className="mt-4 text-base sm:text-xl text-ink/70 font-medium max-w-2xl mx-auto">
+            Switch palettes in one click, or fine-tune fonts, button shapes,
+            patterns, and layouts inside your dashboard.
           </p>
         </div>
 
-        {/* Scrollable container on mobile, grid on desktop */}
-        <div className="flex overflow-x-auto pb-6 pt-2 px-2 gap-6 snap-x snap-mandatory sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:overflow-visible">
-          {themes.map((t) => (
-            <div
-              key={t.name}
-              className="flex-none w-[260px] sm:w-auto snap-center flex flex-col items-center"
-            >
-              {/* CSS Phone mini mockup */}
-              <div
-                className={`w-full rounded-[36px] p-5 border-4 shadow-lg flex flex-col items-center transition-all duration-300 hover:-translate-y-2 hover:shadow-xl ${t.phoneBg}`}
+        {/* Preset Chips Row (Horizontal Scroll on Mobile, Wrapped on Desktop) */}
+        <div
+          role="radiogroup"
+          aria-label="Preset styles"
+          className="flex overflow-x-auto gap-2.5 pb-4 px-2 no-scrollbar sm:flex-wrap sm:justify-center items-center"
+        >
+          {THEME_PRESETS.map((preset, index) => {
+            const isSelected = selectedPreset.id === preset.id;
+            const swatchBg = getSwatchColor(preset);
+            const buttonFill = preset.theme.button.fill;
+
+            return (
+              <button
+                key={preset.id}
+                ref={(el) => {
+                  chipRefs.current[index] = el;
+                }}
+                type="button"
+                role="radio"
+                aria-checked={isSelected}
+                tabIndex={isSelected ? 0 : -1}
+                onClick={() => setSelectedPreset(preset)}
+                onKeyDown={(e) => handleKeyDown(e, index)}
+                className={`flex-shrink-0 inline-flex items-center gap-2 px-3.5 py-2 rounded-full font-bold text-xs sm:text-sm transition-all duration-150 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2 ${
+                  isSelected
+                    ? "bg-forest text-lime shadow-md scale-105"
+                    : "bg-white text-ink border border-hairline hover:bg-cream hover:border-ink/20"
+                }`}
               >
-                {/* Speaker pill */}
-                <div className="w-14 h-2.5 bg-current opacity-20 rounded-full mb-4" />
+                {/* Two tiny color dots for preview */}
+                <span className="flex items-center -space-x-1 shrink-0" aria-hidden="true">
+                  <span
+                    className="w-3.5 h-3.5 rounded-full border border-black/15 shadow-2xs"
+                    style={{ backgroundColor: swatchBg }}
+                  />
+                  <span
+                    className="w-3.5 h-3.5 rounded-full border border-black/15 shadow-2xs"
+                    style={{ backgroundColor: buttonFill }}
+                  />
+                </span>
+                <span>{preset.name}</span>
+              </button>
+            );
+          })}
+        </div>
 
-                {/* Avatar */}
-                <div
-                  className={`w-14 h-14 rounded-full flex items-center justify-center font-heading font-extrabold text-lg mb-2 shadow-sm ${t.avatarBg}`}
-                >
-                  {t.initials}
-                </div>
-
-                {/* Handle and role */}
-                <h3 className="font-heading font-bold text-sm leading-tight text-center">
-                  {t.username}
-                </h3>
-                <p className="text-[11px] font-medium opacity-80 mb-4 text-center">
-                  {t.role}
-                </p>
-
-                {/* Mini link buttons */}
-                <div className="w-full flex flex-col gap-2">
-                  {t.links.map((linkText) => (
-                    <div
-                      key={linkText}
-                      className={`w-full py-2 px-3 rounded-xl text-xs font-bold text-center truncate shadow-xs ${t.btnBg}`}
-                    >
-                      {linkText}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Mini brand tag */}
-                <div className="mt-4 text-[10px] font-bold opacity-40 uppercase tracking-widest">
-                  mylinks✦
-                </div>
-              </div>
-
-              {/* Theme description tag */}
-              <div className="mt-4 text-center">
-                <p className="font-heading font-extrabold text-base text-ink">
-                  {t.name}
-                </p>
-                <p className="text-xs font-semibold text-ink/60">
-                  {t.tag}
-                </p>
+        {/* Large Phone Mockup with Real ProfileView */}
+        <div className="mt-10 sm:mt-14 flex flex-col items-center">
+          <div className="relative w-[300px] sm:w-[330px] md:w-[350px] h-[620px] sm:h-[660px] rounded-[48px] bg-ink border-[8px] border-ink shadow-2xl flex-shrink-0 overflow-hidden select-none">
+            {/* Dynamic Island Notch */}
+            <div className="absolute top-0 inset-x-0 h-6 flex justify-center z-40 pointer-events-none">
+              <div className="w-28 h-5 bg-ink rounded-b-2xl flex items-center justify-center">
+                <div className="w-8 h-1 bg-white/20 rounded-full" />
               </div>
             </div>
-          ))}
+
+            {/* Real ProfileView Render */}
+            <div
+              className="w-full h-full bg-white rounded-[38px] overflow-y-auto no-scrollbar relative"
+              aria-hidden="true"
+              // @ts-expect-error React 19 inert attribute
+              inert=""
+            >
+              <ProfileView
+                mode="preview"
+                displayName={SAMPLE_PROFILE.displayName}
+                bio={SAMPLE_PROFILE.bio}
+                avatarUrl={SAMPLE_PROFILE.avatarUrl}
+                links={SAMPLE_PROFILE.links}
+                theme={selectedPreset.theme}
+              />
+            </div>
+          </div>
+
+          <p className="mt-4 text-xs font-bold text-ink/50 uppercase tracking-widest">
+            Currently previewing: {selectedPreset.name} theme
+          </p>
         </div>
       </div>
     </section>

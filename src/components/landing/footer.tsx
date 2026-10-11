@@ -4,6 +4,7 @@ import { Logo } from "@/components/landing/logo";
 
 export function Footer() {
   const currentYear = 2026;
+  const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL;
 
   return (
     <footer
@@ -15,7 +16,7 @@ export function Footer() {
           <div>
             <Logo textColor="text-white" markColor="text-lime" />
             <p className="mt-2 text-sm text-white/70 max-w-sm font-medium">
-              {siteConfig.tagline} Simple, bold, and crafted for modern creators.
+              {siteConfig.tagline}
             </p>
           </div>
 
@@ -24,39 +25,46 @@ export function Footer() {
             className="flex flex-wrap items-center gap-6 sm:gap-8 text-sm font-semibold text-white/80"
           >
             <Link
-              href="#features"
-              className="hover:text-lime transition-colors"
-            >
-              Features
-            </Link>
-            <Link
-              href="#how-it-works"
-              className="hover:text-lime transition-colors"
-            >
-              How it works
-            </Link>
-            <Link
               href="#themes"
               className="hover:text-lime transition-colors"
             >
               Themes
             </Link>
             <Link
-              href="/login"
+              href="#features"
               className="hover:text-lime transition-colors"
             >
-              Log in
+              Features
             </Link>
-            <span className="text-white/20 hidden sm:inline">|</span>
-            <span className="text-white/50 cursor-not-allowed" title="Coming soon">
+            <Link
+              href="#faq"
+              className="hover:text-lime transition-colors"
+            >
+              FAQ
+            </Link>
+            <span className="text-white/20 hidden sm:inline" aria-hidden="true">
+              |
+            </span>
+            <Link
+              href="/privacy"
+              className="hover:text-lime transition-colors"
+            >
               Privacy
-            </span>
-            <span className="text-white/50 cursor-not-allowed" title="Coming soon">
+            </Link>
+            <Link
+              href="/terms"
+              className="hover:text-lime transition-colors"
+            >
               Terms
-            </span>
-            <span className="text-white/50 cursor-not-allowed" title="Coming soon">
-              Contact
-            </span>
+            </Link>
+            {contactEmail && (
+              <a
+                href={`mailto:${contactEmail}`}
+                className="hover:text-lime transition-colors"
+              >
+                Contact
+              </a>
+            )}
           </nav>
         </div>
 

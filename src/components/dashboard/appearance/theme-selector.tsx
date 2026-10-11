@@ -29,7 +29,8 @@ import {
 } from "@/lib/color";
 import { getFontFamily } from "@/components/profile/ProfileView";
 import { updateTheme as updateThemeAction } from "@/server/actions/theme";
-import { Check, Loader2, AlertCircle, Wand2 } from "lucide-react";
+import { Check, AlertCircle, Wand2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const BRAND_PALETTE = [
   "#D4E83A", // Lime
@@ -146,9 +147,9 @@ function ColorControl({
   };
 
   return (
-    <div className="flex flex-col gap-2 p-3.5 rounded-2xl bg-cream border border-ink/10">
+    <div className="flex flex-col gap-2.5 p-4 rounded-[20px] bg-cream border border-hairline">
       <div className="flex items-center justify-between">
-        <label htmlFor={id} className="text-xs font-bold text-ink/70">
+        <label htmlFor={id} className="text-xs font-bold text-ink/75">
           {label}
         </label>
         {issue && onFix && (
@@ -156,7 +157,7 @@ function ColorControl({
             type="button"
             onClick={onFix}
             title="Auto-fix contrast"
-            className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-forest text-cream hover:bg-forest/90 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-forest text-lime hover:bg-[#183d14] transition-colors cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest"
           >
             <Wand2 className="w-3 h-3" />
             <span>Fix</span>
@@ -169,7 +170,7 @@ function ColorControl({
           type="button"
           onClick={() => colorInputRef.current?.click()}
           aria-label={`Open color picker for ${label}`}
-          className="w-10 h-10 rounded-xl border border-ink/20 flex-shrink-0 cursor-pointer shadow-xs transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest"
+          className="w-10 h-10 rounded-[14px] border border-hairline shrink-0 cursor-pointer shadow-xs transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest"
           style={{ backgroundColor: normalizeHex(displayHex) || "#FFFFFF" }}
         />
         <input
@@ -190,9 +191,8 @@ function ColorControl({
             onBlur={handleInputBlur}
             maxLength={7}
             placeholder="#000000"
-            className={`w-full font-mono text-xs font-bold px-3 py-2 rounded-xl bg-white border ${
-              isValidHex ? "border-ink/20 focus:border-forest" : "border-coral text-coral"
-            } text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest transition-colors`}
+            className={`w-full font-mono text-xs font-bold px-3 py-2.5 rounded-[14px] bg-white border ${isValidHex ? "border-hairline focus:border-forest" : "border-tomato text-tomato"
+              } text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest transition-colors`}
           />
         </div>
       </div>
@@ -206,9 +206,8 @@ function ColorControl({
               type="button"
               onClick={() => handleSwatchClick(hex)}
               aria-label={`Select ${hex} for ${label}`}
-              className={`w-5 h-5 rounded-md border cursor-pointer transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-forest ${
-                isSelected ? "border-ink ring-2 ring-forest ring-offset-1" : "border-ink/20"
-              }`}
+              className={`w-5 h-5 rounded-md border cursor-pointer transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-forest ${isSelected ? "border-ink ring-2 ring-forest ring-offset-1" : "border-ink/20"
+                }`}
               style={{ backgroundColor: hex }}
             />
           );
@@ -217,9 +216,8 @@ function ColorControl({
 
       {issue && (
         <div
-          className={`flex items-start gap-1.5 text-[11px] font-bold mt-1 ${
-            issue.level === "error" ? "text-coral" : "text-amber-700"
-          }`}
+          className={`flex items-start gap-1.5 text-[11px] font-bold mt-1 ${issue.level === "error" ? "text-coral" : "text-amber-700"
+            }`}
         >
           <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
           <span>{issue.message}</span>
@@ -610,15 +608,15 @@ export function ThemeSelector({ initialTheme }: ThemeSelectorProps) {
               preset.theme.layout.spacing === "compact"
                 ? "gap-1"
                 : preset.theme.layout.spacing === "relaxed"
-                ? "gap-2"
-                : "gap-1.5";
+                  ? "gap-2"
+                  : "gap-1.5";
 
             const swatchAvatarShape =
               preset.theme.layout.avatarShape === "rounded"
                 ? "rounded-md"
                 : preset.theme.layout.avatarShape === "square"
-                ? "rounded-none"
-                : "rounded-full";
+                  ? "rounded-none"
+                  : "rounded-full";
 
             return (
               <button
@@ -633,11 +631,10 @@ export function ThemeSelector({ initialTheme }: ThemeSelectorProps) {
                 tabIndex={tabIndex}
                 onClick={() => handleSelectPreset(preset)}
                 onKeyDown={(e) => handlePresetKeyDown(e, index)}
-                className={`group flex flex-col items-center gap-2.5 p-2.5 rounded-2xl transition-all cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2 ${
-                  isSelected
+                className={`group flex flex-col items-center gap-2.5 p-2.5 rounded-2xl transition-all cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2 ${isSelected
                     ? "ring-2 ring-forest ring-offset-2 bg-forest/5"
                     : "hover:bg-ink/5"
-                }`}
+                  }`}
               >
                 {/* Mini phone-shaped swatch with real background rendering */}
                 <div
@@ -670,22 +667,22 @@ export function ThemeSelector({ initialTheme }: ThemeSelectorProps) {
                         preset.theme.button.shape === "pill"
                           ? "rounded-full"
                           : preset.theme.button.shape === "rounded"
-                          ? "rounded-md"
-                          : "rounded-none";
+                            ? "rounded-md"
+                            : "rounded-none";
 
                       const buttonSwatchStyle: React.CSSProperties =
                         preset.theme.button.style === "outline"
                           ? {
-                              backgroundColor: "transparent",
-                              border: `1.5px solid ${preset.theme.button.fill}`,
-                            }
+                            backgroundColor: "transparent",
+                            border: `1.5px solid ${preset.theme.button.fill}`,
+                          }
                           : preset.theme.button.style === "hard-shadow"
-                          ? {
+                            ? {
                               backgroundColor: preset.theme.button.fill,
                               border: `1.5px solid ${preset.theme.button.textColor}`,
                               boxShadow: `2px 2px 0px ${preset.theme.button.textColor}`,
                             }
-                          : {
+                            : {
                               backgroundColor: preset.theme.button.fill,
                             };
 
@@ -710,9 +707,8 @@ export function ThemeSelector({ initialTheme }: ThemeSelectorProps) {
                 {/* Preset Name */}
                 <div className="flex items-center justify-center">
                   <span
-                    className={`text-sm font-bold ${
-                      isSelected ? "text-forest font-black" : "text-ink"
-                    }`}
+                    className={`text-sm font-bold ${isSelected ? "text-forest font-black" : "text-ink"
+                      }`}
                   >
                     {preset.name}
                   </span>
@@ -766,11 +762,10 @@ export function ThemeSelector({ initialTheme }: ThemeSelectorProps) {
                       role="radio"
                       aria-checked={isSelected}
                       onClick={() => handleUpdateBackgroundType(opt.id)}
-                      className={`py-2 px-3 rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${
-                        isSelected
+                      className={`py-2 px-3 rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${isSelected
                           ? "bg-white text-ink shadow-xs"
                           : "text-ink/60 hover:text-ink"
-                      }`}
+                        }`}
                     >
                       {opt.label}
                     </button>
@@ -838,11 +833,10 @@ export function ThemeSelector({ initialTheme }: ThemeSelectorProps) {
                           role="radio"
                           aria-checked={isSelected}
                           onClick={() => handleUpdateGradientDirection(opt.id)}
-                          className={`py-2 px-3 rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${
-                            isSelected
+                          className={`py-2 px-3 rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${isSelected
                               ? "bg-white text-ink shadow-xs"
                               : "text-ink/60 hover:text-ink"
-                          }`}
+                            }`}
                         >
                           {opt.label}
                         </button>
@@ -899,11 +893,10 @@ export function ThemeSelector({ initialTheme }: ThemeSelectorProps) {
                           role="radio"
                           aria-checked={isSelected}
                           onClick={() => handleUpdatePatternKind(opt.id)}
-                          className={`py-2 px-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${
-                            isSelected
+                          className={`py-2 px-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${isSelected
                               ? "bg-white text-ink shadow-xs"
                               : "text-ink/60 hover:text-ink"
-                          }`}
+                            }`}
                         >
                           {opt.label}
                         </button>
@@ -936,11 +929,10 @@ export function ThemeSelector({ initialTheme }: ThemeSelectorProps) {
                           role="radio"
                           aria-checked={isSelected}
                           onClick={() => handleUpdatePatternSize(opt.id)}
-                          className={`py-2 px-3 rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${
-                            isSelected
+                          className={`py-2 px-3 rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${isSelected
                               ? "bg-white text-ink shadow-xs"
                               : "text-ink/60 hover:text-ink"
-                          }`}
+                            }`}
                         >
                           {opt.label}
                         </button>
@@ -1018,11 +1010,10 @@ export function ThemeSelector({ initialTheme }: ThemeSelectorProps) {
                       role="radio"
                       aria-checked={isSelected}
                       onClick={() => handleUpdateLayoutAlign(opt.id)}
-                      className={`py-2.5 px-3 rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${
-                        isSelected
+                      className={`py-2.5 px-3 rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${isSelected
                           ? "bg-white text-ink shadow-xs"
                           : "text-ink/60 hover:text-ink"
-                      }`}
+                        }`}
                     >
                       {opt.label}
                     </button>
@@ -1056,11 +1047,10 @@ export function ThemeSelector({ initialTheme }: ThemeSelectorProps) {
                       role="radio"
                       aria-checked={isSelected}
                       onClick={() => handleUpdateAvatarShape(opt.id)}
-                      className={`py-2.5 px-3 rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${
-                        isSelected
+                      className={`py-2.5 px-3 rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${isSelected
                           ? "bg-white text-ink shadow-xs"
                           : "text-ink/60 hover:text-ink"
-                      }`}
+                        }`}
                     >
                       {opt.label}
                     </button>
@@ -1094,11 +1084,10 @@ export function ThemeSelector({ initialTheme }: ThemeSelectorProps) {
                       role="radio"
                       aria-checked={isSelected}
                       onClick={() => handleUpdateSpacing(opt.id)}
-                      className={`py-2.5 px-3 rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${
-                        isSelected
+                      className={`py-2.5 px-3 rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${isSelected
                           ? "bg-white text-ink shadow-xs"
                           : "text-ink/60 hover:text-ink"
-                      }`}
+                        }`}
                     >
                       {opt.label}
                     </button>
@@ -1142,11 +1131,10 @@ export function ThemeSelector({ initialTheme }: ThemeSelectorProps) {
                       role="radio"
                       aria-checked={isSelected}
                       onClick={() => handleUpdateShape(opt.id)}
-                      className={`py-2.5 px-3 rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${
-                        isSelected
+                      className={`py-2.5 px-3 rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${isSelected
                           ? "bg-white text-ink shadow-xs"
                           : "text-ink/60 hover:text-ink"
-                      }`}
+                        }`}
                     >
                       {opt.label}
                     </button>
@@ -1180,11 +1168,10 @@ export function ThemeSelector({ initialTheme }: ThemeSelectorProps) {
                       role="radio"
                       aria-checked={isSelected}
                       onClick={() => handleUpdateStyle(opt.id)}
-                      className={`py-2.5 px-3 rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${
-                        isSelected
+                      className={`py-2.5 px-3 rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${isSelected
                           ? "bg-white text-ink shadow-xs"
                           : "text-ink/60 hover:text-ink"
-                      }`}
+                        }`}
                     >
                       {opt.label}
                     </button>
@@ -1224,11 +1211,10 @@ export function ThemeSelector({ initialTheme }: ThemeSelectorProps) {
                     tabIndex={tabIndex}
                     onClick={() => handleUpdateFont(opt.id)}
                     onKeyDown={(e) => handleFontKeyDown(e, index)}
-                    className={`flex flex-col items-start p-4 rounded-2xl border transition-all cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2 ${
-                      isSelected
+                    className={`flex flex-col items-start p-4 rounded-2xl border transition-all cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2 ${isSelected
                         ? "border-forest bg-forest/5 ring-1 ring-forest"
                         : "border-ink/10 hover:border-ink/25 bg-white"
-                    }`}
+                      }`}
                   >
                     <span
                       className="text-lg font-bold text-ink mb-1 truncate w-full"
@@ -1277,27 +1263,24 @@ export function ThemeSelector({ initialTheme }: ThemeSelectorProps) {
 
         {/* Actions Bar */}
         <div className="flex flex-wrap items-center gap-4 pt-6 border-t border-ink/5 mt-8">
-          <button
-            type="button"
+          <Button
+            variant="primary"
+            size="48px"
             onClick={handleSave}
             disabled={!hasChanges || isSaving || hasErrorIssues}
-            className="inline-flex items-center justify-center min-w-[140px] gap-2 bg-ink text-cream font-bold py-3 px-6 rounded-full transition-all hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            isLoading={isSaving}
           >
-            {isSaving ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              "Save theme"
-            )}
-          </button>
+            Save theme
+          </Button>
 
           {hasChanges && !isSaving && (
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="48px"
               onClick={handleReset}
-              className="text-ink/60 hover:text-ink font-bold text-sm px-3 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest rounded-full cursor-pointer"
             >
               Reset
-            </button>
+            </Button>
           )}
 
           {isSuccess && (

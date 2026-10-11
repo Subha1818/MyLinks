@@ -1,10 +1,19 @@
 "use client";
 
 import { useState, useTransition, useId } from "react";
-import { Plus, Link2, X, Loader2 } from "lucide-react";
-import { Card } from "./card";
-import { EmptyState } from "./empty-state";
-import { addBlockAction, editBlockAction, removeBlockAction, reorderBlocksAction, setBlockVisibilityAction } from "@/server/actions/blocks";
+import { Plus, Link2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Modal } from "@/components/ui/modal";
+import { Input } from "@/components/ui/input";
+import { FormField } from "@/components/ui/form-field";
+import { EmptyState } from "@/components/ui/empty-state";
+import {
+  addBlockAction,
+  editBlockAction,
+  removeBlockAction,
+  reorderBlocksAction,
+  setBlockVisibilityAction,
+} from "@/server/actions/blocks";
 import { MAX_LINKS_PER_PAGE } from "@/lib/limits";
 import { LinkRow, type LinkBlock } from "./link-row";
 import {
@@ -23,21 +32,20 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useRouter } from "next/navigation";
-
 import { usePageDraft } from "./PageDraftProvider";
 
-export function LinksList({ initialLinks }: { initialLinks: LinkBlock[] }) {
+export function LinksList({ initialLinks: _initialLinks }: { initialLinks: LinkBlock[] }) {
   const { draft, updateBlocks } = usePageDraft();
   const links = draft.blocks;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLink, setEditingLink] = useState<LinkBlock | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  
+
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
-  
+
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const dndId = useId();
@@ -81,7 +89,7 @@ export function LinksList({ initialLinks }: { initialLinks: LinkBlock[] }) {
 
   const handleToggleVisibility = (id: string, isVisible: boolean) => {
     const oldLinks = [...links];
-    const newLinks = links.map(l => l.id === id ? { ...l, isVisible } : l);
+    const newLinks = links.map((l) => (l.id === id ? { ...l, isVisible } : l));
     updateBlocks(newLinks); // Optimistic update
 
     startTransition(async () => {
@@ -122,10 +130,10 @@ export function LinksList({ initialLinks }: { initialLinks: LinkBlock[] }) {
   const handleSave = () => {
     setError(null);
     setFieldErrors({});
-    
+
     startTransition(async () => {
       const payload = { title, url };
-      
+
       let res;
       if (editingLink) {
         res = await editBlockAction(editingLink.id, payload);
@@ -155,32 +163,38 @@ export function LinksList({ initialLinks }: { initialLinks: LinkBlock[] }) {
     });
   };
 
-  // The PageDraftProvider now handles syncing from server when initialLinks update,
-  // so we don't need the manual sync effect here anymore.
   return (
     <>
-      <div className="mt-8 flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
-        <h2 className="font-heading font-bold text-xl text-ink">Links</h2>
+      <div className="mt-10 flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
+        <div>
+          <h2 className="font-heading font-bold text-[22px] sm:text-[24px] text-ink">
+            Links
+          </h2>
+          <p className="text-sm text-ink/60 font-medium">
+            Drag to reorder. Toggle switches to hide or show on your public page.
+          </p>
+        </div>
         <div className="flex items-center gap-4">
-          <div className="text-sm font-bold text-ink/60">
+          <div className="text-xs sm:text-sm font-bold text-ink/60">
             {links.length} / {MAX_LINKS_PER_PAGE} links
           </div>
-          <button
+          <Button
+            variant="primary"
+            size="40px"
             onClick={() => handleOpenModal()}
             disabled={isPending || links.length >= MAX_LINKS_PER_PAGE}
-            className="inline-flex items-center justify-center gap-2 bg-ink text-cream hover:bg-ink/90 font-bold text-sm py-2 px-4 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus className="w-4 h-4" />
             <span>Add link</span>
-          </button>
+          </Button>
         </div>
       </div>
-      
+
       {links.length === 0 ? (
         <EmptyState
           icon={Link2}
           title="No links yet"
-          description="Add links to your profile to share them with your audience."
+          description="Add your first link to your profile and share everything you create with your audience."
           action={{
             label: "Add your first link",
             onClick: () => handleOpenModal(),
@@ -197,7 +211,7 @@ export function LinksList({ initialLinks }: { initialLinks: LinkBlock[] }) {
             items={links.map((link) => link.id)}
             strategy={verticalListSortingStrategy}
           >
-            <div className="space-y-4">
+            <div className="space-y-3">
               {links.map((link) => (
                 <LinkRow
                   key={link.id}
@@ -214,132 +228,109 @@ export function LinksList({ initialLinks }: { initialLinks: LinkBlock[] }) {
       )}
 
       {/* Delete Confirm Modal */}
-      {deleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/40 backdrop-blur-sm">
-          <Card className="w-full max-w-sm p-6 shadow-2xl">
-            <h3 className="font-heading font-bold text-xl mb-2 text-ink">Delete this link?</h3>
-            <p className="text-ink/70 text-sm mb-6">This action cannot be undone.</p>
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => setDeleteId(null)}
-                disabled={isPending}
-                className="px-4 py-2 font-bold text-ink hover:bg-ink/5 rounded-full transition-colors text-sm"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleDelete(deleteId)}
-                disabled={isPending}
-                className="px-4 py-2 font-bold text-cream bg-red-600 hover:bg-red-700 rounded-full transition-colors flex items-center gap-2 text-sm disabled:opacity-50"
-              >
-                {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-                Delete
-              </button>
-            </div>
-          </Card>
+      <Modal
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        title="Delete this link?"
+        maxWidth="sm"
+      >
+        <p className="text-ink/70 text-sm mb-6 leading-relaxed">
+          This action will immediately remove the link from your public page and cannot be undone.
+        </p>
+        <div className="flex gap-3 justify-end">
+          <Button
+            variant="secondary"
+            size="40px"
+            onClick={() => setDeleteId(null)}
+            disabled={isPending}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="danger"
+            size="40px"
+            onClick={() => deleteId && handleDelete(deleteId)}
+            isLoading={isPending}
+          >
+            Delete
+          </Button>
         </div>
-      )}
+      </Modal>
 
       {/* Add / Edit Modal */}
-      {isModalOpen && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/40 backdrop-blur-sm"
-          role="dialog"
-          aria-modal="true"
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        title={editingLink ? "Edit link" : "Add link"}
+        maxWidth="md"
+      >
+        {error && (
+          <div
+            className="p-3 mb-6 text-sm text-tomato bg-tomato/10 border border-tomato/20 rounded-[16px] font-bold"
+            role="alert"
+            aria-live="polite"
+          >
+            {error}
+          </div>
+        )}
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSave();
+          }}
+          className="space-y-5"
         >
-          <div className="absolute inset-0" onClick={handleCloseModal} />
-          <Card className="w-full max-w-md p-0 shadow-2xl relative z-10 flex flex-col max-h-[90vh]">
-            <div className="p-6 border-b border-ink/10 flex justify-between items-center">
-              <h3 className="font-heading font-bold text-xl text-ink">
-                {editingLink ? "Edit link" : "Add link"}
-              </h3>
-              <button
-                onClick={handleCloseModal}
-                className="p-2 text-ink/50 hover:text-ink hover:bg-ink/5 rounded-full transition-colors"
-                aria-label="Close"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="p-6 overflow-y-auto">
-              {error && (
-                <div className="p-3 mb-6 text-sm text-red-700 bg-red-50 rounded-xl" role="alert" aria-live="polite">
-                  {error}
-                </div>
-              )}
-              
-              <div className="space-y-5">
-                <div>
-                  <label htmlFor="link-title" className="block text-sm font-bold text-ink/70 mb-1">
-                    Title
-                  </label>
-                  <input
-                    id="link-title"
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="w-full px-4 py-3 bg-cream border border-ink/10 focus:border-ink rounded-xl text-ink outline-none transition-colors"
-                    placeholder="My Portfolio"
-                    aria-invalid={!!fieldErrors.title}
-                    aria-describedby={fieldErrors.title ? "title-error" : undefined}
-                    disabled={isPending}
-                  />
-                  {fieldErrors.title && (
-                    <p id="title-error" className="mt-1 text-xs text-red-600 font-medium">
-                      {fieldErrors.title[0]}
-                    </p>
-                  )}
-                </div>
+          <FormField
+            id="link-title"
+            label="Title"
+            error={fieldErrors.title?.[0]}
+          >
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. My Portfolio"
+              disabled={isPending}
+              autoFocus
+            />
+          </FormField>
 
-                <div>
-                  <label htmlFor="link-url" className="block text-sm font-bold text-ink/70 mb-1">
-                    URL
-                  </label>
-                  <input
-                    id="link-url"
-                    type="url"
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                    className="w-full px-4 py-3 bg-cream border border-ink/10 focus:border-ink rounded-xl text-ink outline-none transition-colors"
-                    placeholder="example.com"
-                    aria-invalid={!!fieldErrors.url}
-                    aria-describedby={fieldErrors.url ? "url-error" : "url-hint"}
-                    disabled={isPending}
-                  />
-                  {fieldErrors.url ? (
-                    <p id="url-error" className="mt-1 text-xs text-red-600 font-medium">
-                      {fieldErrors.url[0]}
-                    </p>
-                  ) : (
-                    <p id="url-hint" className="mt-1 text-xs text-ink/50 font-medium">
-                      Starts with https://
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
+          <FormField
+            id="link-url"
+            label="URL"
+            hint="Starts with https://"
+            error={fieldErrors.url?.[0]}
+          >
+            <Input
+              type="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://example.com"
+              disabled={isPending}
+            />
+          </FormField>
 
-            <div className="p-6 border-t border-ink/10 flex justify-end gap-3 bg-ink/5 rounded-b-2xl">
-              <button
-                onClick={handleCloseModal}
-                disabled={isPending}
-                className="px-6 py-3 font-bold text-ink hover:bg-ink/5 rounded-full transition-colors text-sm"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={isPending}
-                className="px-6 py-3 font-bold text-cream bg-ink hover:bg-ink/90 rounded-full transition-colors flex items-center gap-2 text-sm disabled:opacity-50"
-              >
-                {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-                Save
-              </button>
-            </div>
-          </Card>
-        </div>
-      )}
+          <div className="pt-4 flex justify-end gap-3 border-t border-hairline mt-6">
+            <Button
+              variant="secondary"
+              size="40px"
+              type="button"
+              onClick={handleCloseModal}
+              disabled={isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              size="40px"
+              type="submit"
+              isLoading={isPending}
+            >
+              Save link
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </>
   );
 }

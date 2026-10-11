@@ -9,6 +9,10 @@
   --color-mustard: #E0A92E;
   --color-cream: #F5F4EF;
   --color-ink: #14181F;
+  --color-mint: #BFEBD6;
+  --color-tomato: #FF5A36;
+  --color-hairline: #E7E5DC;
+  --color-coral: #FF5A36;
 
   --font-heading: var(--font-bricolage), system-ui, sans-serif;
   --font-body: var(--font-dm-sans), system-ui, sans-serif;

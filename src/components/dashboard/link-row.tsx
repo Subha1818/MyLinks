@@ -2,8 +2,11 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Pencil, Trash2, MousePointerClick } from "lucide-react";
-import { Card } from "./card";
+import { GripVertical, Pencil, Trash2, MousePointerClick, Link2 } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
 
 export type LinkBlock = {
   id: string;
@@ -22,7 +25,13 @@ interface LinkRowProps {
   isDragDisabled: boolean;
 }
 
-export function LinkRow({ link, onEdit, onDelete, onToggleVisibility, isDragDisabled }: LinkRowProps) {
+export function LinkRow({
+  link,
+  onEdit,
+  onDelete,
+  onToggleVisibility,
+  isDragDisabled,
+}: LinkRowProps) {
   const {
     attributes,
     listeners,
@@ -42,68 +51,86 @@ export function LinkRow({ link, onEdit, onDelete, onToggleVisibility, isDragDisa
     <Card
       ref={setNodeRef}
       style={style}
-      className={`p-4 sm:p-5 flex items-center gap-3 transition-shadow ${
-        isDragging ? "shadow-2xl scale-[1.02] ring-2 ring-ink/10" : ""
-      } ${!link.isVisible && !isDragging ? "opacity-60" : ""}`}
+      className={cn(
+        "rounded-[20px] p-4 sm:p-5 flex items-center gap-3 sm:gap-4 transition-all duration-150 border border-hairline",
+        isDragging && "shadow-xl scale-[1.02] ring-2 ring-forest",
+        !link.isVisible && !isDragging && "opacity-75 bg-[#FAF9F5]"
+      )}
     >
+      {/* Drag handle */}
       <button
         {...attributes}
         {...listeners}
+        type="button"
         disabled={isDragDisabled}
-        className={`drag-handle p-2 -ml-2 text-ink/40 hover:text-ink transition-colors rounded-lg touch-none ${
-          isDragDisabled ? "hidden" : ""
-        }`}
+        className={cn(
+          "drag-handle w-8 h-8 rounded-lg flex items-center justify-center text-ink/40 hover:text-ink hover:bg-cream transition-colors touch-none shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest",
+          isDragDisabled && "hidden"
+        )}
         aria-label={`Drag to reorder ${link.title}`}
       >
         <GripVertical className="w-5 h-5" />
       </button>
 
+      {/* Colored icon chip */}
+      <div
+        className="w-10 h-10 rounded-2xl bg-cobalt/10 text-cobalt flex items-center justify-center shrink-0 border border-cobalt/10 shadow-2xs"
+        aria-hidden="true"
+      >
+        <Link2 className="w-4 h-4 stroke-[2.5]" />
+      </div>
+
+      {/* Title & URL */}
       <div className="flex-1 min-w-0 flex flex-col justify-center">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <p className="font-bold text-ink truncate text-sm sm:text-base">
             {link.title}
           </p>
           {!link.isVisible && (
-            <span className="px-2 py-0.5 bg-ink/10 text-ink/70 text-[10px] font-bold rounded-full tracking-wide uppercase">
+            <Badge variant="warning" size="sm">
               Hidden
-            </span>
+            </Badge>
           )}
         </div>
-        <div className="flex items-center gap-3 mt-0.5">
-          <p className="text-ink/60 text-xs sm:text-sm truncate max-w-[200px] sm:max-w-[300px]">{link.url}</p>
-          <div className="flex items-center gap-1 text-ink/50 text-xs font-medium">
-            <MousePointerClick className="w-3.5 h-3.5" />
-            <span>{link.clickCount === 1 ? "1 click" : `${link.clickCount || 0} clicks`}</span>
-          </div>
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1">
+          <p className="text-ink/60 text-xs sm:text-sm truncate max-w-[180px] sm:max-w-[280px]">
+            {link.url}
+          </p>
+          <Badge variant="neutral" size="sm">
+            <MousePointerClick className="w-3 h-3 text-ink/50" />
+            <span>
+              {link.clickCount === 1
+                ? "1 click"
+                : `${link.clickCount || 0} clicks`}
+            </span>
+          </Badge>
         </div>
       </div>
 
-      <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-        <label className="relative inline-flex items-center cursor-pointer p-2">
-          <input
-            type="checkbox"
-            className="sr-only peer"
-            checked={link.isVisible}
-            onChange={(e) => onToggleVisibility(link.id, e.target.checked)}
-            role="switch"
-            aria-checked={link.isVisible}
-            aria-label={`Show ${link.title} on your page`}
-          />
-          <div className="w-9 h-5 bg-ink/20 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-ink/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[10px] after:left-[10px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-ink"></div>
-        </label>
+      {/* Actions */}
+      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <Switch
+          checked={link.isVisible}
+          onCheckedChange={(val) => onToggleVisibility(link.id, val)}
+          ariaLabel={`Show ${link.title} on your page`}
+        />
+
         <button
+          type="button"
           onClick={() => onEdit(link)}
-          className="p-2 text-ink/50 hover:text-ink hover:bg-ink/5 rounded-lg transition-colors"
+          className="w-9 h-9 rounded-full flex items-center justify-center text-ink/50 hover:text-ink hover:bg-cream border border-transparent hover:border-hairline transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest"
           aria-label={`Edit ${link.title}`}
         >
-          <Pencil className="w-5 h-5" />
+          <Pencil className="w-4 h-4" />
         </button>
+
         <button
+          type="button"
           onClick={() => onDelete(link.id)}
-          className="p-2 text-ink/50 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+          className="w-9 h-9 rounded-full flex items-center justify-center text-ink/50 hover:text-tomato hover:bg-tomato/10 border border-transparent hover:border-tomato/20 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tomato"
           aria-label={`Delete ${link.title}`}
         >
-          <Trash2 className="w-5 h-5" />
+          <Trash2 className="w-4 h-4" />
         </button>
       </div>
     </Card>

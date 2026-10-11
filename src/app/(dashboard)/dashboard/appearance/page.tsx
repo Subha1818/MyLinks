@@ -1,10 +1,11 @@
 export const instant = false;
-import { PageHeader } from "@/components/dashboard/page-header";
+import { PageHeader } from "@/components/ui/page-header";
 import { PhonePreview } from "@/components/dashboard/PhonePreview";
 import { ThemeSelector } from "@/components/dashboard/appearance/theme-selector";
 import { requireUser } from "@/server/session";
 import { getPageByUserId } from "@/server/services/pages";
 import { redirect } from "next/navigation";
+import { Palette } from "lucide-react";
 
 export const metadata = {
   title: "Appearance | Dashboard",
@@ -21,14 +22,13 @@ export default async function AppearancePage() {
   return (
     <div className="w-full max-w-6xl pb-24 xl:grid xl:grid-cols-[1fr_320px] xl:gap-12">
       <div className="min-w-0 max-w-3xl">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
-          <div className="flex-1">
-            <PageHeader
-              title="Appearance"
-              description="Customize the look and feel of your page."
-            />
-          </div>
-        </div>
+        {/* Color-coded page header band: lilac band with deep purple text */}
+        <PageHeader
+          title="Appearance"
+          description="Customize the colors, typography, shapes, and layout of your public page."
+          variant="lilac"
+          icon={<Palette className="w-6 h-6 stroke-[2.2]" />}
+        />
 
         <ThemeSelector initialTheme={page.theme} />
       </div>

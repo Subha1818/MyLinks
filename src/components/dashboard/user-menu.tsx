@@ -5,7 +5,7 @@ import { LogOut, Settings } from "lucide-react";
 import Link from "next/link";
 import { signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { siteConfig } from "@/lib/site";
+import { getPublicUrlDisplay } from "@/lib/urls";
 import { Avatar } from "@/components/ui/avatar";
 
 export function UserMenu({
@@ -47,12 +47,13 @@ export function UserMenu({
   };
 
   const nameToDisplay = page.displayName || page.username;
+  const publicUrlDisplay = getPublicUrlDisplay(page.username);
 
   return (
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="rounded-full overflow-hidden border border-ink/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest"
+        className="rounded-full overflow-hidden border border-hairline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest cursor-pointer"
         aria-label="Open user menu"
         aria-expanded={isOpen}
       >
@@ -64,27 +65,29 @@ export function UserMenu({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-ink/10 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
-          <div className="px-4 py-3 border-b border-ink/5">
+        <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-hairline rounded-[20px] shadow-xl py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+          <div className="px-4 py-3 border-b border-hairline">
             <p className="font-bold text-sm text-ink truncate">{nameToDisplay}</p>
-            <p className="text-xs text-ink/60 truncate mt-0.5">{siteConfig.name.toLowerCase()}.com/{page.username}</p>
+            <p className="text-xs text-ink/60 truncate mt-0.5" title={publicUrlDisplay}>
+              {publicUrlDisplay}
+            </p>
           </div>
           <div className="py-2 flex flex-col">
             <Link
               href="/dashboard/settings"
               onClick={() => setIsOpen(false)}
-              className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-ink/70 hover:text-ink hover:bg-cream transition-colors"
+              className="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-ink/70 hover:text-ink hover:bg-cream transition-colors"
             >
               <Settings className="w-4 h-4" />
-              Settings
+              <span>Settings</span>
             </Link>
             <button
               onClick={handleSignOut}
               disabled={isSigningOut}
-              className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-coral hover:bg-coral/5 transition-colors text-left w-full disabled:opacity-50"
+              className="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-tomato hover:bg-tomato/10 transition-colors text-left w-full cursor-pointer disabled:opacity-50"
             >
               <LogOut className="w-4 h-4" />
-              {isSigningOut ? "Signing out..." : "Sign out"}
+              <span>{isSigningOut ? "Signing out..." : "Sign out"}</span>
             </button>
           </div>
         </div>

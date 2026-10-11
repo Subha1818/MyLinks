@@ -1,4 +1,3 @@
-import { siteConfig } from "@/lib/site";
 import { ClaimForm } from "@/components/landing/claim-form";
 import { HeroMockup } from "@/components/landing/hero-mockup";
 
@@ -6,7 +5,7 @@ export function Hero() {
   return (
     <section
       aria-label="Hero Section"
-      className="bg-lime text-forest pt-12 pb-20 sm:pt-20 sm:pb-32 px-4 sm:px-6 lg:px-8 overflow-hidden"
+      className="bg-lime text-forest pt-10 pb-20 sm:pt-16 sm:pb-28 px-4 sm:px-6 lg:px-8 overflow-hidden"
     >
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
@@ -15,7 +14,7 @@ export function Hero() {
             {/* Playful badge */}
             <div className="inline-flex items-center gap-2 self-start bg-forest text-lime text-xs sm:text-sm font-bold px-4 py-1.5 rounded-full mb-6 uppercase tracking-wider shadow-sm">
               <span>✦</span>
-              <span>The Next-Gen Link in Bio</span>
+              <span>Clean Link-in-Bio</span>
             </div>
 
             {/* Massive Heading */}
@@ -23,17 +22,19 @@ export function Hero() {
               A link in bio built for you.
             </h1>
 
-            {/* Supporting Copy */}
+            {/* Honest Supporting Copy */}
             <p className="mt-6 text-lg sm:text-xl text-forest/90 font-medium max-w-xl leading-relaxed">
-              Join thousands of creators using {siteConfig.name} to share everything they make, curate, and love — in one clean, lightning-fast link.
+              Share your links, art, music, and stores in one clean, fast page.
+              Choose from 14 curated themes or customize your own colors, fonts,
+              and patterns.
             </p>
 
             {/* Claim Handle Form */}
             <ClaimForm />
           </div>
 
-          {/* Right Hero Column: CSS Phone Mockup */}
-          <div className="lg:col-span-5 flex justify-center lg:justify-end pt-6 lg:pt-0">
+          {/* Right Hero Column: Real ProfileView Mockup */}
+          <div className="lg:col-span-5 flex justify-center lg:justify-end pt-4 lg:pt-0">
             <HeroMockup />
           </div>
         </div>

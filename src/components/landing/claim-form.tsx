@@ -30,7 +30,7 @@ export function ClaimForm() {
         Claim your username handle
       </label>
 
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-white rounded-3xl sm:rounded-full p-2 shadow-lg border border-forest/10 focus-within:ring-4 focus-within:ring-forest/20 transition-all gap-2">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-white rounded-[24px] sm:rounded-full p-2 shadow-lg border border-forest/10 focus-within:ring-4 focus-within:ring-forest/20 transition-all gap-2">
         <div className="flex items-center flex-1 px-3 sm:px-4 py-2 sm:py-0">
           <span className="text-forest/70 font-semibold select-none text-base sm:text-lg">
             {siteConfig.reservedDomainPrefix}
@@ -50,15 +50,15 @@ export function ClaimForm() {
 
         <button
           type="submit"
-          className="bg-forest text-lime hover:bg-[#163812] active:scale-[0.98] font-bold text-base px-6 py-3.5 rounded-full transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm whitespace-nowrap"
+          className="bg-forest text-lime hover:bg-[#183d14] active:scale-[0.98] font-bold text-base px-6 py-3.5 rounded-full transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2"
         >
           <span>Claim your link</span>
           <ArrowRight className="w-4 h-4 stroke-[2.5]" />
         </button>
       </div>
 
-      <p className="mt-3 text-xs sm:text-sm font-medium text-forest/80 px-2">
-        It’s free, fast, and takes less than a minute to claim.
+      <p className="mt-3 text-xs sm:text-sm font-bold text-forest/80 px-2">
+        Free to start. Sign in with Google in one click.
       </p>
     </form>
   );

@@ -2,15 +2,25 @@
 
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
+import { getPublicUrl } from "@/lib/urls";
+import { Button } from "@/components/ui/button";
 
-export function CopyLinkButton({ username }: { username: string }) {
+export function CopyLinkButton({
+  username,
+  variant = "primary",
+  size = "40px",
+  className,
+}: {
+  username: string;
+  variant?: "primary" | "accent" | "secondary" | "ghost";
+  size?: "40px" | "48px" | "sm" | "md";
+  className?: string;
+}) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
-      const url = `${baseUrl}/${username}`;
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(getPublicUrl(username));
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
@@ -19,12 +29,14 @@ export function CopyLinkButton({ username }: { username: string }) {
   };
 
   return (
-    <button
+    <Button
+      variant={variant}
+      size={size}
       onClick={handleCopy}
-      className="inline-flex items-center gap-2 bg-ink hover:bg-black text-cream font-bold text-sm py-2.5 px-5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2"
+      className={className}
     >
-      {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+      {copied ? <Check className="w-4 h-4 shrink-0" /> : <Copy className="w-4 h-4 shrink-0" />}
       <span>{copied ? "Copied!" : "Copy link"}</span>
-    </button>
+    </Button>
   );
 }

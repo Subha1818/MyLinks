@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Flag, X, Loader2, CheckCircle2 } from "lucide-react";
+import { Flag, X, CheckCircle2 } from "lucide-react";
+import { StarSpinner } from "@/components/brand/StarLoader";
 import { submitReportAction } from "@/server/actions/report";
 
 export function ReportButton({ username }: { username: string }) {
@@ -176,7 +177,7 @@ export function ReportButton({ username }: { username: string }) {
                     disabled={isPending}
                     className="flex-1 py-3 px-4 bg-ink text-white font-bold rounded-xl hover:bg-ink/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                   >
-                    {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "Submit"}
+                    {isPending ? <StarSpinner className="w-5 h-5" /> : "Submit"}
                   </button>
                 </div>
               </form>

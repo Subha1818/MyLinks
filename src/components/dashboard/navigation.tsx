@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Palette, Settings } from "lucide-react";
+import { StarSpinner } from "@/components/brand/StarLoader";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -29,6 +30,44 @@ const navItems = [
   },
 ];
 
+function NavLinkContent({
+  item,
+  isActive,
+  isMobile,
+}: {
+  item: (typeof navItems)[number];
+  isActive: boolean;
+  isMobile: boolean;
+}) {
+  const { pending } = useLinkStatus();
+  const Icon = item.icon;
+
+  return (
+    <>
+      {/* Colored icon chip */}
+      <span
+        className={cn(
+          "rounded-full flex items-center justify-center shrink-0 transition-all",
+          isMobile ? "w-6 h-6" : "w-8 h-8",
+          isActive
+            ? "bg-forest/15 text-forest"
+            : cn(item.chipBg, item.chipText, "shadow-2xs")
+        )}
+        aria-hidden="true"
+      >
+        {pending ? (
+          <StarSpinner size={isMobile ? 14 : 16} />
+        ) : (
+          <Icon className={isMobile ? "w-3.5 h-3.5" : "w-4 h-4"} />
+        )}
+      </span>
+      <span className="truncate">
+        {pending && !isMobile ? "Opening..." : item.name}
+      </span>
+    </>
+  );
+}
+
 export function Navigation({
   isMobile = false,
 }: {
@@ -46,7 +85,6 @@ export function Navigation({
     >
       {navItems.map((item) => {
         const isActive = pathname === item.href;
-        const Icon = item.icon;
 
         return (
           <Link
@@ -63,20 +101,7 @@ export function Navigation({
                 : "text-ink/70 hover:text-ink hover:bg-cream"
             )}
           >
-            {/* Colored icon chip */}
-            <span
-              className={cn(
-                "rounded-full flex items-center justify-center shrink-0 transition-all",
-                isMobile ? "w-6 h-6" : "w-8 h-8",
-                isActive
-                  ? "bg-forest/15 text-forest"
-                  : cn(item.chipBg, item.chipText, "shadow-2xs")
-              )}
-              aria-hidden="true"
-            >
-              <Icon className={isMobile ? "w-3.5 h-3.5" : "w-4 h-4"} />
-            </span>
-            <span className="truncate">{item.name}</span>
+            <NavLinkContent item={item} isActive={isActive} isMobile={isMobile} />
           </Link>
         );
       })}

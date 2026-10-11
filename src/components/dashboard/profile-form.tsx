@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FormField } from "@/components/ui/form-field";
 import { Avatar } from "@/components/ui/avatar";
-import { Check, Loader2, Upload, Trash2 } from "lucide-react";
+import { Check, Upload, Trash2 } from "lucide-react";
+import { StarSpinner } from "@/components/brand/StarLoader";
 import { updateProfile, removeAvatar } from "@/server/actions/profile";
 import { profileSchema } from "@/lib/validators/profile";
 import { useRouter } from "next/navigation";
@@ -233,7 +234,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
               />
               {(isUploading || isRemoving) && (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Loader2 className="w-6 h-6 text-forest animate-spin" />
+                  <StarSpinner className="w-7 h-7 text-forest" />
                 </div>
               )}
             </div>

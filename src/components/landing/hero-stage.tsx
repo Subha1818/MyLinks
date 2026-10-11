@@ -32,11 +32,29 @@ export function HeroStage() {
 
   const stageRef = useRef<HTMLDivElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const stepCountRef = useRef(0);
   const prefersReducedMotion = usePrefersReducedMotion();
 
   const nextPreset = useCallback(() => {
+    stepCountRef.current += 1;
+    // Theme cycle stops by itself after two full rounds of all themes
+    if (stepCountRef.current >= HERO_PRESETS.length * 2) {
+      setIsPlaying(false);
+      return;
+    }
     setCurrentIndex((prev) => (prev + 1) % HERO_PRESETS.length);
   }, []);
+
+  const togglePlay = () => {
+    if (!isPlaying) {
+      if (stepCountRef.current >= HERO_PRESETS.length * 2) {
+        stepCountRef.current = 0;
+      }
+      setIsPlaying(true);
+    } else {
+      setIsPlaying(false);
+    }
+  };
 
   // Preset cycling timer (paused on hover, focus, reduced motion, or toggle)
   useEffect(() => {
@@ -170,7 +188,10 @@ export function HeroStage() {
         </div>
 
         {/* Real ProfileView Render */}
-        <div className="w-full h-full bg-white rounded-[34px] overflow-y-auto no-scrollbar relative">
+        <div
+          style={{ scrollbarWidth: "none" }}
+          className="w-full h-full bg-white rounded-[34px] overflow-y-auto no-scrollbar [&::-webkit-scrollbar]:hidden relative"
+        >
           <ProfileView
             mode="preview"
             displayName={SAMPLE_PROFILE.displayName}
@@ -292,35 +313,19 @@ export function HeroStage() {
         </div>
       </div>
 
-      {/* Layer 3 / Satellite D: Theme label pill & pause/play controls at the bottom */}
-      <div className="absolute -bottom-4 inset-x-0 mx-auto w-fit z-30 flex items-center gap-2.5 bg-forest text-lime px-4 py-1.5 rounded-full border border-forest/30 shadow-[3px_3px_0px_#14181F]">
-        <span className="text-xs font-extrabold uppercase tracking-wider">
-          Theme: {activePreset.name}
-        </span>
-
-        <span className="text-lime/40" aria-hidden="true">
-          •
-        </span>
-
-        <button
-          type="button"
-          onClick={() => setIsPlaying(!isPlaying)}
-          aria-label={isPlaying ? "Pause theme preview cycling" : "Play theme preview cycling"}
-          className="inline-flex items-center gap-1 text-xs font-bold bg-lime/15 hover:bg-lime/25 text-lime px-2 py-0.5 rounded-full transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime"
-        >
-          {isPlaying ? (
-            <>
-              <Pause className="w-3 h-3 stroke-[2.5]" />
-              <span>Pause</span>
-            </>
-          ) : (
-            <>
-              <Play className="w-3 h-3 stroke-[2.5]" />
-              <span>Play</span>
-            </>
-          )}
-        </button>
-      </div>
+      {/* ONE small icon-only pause/play button in a quiet corner of the stage */}
+      <button
+        type="button"
+        onClick={togglePlay}
+        aria-label={isPlaying ? "Pause theme animation" : "Play theme animation"}
+        className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 z-30 w-9 h-9 rounded-full bg-white text-forest border border-forest/20 shadow-md flex items-center justify-center hover:bg-cream active:scale-95 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest"
+      >
+        {isPlaying ? (
+          <Pause className="w-4 h-4 stroke-[2.5]" />
+        ) : (
+          <Play className="w-4 h-4 stroke-[2.5] ml-0.5" />
+        )}
+      </button>
     </div>
   );
 }

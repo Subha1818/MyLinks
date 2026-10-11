@@ -3,7 +3,9 @@
 import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { checkUsername, submitOnboarding } from "./actions";
-import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { CheckCircle2, AlertCircle } from "lucide-react";
+import { StarLoader, StarSpinner } from "@/components/brand/StarLoader";
+import { Button } from "@/components/ui/button";
 import { useSession } from "@/lib/auth-client";
 
 export default function OnboardingPage() {
@@ -69,11 +71,7 @@ export default function OnboardingPage() {
   };
 
   if (sessionLoading) {
-    return (
-      <div className="min-h-screen bg-cream flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-ink/40" />
-      </div>
-    );
+    return <StarLoader variant="fullscreen" label="Checking your account..." />;
   }
 
   if (!session) {
@@ -121,7 +119,7 @@ export default function OnboardingPage() {
                 }`}
               />
               <div className="absolute right-4 flex items-center justify-center">
-                {status === "loading" && <Loader2 className="w-5 h-5 animate-spin text-ink/40" />}
+                {status === "loading" && <StarSpinner size={20} />}
                 {status === "valid" && <CheckCircle2 className="w-5 h-5 text-forest" />}
                 {status === "invalid" && <AlertCircle className="w-5 h-5 text-coral" />}
               </div>
@@ -136,17 +134,17 @@ export default function OnboardingPage() {
             )}
           </div>
 
-          <button
+          <Button
             type="submit"
+            variant="primary"
+            size="48px"
             disabled={status !== "valid" || isPending}
-            className="mt-4 w-full inline-flex items-center justify-center bg-ink text-cream hover:bg-black font-bold text-lg py-4 px-6 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            loading={isPending}
+            pendingText="Claiming..."
+            className="mt-4 w-full text-lg"
           >
-            {isPending ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              "Claim Username"
-            )}
-          </button>
+            Claim Username
+          </Button>
         </form>
       </div>
     </main>

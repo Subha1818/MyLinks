@@ -11,7 +11,7 @@ export const SAMPLE_PROFILE = {
   links: [
     {
       id: "sample-link-1",
-      title: "🎨 2026 Art Print Collection",
+      title: "Art Prints",
       url: "https://example.com/art-prints",
       position: 1024,
       isVisible: true,
@@ -19,7 +19,7 @@ export const SAMPLE_PROFILE = {
     },
     {
       id: "sample-link-2",
-      title: "📓 Behind the Scenes Sketchbook",
+      title: "Sketchbook Tour",
       url: "https://example.com/sketchbook",
       position: 2048,
       isVisible: true,
@@ -27,7 +27,7 @@ export const SAMPLE_PROFILE = {
     },
     {
       id: "sample-link-3",
-      title: "💌 Monthly Creative Dispatch",
+      title: "Monthly Drop",
       url: "https://example.com/newsletter",
       position: 3072,
       isVisible: true,
@@ -35,8 +35,8 @@ export const SAMPLE_PROFILE = {
     },
     {
       id: "sample-link-4",
-      title: "🖌️ Recommended Digital Brushes",
-      url: "https://example.com/brushes",
+      title: "Reading List",
+      url: "https://example.com/reading-list",
       position: 4096,
       isVisible: true,
       clickCount: 37,

@@ -5,7 +5,8 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Logo } from "@/components/landing/logo";
 import { siteConfig } from "@/lib/site";
-import { ArrowLeft, Sparkles, Loader2 } from "lucide-react";
+import { ArrowLeft, Sparkles } from "lucide-react";
+import { StarSpinner } from "@/components/brand/StarLoader";
 import { signIn } from "@/lib/auth-client";
 
 export function LoginForm() {
@@ -55,7 +56,7 @@ export function LoginForm() {
         className="w-full inline-flex items-center justify-center gap-3 bg-white text-ink border-2 border-ink hover:bg-cream font-bold text-lg py-4 px-6 rounded-full transition-all cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
       >
         {isLoading ? (
-          <Loader2 className="w-5 h-5 animate-spin" />
+          <StarSpinner className="w-5 h-5 text-forest" />
         ) : (
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -76,7 +77,7 @@ export function LoginForm() {
             />
           </svg>
         )}
-        <span>Continue with Google</span>
+        <span>{isLoading ? "Opening..." : "Continue with Google"}</span>
       </button>
 
       <div className="mt-8 pt-6 border-t border-ink/10 flex flex-col gap-3">

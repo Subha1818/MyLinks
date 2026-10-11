@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { LogOut, ShieldAlert, Loader2, CheckCircle2 } from "lucide-react";
+import { LogOut, ShieldAlert, CheckCircle2 } from "lucide-react";
+import { StarSpinner } from "@/components/brand/StarLoader";
 import { signOut, authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 
@@ -31,7 +32,7 @@ export function SignOutButton() {
       className="inline-flex items-center justify-center gap-2 bg-cream hover:bg-ink/5 text-ink border border-ink/20 font-bold text-sm py-2.5 px-5 rounded-full transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
     >
       {isSigningOut ? (
-        <Loader2 className="w-4 h-4 animate-spin" />
+        <StarSpinner className="w-4 h-4" />
       ) : (
         <LogOut className="w-4 h-4" />
       )}
@@ -149,7 +150,7 @@ export function SignOutAllButton() {
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <StarSpinner className="w-4 h-4" />
                     <span>Signing out...</span>
                   </>
                 ) : (

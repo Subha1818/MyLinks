@@ -242,4 +242,125 @@ h1, h2, h3, h4, h5, h6 {
   animation: notification-loop 6.2s ease-in-out infinite;
 }
 
+/* StarLoader Branded Animations */
+@keyframes star-loader-colors {
+  0%, 20% {
+    background-color: #D4E83A; /* Lime */
+  }
+  25%, 45% {
+    background-color: #EBC4EE; /* Lilac */
+  }
+  50%, 70% {
+    background-color: #E0A92E; /* Mustard */
+  }
+  75%, 95% {
+    background-color: #BFEBD6; /* Mint */
+  }
+  100% {
+    background-color: #D4E83A;
+  }
+}
+
+@keyframes star-playful-spin {
+  0% {
+    transform: rotate(0deg) scale(1, 1);
+  }
+  25% {
+    transform: rotate(190deg) scale(0.9, 1.15);
+  }
+  35% {
+    transform: rotate(180deg) scale(1, 1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1, 1);
+  }
+  75% {
+    transform: rotate(370deg) scale(0.9, 1.15);
+  }
+  85% {
+    transform: rotate(360deg) scale(1, 1);
+  }
+  100% {
+    transform: rotate(360deg) scale(1, 1);
+  }
+}
+
+@keyframes star-calm-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(0.95);
+  }
+}
+
+@keyframes star-spinner-continuous {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes loader-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes delayed-text-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-star-colors {
+  animation: star-loader-colors 6s ease-in-out infinite;
+}
+
+.animate-star-playful-spin {
+  animation: star-playful-spin 2.2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+}
+
+.animate-star-playful-spin-fast {
+  animation: star-playful-spin 1.1s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+}
+
+.animate-star-pulse {
+  animation: star-calm-pulse 2s ease-in-out infinite;
+}
+
+.animate-star-spinner {
+  animation: star-spinner-continuous 0.8s linear infinite;
+}
+
+.animate-loader-fade-in {
+  animation: loader-fade-in 0.25s ease-out 150ms both;
+}
+
+.animate-delayed-text {
+  animation: delayed-text-in 0.4s ease-out 3s both;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+
 

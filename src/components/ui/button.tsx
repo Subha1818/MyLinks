@@ -1,5 +1,8 @@
+"use client";
+
 import React from "react";
-import { Loader2 } from "lucide-react";
+import { useLinkStatus } from "next/link";
+import { StarSpinner } from "@/components/brand/StarLoader";
 import { cn } from "@/lib/utils";
 
 export interface ButtonProps
@@ -15,7 +18,9 @@ export interface ButtonProps
     | "light"
     | "forest";
   size?: "40px" | "48px" | "sm" | "md" | "lg";
+  loading?: boolean;
   isLoading?: boolean;
+  pendingText?: string;
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -25,13 +30,18 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       variant = "primary",
       size = "40px",
       type = "button",
+      loading = false,
       isLoading = false,
+      pendingText,
       disabled = false,
       children,
       ...props
     },
     ref
   ) => {
+    const linkStatus = useLinkStatus();
+    const isPending = loading || isLoading || linkStatus.pending;
+
     // Normalise legacy variants
     const resolvedVariant =
       variant === "dark"
@@ -47,7 +57,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       size === "sm" ? "40px" : size === "md" ? "48px" : size;
 
     const baseStyles =
-      "inline-flex items-center justify-center font-bold rounded-full transition-all duration-150 cursor-pointer select-none outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed hover:-translate-y-[1px] active:translate-y-0 motion-reduce:transform-none motion-reduce:transition-none";
+      "inline-flex items-center justify-center font-bold rounded-full transition-all duration-150 cursor-pointer select-none outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2 disabled:opacity-60 disabled:pointer-events-none disabled:cursor-not-allowed hover:-translate-y-[1px] active:translate-y-0 motion-reduce:transform-none motion-reduce:transition-none";
 
     const variantStyles: Record<string, string> = {
       primary:
@@ -72,8 +82,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         type={type}
-        disabled={disabled || isLoading}
-        aria-busy={isLoading || undefined}
+        disabled={disabled || isPending}
+        aria-busy={isPending || undefined}
         className={cn(
           baseStyles,
           variantStyles[resolvedVariant] || variantStyles.primary,
@@ -82,8 +92,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         )}
         {...props}
       >
-        {isLoading && <Loader2 className="w-4 h-4 animate-spin shrink-0" />}
-        {children}
+        {isPending && <StarSpinner className="w-4 h-4 shrink-0" />}
+        {isPending && pendingText ? pendingText : children}
       </button>
     );
   }

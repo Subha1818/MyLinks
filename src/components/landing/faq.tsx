@@ -20,7 +20,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "What do you do with my visitors' data?",
-    a: "We never place tracking cookies or pixels on your visitors' devices, and we never log or store visitor IP addresses. Click tracking only records the event timestamp and coarse country code. Check our Privacy Policy for complete details.",
+    a: "We never place tracking cookies or pixels on your visitors' devices, and we never log or store visitor IP addresses. Click tracking only records the event timestamp, link ID, coarse country header, and device category. Check our Privacy Policy for complete details.",
     hasPrivacyLink: true,
   },
   {

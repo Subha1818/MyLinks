@@ -1,11 +1,19 @@
+"use client";
+
+import { useRef } from "react";
 import { ClaimForm } from "@/components/landing/claim-form";
-import { HeroMockup } from "@/components/landing/hero-mockup";
+import { HeroStage } from "@/components/landing/hero-stage";
+import { useScrollProgress } from "@/lib/use-scroll-progress";
 
 export function Hero() {
+  const sectionRef = useRef<HTMLElement | null>(null);
+  useScrollProgress(sectionRef);
+
   return (
     <section
+      ref={sectionRef}
       aria-label="Hero Section"
-      className="bg-lime text-forest pt-10 pb-20 sm:pt-16 sm:pb-28 px-4 sm:px-6 lg:px-8 overflow-hidden"
+      className="bg-lime text-forest pt-10 pb-20 sm:pt-16 sm:pb-28 px-4 sm:px-6 lg:px-8 overflow-x-clip relative"
     >
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
@@ -33,9 +41,9 @@ export function Hero() {
             <ClaimForm />
           </div>
 
-          {/* Right Hero Column: Real ProfileView Mockup */}
-          <div className="lg:col-span-5 flex justify-center lg:justify-end pt-4 lg:pt-0">
-            <HeroMockup />
+          {/* Right Hero Column: Layered Hero Stage with Satellites */}
+          <div className="lg:col-span-5 flex justify-center lg:justify-end pt-6 lg:pt-0">
+            <HeroStage />
           </div>
         </div>
       </div>

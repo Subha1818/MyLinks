@@ -10,9 +10,9 @@ export function TopBar({
   page: { displayName: string | null; username: string; avatarUrl: string | null };
 }) {
   return (
-    <header className="sticky top-0 z-40 w-full bg-white lg:bg-transparent lg:border-none border-b border-hairline lg:static lg:mb-8">
-      {/* Mobile Top Bar */}
-      <div className="flex lg:hidden items-center justify-between px-4 h-16">
+    <header className="w-full lg:bg-transparent lg:mb-8">
+      {/* Mobile Top Bar — static, part of the page flow */}
+      <div className="flex lg:hidden items-center justify-between px-1 py-4">
         <Logo className="text-2xl" />
         <UserMenu page={page} />
       </div>

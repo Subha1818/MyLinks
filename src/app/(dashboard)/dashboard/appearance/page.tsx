@@ -1,6 +1,6 @@
 export const instant = false;
 import { PageHeader } from "@/components/ui/page-header";
-import { PhonePreview } from "@/components/dashboard/PhonePreview";
+import { PhonePreview, MobileInlinePhonePreview } from "@/components/dashboard/PhonePreview";
 import { ThemeSelector } from "@/components/dashboard/appearance/theme-selector";
 import { requireUser } from "@/server/session";
 import { getPageByUserId } from "@/server/services/pages";
@@ -29,6 +29,9 @@ export default async function AppearancePage() {
           variant="lilac"
           icon={<Palette className="w-6 h-6 stroke-[2.2]" />}
         />
+
+        {/* Inline mobile preview - shown between header and presets on mobile */}
+        <MobileInlinePhonePreview />
 
         <ThemeSelector initialTheme={page.theme} />
       </div>

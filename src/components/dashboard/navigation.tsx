@@ -13,6 +13,7 @@ const navItems = [
     icon: LayoutDashboard,
     chipBg: "bg-lime",
     chipText: "text-forest",
+    activeClass: "bg-lime text-forest border-2 border-forest/20 shadow-xs",
   },
   {
     name: "Appearance",
@@ -20,13 +21,15 @@ const navItems = [
     icon: Palette,
     chipBg: "bg-lilac",
     chipText: "text-[#3B1A4A]",
+    activeClass: "bg-lilac text-[#3B1A4A] border-2 border-[#3B1A4A]/20 shadow-xs",
   },
   {
     name: "Settings",
     href: "/dashboard/settings",
     icon: Settings,
-    chipBg: "bg-mustard",
-    chipText: "text-[#2A1B00]",
+    chipBg: "bg-[#FF8024]",
+    chipText: "text-white",
+    activeClass: "bg-[#FF8024]/20 text-[#8C3400] border-2 border-[#FF8024]/40 shadow-xs",
   },
 ];
 
@@ -50,7 +53,7 @@ function NavLinkContent({
           "rounded-full flex items-center justify-center shrink-0 transition-all",
           isMobile ? "w-6 h-6" : "w-8 h-8",
           isActive
-            ? "bg-forest/15 text-forest"
+            ? "bg-black/10 text-current"
             : cn(item.chipBg, item.chipText, "shadow-2xs")
         )}
         aria-hidden="true"
@@ -97,8 +100,8 @@ export function Navigation({
                 ? "flex-col justify-center gap-1 min-h-[48px] py-1.5 px-3 text-[11px] sm:text-xs"
                 : "gap-3 py-2.5 px-3.5 text-sm sm:text-base hover:-translate-y-[0.5px]",
               isActive
-                ? "bg-lime text-forest shadow-xs"
-                : "text-ink/70 hover:text-ink hover:bg-cream"
+                ? item.activeClass
+                : "text-ink/75 hover:text-ink hover:bg-white hover:border-ink/15 border-2 border-transparent"
             )}
           >
             <NavLinkContent item={item} isActive={isActive} isMobile={isMobile} />

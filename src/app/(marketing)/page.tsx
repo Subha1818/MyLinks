@@ -47,7 +47,7 @@ export default function MarketingPage() {
       />
 
       {/* Top Banner & Hero Area (Lime Band) */}
-      <div className="bg-lime pt-4">
+      <div className="bg-lime pt-20 sm:pt-24">
         <Navbar />
         <Hero />
       </div>

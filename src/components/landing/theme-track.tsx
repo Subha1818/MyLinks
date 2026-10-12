@@ -92,11 +92,11 @@ export function ThemeTrack() {
     if (!trackRef.current || !sectionRef.current) return;
 
     const viewportWidth = window.innerWidth;
-    // Center item 0 at progress 0, center item 8 at progress 1
+    // Exactly center active item in the horizontal middle of the viewport
     const trackTranslate =
-      viewportWidth / 2 - itemWidth / 2 - progress * lastIndex * itemDistance;
+      (viewportWidth - itemWidth) / 2 - progress * lastIndex * itemDistance;
 
-    trackRef.current.style.transform = `translateX(${trackTranslate.toFixed(1)}px)`;
+    trackRef.current.style.transform = `translate3d(${trackTranslate.toFixed(1)}px, -50%, 0)`;
 
     const floatingIndex = progress * lastIndex;
     const focusedIndex = Math.min(lastIndex, Math.max(0, Math.round(floatingIndex)));
@@ -182,7 +182,7 @@ export function ThemeTrack() {
           </div>
 
           {/* Center: Translating Track */}
-          <div className="relative w-full flex-1 flex flex-col items-center justify-center min-h-0 my-2">
+          <div className="relative w-full flex-1 overflow-hidden min-h-[520px] my-2">
             <div
               ref={trackRef}
               aria-hidden="true"
@@ -190,8 +190,9 @@ export function ThemeTrack() {
               style={{
                 willChange: "transform",
                 width: `${totalItems * itemDistance}px`,
+                transform: "translate3d(calc(50vw - 140px), -50%, 0)",
               }}
-              className="flex items-center gap-10 flex-nowrap"
+              className="absolute left-0 top-1/2 flex items-center gap-10 flex-nowrap"
             >
               {items.map((item, index) => (
                 <div

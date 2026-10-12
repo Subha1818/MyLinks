@@ -5,28 +5,22 @@ import { Check, X, MousePointerClick, RefreshCw, ExternalLink } from "lucide-rea
 import { usePrefersReducedMotion } from "@/lib/use-scroll-progress";
 
 export function PrivacyReceipt() {
-  const [isPrinted, setIsPrinted] = useState(false);
+  const [replayKey, setReplayKey] = useState(0);
   const prefersReducedMotion = usePrefersReducedMotion();
 
-  const handleTrigger = (e: React.MouseEvent) => {
+  const handleReplay = (e: React.MouseEvent) => {
     e.preventDefault();
-    setIsPrinted(true);
-  };
-
-  const handleReset = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsPrinted(false);
+    setReplayKey((prev) => prev + 1);
   };
 
   return (
     <div className="w-full flex flex-col items-center select-none">
       {/* Trigger Area */}
-      <div className="flex flex-col items-center gap-3">
+      <div className="flex flex-col items-center gap-2.5">
         <button
           id="portfolio-receipt-trigger"
           type="button"
-          onClick={handleTrigger}
-          aria-expanded={isPrinted}
+          onClick={handleReplay}
           aria-controls="privacy-receipt-output"
           className="group relative bg-lime text-forest font-heading font-extrabold text-base sm:text-lg px-8 py-3.5 rounded-full border-2 border-forest shadow-[4px_4px_0px_#14181F] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_#14181F] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center gap-2.5 cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white"
         >
@@ -36,17 +30,17 @@ export function PrivacyReceipt() {
 
         <span className="text-xs font-bold text-white/80 uppercase tracking-wider flex items-center gap-1.5">
           <MousePointerClick className="w-3.5 h-3.5 text-lime" />
-          <span>Try it: click this link</span>
+          <span>Click to replay log animation</span>
         </span>
       </div>
 
-      {/* Interactive Paper Receipt Strip */}
-      {isPrinted && (
-        <div
-          id="privacy-receipt-output"
-          aria-live="polite"
-          className="mt-6 w-full max-w-sm sm:max-w-md mx-auto animate-in fade-in slide-in-from-top-4 duration-300"
-        >
+      {/* Interactive Paper Receipt Strip - Rendered Directly */}
+      <div
+        key={replayKey}
+        id="privacy-receipt-output"
+        aria-live="polite"
+        className="mt-6 w-full max-w-sm sm:max-w-md mx-auto animate-in fade-in slide-in-from-top-4 duration-300"
+      >
           {/* Plain-text summary for assistive technology */}
           <div className="sr-only">
             Stored: time, link, country, device type. Not stored: IP address, cookies, browser details, identity.
@@ -178,30 +172,30 @@ export function PrivacyReceipt() {
               <span className="text-[11px] font-bold text-ink/75 italic">
                 “That&apos;s the whole record.”
               </span>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-ink bg-cream hover:bg-hairline px-3 py-1.5 rounded-full border border-ink/20 cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest"
-              >
-                <RefreshCw className="w-3 h-3" />
-                <span>Again</span>
-              </button>
-            </div>
+                <button
+                  type="button"
+                  onClick={handleReplay}
+                  aria-label="Replay telemetry animation"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-ink bg-cream hover:bg-hairline px-3 py-1.5 rounded-full border border-ink/20 cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                  <span>Replay</span>
+                </button>
+              </div>
 
-            {/* CSS / SVG Zigzag Perforated Bottom Edge */}
-            <div className="absolute -bottom-3 inset-x-0 w-full overflow-hidden leading-none pointer-events-none">
-              <svg
-                className="w-full h-3 text-white fill-current block"
-                viewBox="0 0 200 12"
-                preserveAspectRatio="none"
-                aria-hidden="true"
-              >
-                <path d="M0 0 L10 12 L20 0 L30 12 L40 0 L50 12 L60 0 L70 12 L80 0 L90 12 L100 0 L110 12 L120 0 L130 12 L140 0 L150 12 L160 0 L170 12 L180 0 L190 12 L200 0 Z" />
-              </svg>
+              {/* CSS / SVG Zigzag Perforated Bottom Edge */}
+              <div className="absolute -bottom-3 inset-x-0 w-full overflow-hidden leading-none pointer-events-none">
+                <svg
+                  className="w-full h-3 text-white fill-current block"
+                  viewBox="0 0 200 12"
+                  preserveAspectRatio="none"
+                  aria-hidden="true"
+                >
+                  <path d="M0 0 L10 12 L20 0 L30 12 L40 0 L50 12 L60 0 L70 12 L80 0 L90 12 L100 0 L110 12 L120 0 L130 12 L140 0 L150 12 L160 0 L170 12 L180 0 L190 12 L200 0 Z" />
+                </svg>
+              </div>
             </div>
           </div>
         </div>
-      )}
-    </div>
-  );
-}
+      );
+    }

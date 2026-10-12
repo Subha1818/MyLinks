@@ -17,8 +17,52 @@ const NAV_LINKS = [
 export function Navbar({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [isVisible, setIsVisible] = useState(true);
   const { data: session } = useSession();
   const loggedIn = session ? !!session : isLoggedIn;
+
+  // Scroll direction detection: hide on scroll down, show on scroll up
+  useEffect(() => {
+    let lastScrollY = typeof window !== "undefined" ? window.scrollY : 0;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY < 150) {
+        setActiveSection(null);
+      }
+
+      // If mobile menu is open, always stay visible
+      if (mobileMenuOpen) {
+        setIsVisible(true);
+        lastScrollY = currentScrollY;
+        return;
+      }
+
+      // Near top of page, always show
+      if (currentScrollY < 60) {
+        setIsVisible(true);
+        lastScrollY = currentScrollY;
+        return;
+      }
+
+      const delta = currentScrollY - lastScrollY;
+
+      // Scrolling down past threshold -> hide
+      if (delta > 8 && currentScrollY > 100) {
+        setIsVisible(false);
+      }
+      // Scrolling up -> show
+      else if (delta < -8) {
+        setIsVisible(true);
+      }
+
+      lastScrollY = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [mobileMenuOpen]);
 
   // Scrollspy via IntersectionObserver
   useEffect(() => {
@@ -51,16 +95,8 @@ export function Navbar({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
 
     elements.forEach((el) => observer.observe(el));
 
-    const handleScroll = () => {
-      if (window.scrollY < 150) {
-        setActiveSection(null);
-      }
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
     return () => {
       observer.disconnect();
-      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
@@ -77,7 +113,14 @@ export function Navbar({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
   }, [mobileMenuOpen]);
 
   return (
-    <header className="sticky top-4 z-50 px-4 sm:px-6 w-full max-w-5xl mx-auto">
+    <header
+      className={cn(
+        "fixed top-4 left-0 right-0 z-50 px-4 sm:px-6 w-full max-w-5xl mx-auto transition-all duration-300 ease-in-out",
+        isVisible
+          ? "translate-y-0 opacity-100"
+          : "-translate-y-28 opacity-0 pointer-events-none"
+      )}
+    >
       <nav
         aria-label="Main Navigation"
         className="bg-white rounded-full px-4 sm:px-6 py-2.5 shadow-md border border-hairline flex items-center justify-between min-h-[64px] transition-all"

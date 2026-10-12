@@ -34,18 +34,18 @@ export function Faq() {
     <section
       id="faq"
       aria-label="Frequently Asked Questions"
-      className="bg-cream py-24 sm:py-32 px-4 sm:px-6 lg:px-8 border-t border-hairline"
+      className="bg-mint text-forest py-24 sm:py-32 px-4 sm:px-6 lg:px-8 border-t-2 border-forest/15"
     >
       <div className="max-w-4xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-16 sm:mb-20">
-          <div className="inline-flex items-center gap-2 bg-ink/5 text-ink text-xs sm:text-sm font-bold px-4 py-1.5 rounded-full mb-4 uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 bg-forest text-lime text-xs sm:text-sm font-extrabold px-4 py-1.5 rounded-full mb-4 uppercase tracking-wider shadow-sm">
             <span>FAQ</span>
           </div>
-          <h2 className="font-heading font-extrabold text-4xl sm:text-6xl text-ink tracking-tight">
+          <h2 className="font-heading font-extrabold text-4xl sm:text-6xl text-forest tracking-tight">
             Frequently asked questions
           </h2>
-          <p className="mt-4 text-base sm:text-xl text-ink/70 font-medium">
+          <p className="mt-4 text-base sm:text-xl text-forest/85 font-medium">
             Clear, honest answers about how MyLinks works.
           </p>
         </div>
@@ -55,15 +55,15 @@ export function Faq() {
           {FAQ_ITEMS.map((item, idx) => (
             <details
               key={idx}
-              className="group rounded-[24px] bg-white border border-hairline p-6 sm:p-7 transition-all duration-150 open:shadow-xs"
+              className="group rounded-[24px] bg-white border-2 border-forest/15 p-6 sm:p-7 transition-all duration-150 shadow-sm open:border-forest open:shadow-md hover:border-forest/35"
             >
-              <summary className="flex items-center justify-between gap-4 font-heading font-extrabold text-lg sm:text-xl text-ink cursor-pointer list-none select-none outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2 rounded-xl">
+              <summary className="flex items-center justify-between gap-4 font-heading font-extrabold text-lg sm:text-xl text-forest cursor-pointer list-none select-none outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2 rounded-xl">
                 <span>{item.q}</span>
-                <span className="w-8 h-8 rounded-full bg-cream border border-hairline flex items-center justify-center shrink-0 text-ink/70 group-open:rotate-45 transition-transform duration-200">
+                <span className="w-8 h-8 rounded-full bg-mint/50 border border-forest/20 flex items-center justify-center shrink-0 text-forest group-open:rotate-45 transition-transform duration-200">
                   <Plus className="w-4 h-4 stroke-[2.5]" />
                 </span>
               </summary>
-              <div className="mt-4 pt-4 border-t border-hairline text-ink/80 font-medium text-base sm:text-lg leading-relaxed">
+              <div className="mt-4 pt-4 border-t border-forest/10 text-ink/80 font-medium text-base sm:text-lg leading-relaxed">
                 {item.a}
                 {item.hasPrivacyLink && (
                   <span className="block mt-2">

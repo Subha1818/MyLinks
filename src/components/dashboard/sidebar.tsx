@@ -27,48 +27,56 @@ export function Sidebar({
   };
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 min-h-screen bg-white border-r border-hairline fixed top-0 left-0 bottom-0 pt-8 pb-6 px-4 z-30">
-      <div className="flex items-center px-3 mb-10">
-        <Logo className="text-3xl" />
+    <aside className="hidden lg:flex flex-col w-64 min-h-screen bg-[#FAF9F5] border-r-2 border-ink/10 fixed top-0 left-0 bottom-0 pt-6 pb-6 px-4 z-30 shadow-xs">
+      {/* Brand Header */}
+      <div className="flex items-center justify-between px-3.5 py-2.5 bg-white border-2 border-ink/10 rounded-2xl mb-8 shadow-2xs">
+        <Logo className="text-2xl" />
       </div>
 
       <div className="flex-1">
         <Navigation />
       </div>
 
-      <div className="mt-auto pt-5 border-t border-hairline flex items-center justify-between gap-3 px-2">
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          <Avatar
-            src={page.avatarUrl}
-            fallback={nameToDisplay}
-            size="md"
-          />
-          <div className="flex flex-col min-w-0 flex-1">
-            <span className="font-bold text-sm text-ink truncate">
-              {nameToDisplay}
-            </span>
-            <span
-              className="text-xs text-ink/60 truncate font-medium"
-              title={publicUrlDisplay}
-            >
-              {publicUrlDisplay}
-            </span>
+      {/* User Profile Card */}
+      <div className="mt-auto pt-4 border-t-2 border-ink/10">
+        <div className="flex items-center justify-between gap-2.5 p-2.5 bg-white rounded-2xl border-2 border-ink/10 shadow-2xs hover:border-ink/25 transition-all">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <div className="relative shrink-0">
+              <Avatar
+                src={page.avatarUrl}
+                fallback={nameToDisplay}
+                size="md"
+                className="ring-2 ring-forest/20"
+              />
+              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-lime border-2 border-white" />
+            </div>
+            <div className="flex flex-col min-w-0 flex-1">
+              <span className="font-heading font-extrabold text-sm text-ink truncate leading-tight">
+                {nameToDisplay}
+              </span>
+              <span
+                className="text-[11px] font-mono text-forest truncate font-bold"
+                title={publicUrlDisplay}
+              >
+                {publicUrlDisplay}
+              </span>
+            </div>
           </div>
-        </div>
 
-        <button
-          type="button"
-          onClick={handleCopy}
-          aria-label={copied ? "Copied" : "Copy public link"}
-          title={copied ? "Copied!" : "Copy link"}
-          className="w-8 h-8 rounded-full border border-hairline hover:border-ink/20 hover:bg-cream flex items-center justify-center text-ink/70 hover:text-ink transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest"
-        >
-          {copied ? (
-            <Check className="w-3.5 h-3.5 text-forest" />
-          ) : (
-            <Copy className="w-3.5 h-3.5" />
-          )}
-        </button>
+          <button
+            type="button"
+            onClick={handleCopy}
+            aria-label={copied ? "Copied" : "Copy public link"}
+            title={copied ? "Copied!" : "Copy link"}
+            className="w-8 h-8 rounded-full bg-cream border border-ink/15 hover:bg-lime hover:text-forest hover:border-forest flex items-center justify-center text-ink/75 transition-all cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest shadow-2xs"
+          >
+            {copied ? (
+              <Check className="w-3.5 h-3.5 text-forest stroke-[2.5]" />
+            ) : (
+              <Copy className="w-3.5 h-3.5" />
+            )}
+          </button>
+        </div>
       </div>
     </aside>
   );

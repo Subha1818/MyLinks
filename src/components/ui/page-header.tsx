@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 export interface PageHeaderProps {
   title: string;
   description?: string;
-  variant?: "lime" | "lilac" | "mustard";
+  variant?: "lime" | "lilac" | "mustard" | "orange";
   icon?: React.ReactNode;
   className?: string;
 }
@@ -31,6 +31,11 @@ export function PageHeader({
       band: "bg-mustard text-[#2A1B00]",
       circle: "bg-[#2A1B00]/10 text-[#2A1B00]",
       textDesc: "text-[#2A1B00]/80",
+    },
+    orange: {
+      band: "bg-[#FF8024] text-[#2B0E00]",
+      circle: "bg-[#2B0E00]/10 text-[#2B0E00]",
+      textDesc: "text-[#2B0E00]/85",
     },
   }[variant];
 

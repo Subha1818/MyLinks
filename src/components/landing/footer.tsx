@@ -14,7 +14,7 @@ export function Footer() {
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 pb-12 border-b border-white/10">
           <div>
-            <Logo textColor="text-white" markColor="text-lime" />
+            <Logo textColor="text-white" />
             <p className="mt-2 text-sm text-white/70 max-w-sm font-medium">
               {siteConfig.tagline}
             </p>

@@ -57,7 +57,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       size === "sm" ? "40px" : size === "md" ? "48px" : size;
 
     const baseStyles =
-      "inline-flex items-center justify-center font-bold rounded-full transition-all duration-150 cursor-pointer select-none outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2 disabled:opacity-60 disabled:pointer-events-none disabled:cursor-not-allowed hover:-translate-y-[1px] active:translate-y-0 motion-reduce:transform-none motion-reduce:transition-none";
+      "inline-flex items-center justify-center font-bold rounded-full transition-all duration-150 cursor-pointer select-none outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2 disabled:opacity-60 disabled:pointer-events-none disabled:cursor-not-allowed hover:-translate-y-[1px] active:translate-y-0 motion-reduce:transform-none motion-reduce:transition-none whitespace-nowrap shrink-0";
 
     const variantStyles: Record<string, string> = {
       primary:

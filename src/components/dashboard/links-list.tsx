@@ -174,8 +174,8 @@ export function LinksList({ initialLinks: _initialLinks }: { initialLinks: LinkB
             Drag to reorder. Toggle switches to hide or show on your public page.
           </p>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="text-xs sm:text-sm font-bold text-ink/60">
+        <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+          <div className="text-xs sm:text-sm font-bold text-ink/60 whitespace-nowrap">
             {links.length} / {MAX_LINKS_PER_PAGE} links
           </div>
           <Button
@@ -183,8 +183,9 @@ export function LinksList({ initialLinks: _initialLinks }: { initialLinks: LinkB
             size="40px"
             onClick={() => handleOpenModal()}
             disabled={isPending || links.length >= MAX_LINKS_PER_PAGE}
+            className="whitespace-nowrap shrink-0 px-4"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 shrink-0" />
             <span>Add link</span>
           </Button>
         </div>

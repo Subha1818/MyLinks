@@ -29,7 +29,7 @@ export function Sidebar({
   return (
     <aside className="hidden lg:flex flex-col w-64 min-h-screen bg-[#FAF9F5] border-r-2 border-ink/10 fixed top-0 left-0 bottom-0 pt-6 pb-6 px-4 z-30 shadow-xs">
       {/* Brand Header */}
-      <div className="flex items-center justify-between px-3.5 py-2.5 bg-white border-2 border-ink/10 rounded-2xl mb-8 shadow-2xs">
+      <div className="px-2 pb-6 border-b-2 border-ink/10 mb-6">
         <Logo className="text-2xl" />
       </div>
 

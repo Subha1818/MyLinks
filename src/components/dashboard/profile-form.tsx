@@ -274,13 +274,9 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
                 )}
               </div>
 
-              {avatarError ? (
+              {avatarError && (
                 <p className="text-xs font-bold text-tomato" aria-live="polite">
                   {avatarError}
-                </p>
-              ) : (
-                <p className="text-xs text-ink/60 font-medium">
-                  JPEG, PNG, or WebP. Max 5MB.
                 </p>
               )}
             </div>

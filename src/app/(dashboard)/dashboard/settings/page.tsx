@@ -34,9 +34,6 @@ export default async function SettingsPage() {
       <div className="space-y-6">
         {/* Card 1: Account Details */}
         <Card className="border-2 border-ink/10 rounded-[32px] p-6 sm:p-8 bg-white shadow-xs hover:border-ink/20 transition-all">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-[#FF8024]/15 text-[#9E3E00] border border-[#FF8024]/30 uppercase tracking-wider mb-2">
-            ✦ Account Profile
-          </div>
           <h2 className="font-heading font-extrabold text-2xl text-ink tracking-tight mb-1">
             Personal Details
           </h2>
@@ -45,16 +42,13 @@ export default async function SettingsPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-6 items-start">
-            <div className="flex-shrink-0 flex flex-col items-center gap-2.5 p-3.5 bg-cream/70 rounded-3xl border-2 border-ink/10 self-center sm:self-start">
+            <div className="flex-shrink-0 flex flex-col items-center gap-2 p-2 bg-cream/70 rounded-2xl border border-ink/10 self-center sm:self-start">
               <Avatar
                 src={page.avatarUrl || session.user.image}
                 fallback={page.displayName || session.user.name || page.username}
                 size="xl"
-                className="ring-4 ring-white shadow-xs"
+                className="ring-2 ring-white shadow-xs"
               />
-              <span className="text-[11px] font-extrabold text-forest bg-mint/70 border border-forest/20 px-2.5 py-0.5 rounded-full">
-                Google Sync
-              </span>
             </div>
 
             <div className="flex-1 space-y-4 w-full">
@@ -74,7 +68,7 @@ export default async function SettingsPage() {
                 </label>
                 <div className="flex items-center justify-between px-4 py-3.5 bg-cream/80 border-2 border-ink/10 rounded-2xl text-ink font-bold text-base shadow-2xs">
                   <span className="truncate">{session.user.email}</span>
-                  <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-forest bg-mint px-2 py-0.5 rounded-full border border-forest/20 shrink-0">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-forest bg-mint px-2.5 py-0.5 rounded-full border border-forest/20 shrink-0">
                     <ShieldCheck className="w-3 h-3 stroke-[2.5]" />
                     Verified
                   </span>
@@ -100,11 +94,8 @@ export default async function SettingsPage() {
 
         {/* Card 2: Public Page Live Link */}
         <Card className="border-2 border-ink/10 rounded-[32px] p-6 sm:p-8 bg-white shadow-xs hover:border-ink/20 transition-all">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-lime/40 text-forest border border-forest/20 uppercase tracking-wider mb-2">
-            ✦ Public Page
-          </div>
           <h2 className="font-heading font-extrabold text-2xl text-ink tracking-tight mb-1">
-            Your Live Bio Link
+            Public Page
           </h2>
           <p className="text-sm font-medium text-ink/70 mb-6">
             Share this link in your social bios, portfolio headers, and newsletters.
@@ -136,11 +127,8 @@ export default async function SettingsPage() {
 
         {/* Card 3: Session & Security */}
         <Card className="border-2 border-ink/10 rounded-[32px] p-6 sm:p-8 bg-white shadow-xs hover:border-ink/20 transition-all">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-coral/15 text-coral border border-coral/30 uppercase tracking-wider mb-2">
-            ✦ Security & Sessions
-          </div>
           <h2 className="font-heading font-extrabold text-2xl text-ink tracking-tight mb-1">
-            Session Management
+            Session & Security
           </h2>
           <p className="text-sm font-medium text-ink/70 mb-6">
             You remain signed in on this device for 30 days of active use. Sign out whenever you leave a public or shared device.

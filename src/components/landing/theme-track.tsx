@@ -107,7 +107,7 @@ export function ThemeTrack() {
       if (!el) continue;
       const dist = Math.abs(floatingIndex - i);
       const factor = Math.max(0, 1 - dist);
-      const scale = 0.92 + 0.16 * factor; // 0.92 to 1.08
+      const scale = 0.92 + 0.10 * factor; // 0.92 to 1.02
       const opacity = 0.5 + 0.5 * factor; // 0.5 to 1.0
 
       el.style.transform = `scale(${scale.toFixed(3)})`;
@@ -169,20 +169,28 @@ export function ThemeTrack() {
 
       {enableStickyTrack ? (
         /* DESKTOP / TABLET: Sticky container (100dvh) with horizontally driven track */
-        <div className="sticky top-0 h-[100dvh] flex flex-col justify-between py-6 sm:py-8 overflow-hidden select-none">
-          {/* Top Pinned Header */}
-          <div className="text-center px-4 z-20">
-            <div className="inline-flex items-center gap-2 bg-black/10 backdrop-blur-xs text-current text-xs sm:text-sm font-bold px-4 py-1.5 rounded-full mb-3 uppercase tracking-wider">
+        <div className="sticky top-0 h-[100dvh] flex flex-col justify-between py-5 sm:py-6 overflow-hidden select-none">
+          {/* Top Pinned Header with Current Theme Pill */}
+          <div className="text-center px-4 z-20 shrink-0">
+            <div className="inline-flex items-center gap-2 bg-black/10 backdrop-blur-xs text-current text-xs sm:text-sm font-bold px-4 py-1.5 rounded-full mb-2 uppercase tracking-wider">
               <Sparkles className="w-3.5 h-3.5" />
               <span>14 ready-made themes</span>
             </div>
             <h2 className="font-heading font-extrabold text-3xl sm:text-5xl lg:text-6xl tracking-tight transition-colors duration-300">
               Pick your look.
             </h2>
+            <div className="mt-3 flex items-center justify-center min-h-[36px]">
+              <div
+                ref={labelRef}
+                className="font-heading font-extrabold text-sm sm:text-base tracking-widest uppercase px-4 py-1 rounded-full bg-black/15 backdrop-blur-xs shadow-xs transition-colors"
+              >
+                {items[0].name}
+              </div>
+            </div>
           </div>
 
           {/* Center: Translating Track */}
-          <div className="relative w-full flex-1 overflow-hidden min-h-[520px] my-2">
+          <div className="relative w-full flex-1 overflow-hidden min-h-[500px] my-2">
             <div
               ref={trackRef}
               aria-hidden="true"
@@ -202,7 +210,7 @@ export function ThemeTrack() {
                   }}
                   style={{
                     width: `${itemWidth}px`,
-                    transform: index === 0 ? "scale(1.08)" : "scale(0.92)",
+                    transform: index === 0 ? "scale(1.02)" : "scale(0.92)",
                     opacity: index === 0 ? 1 : 0.5,
                   }}
                   className="shrink-0 flex flex-col items-center justify-center transition-transform duration-75"
@@ -256,16 +264,6 @@ export function ThemeTrack() {
                   )}
                 </div>
               ))}
-            </div>
-
-            {/* Focused Theme Name Label under Phone */}
-            <div className="mt-4 z-20 flex items-center justify-center min-h-[32px]">
-              <div
-                ref={labelRef}
-                className="font-heading font-extrabold text-lg sm:text-2xl tracking-wide uppercase px-4 py-1 rounded-full bg-black/10 backdrop-blur-xs"
-              >
-                {items[0].name}
-              </div>
             </div>
           </div>
 

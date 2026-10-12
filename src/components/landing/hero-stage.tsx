@@ -14,14 +14,14 @@ import { THEME_PRESETS } from "@/lib/theme-presets";
 import { SAMPLE_PROFILE } from "./sample-profile";
 import { usePrefersReducedMotion } from "@/lib/use-scroll-progress";
 
-// 6 diverse real presets to cycle through in the hero stage
+// 6 diverse real presets to cycle through in the hero stage (default is sunrise for high contrast against lime hero)
 const HERO_PRESETS = [
-  THEME_PRESETS.find((p) => p.id === "lime") || THEME_PRESETS[0],
+  THEME_PRESETS.find((p) => p.id === "sunrise") || THEME_PRESETS[13],
   THEME_PRESETS.find((p) => p.id === "lilac") || THEME_PRESETS[3],
   THEME_PRESETS.find((p) => p.id === "cobalt") || THEME_PRESETS[1],
   THEME_PRESETS.find((p) => p.id === "mustard") || THEME_PRESETS[4],
   THEME_PRESETS.find((p) => p.id === "polka") || THEME_PRESETS[8],
-  THEME_PRESETS.find((p) => p.id === "sunrise") || THEME_PRESETS[13],
+  THEME_PRESETS.find((p) => p.id === "lime") || THEME_PRESETS[0],
 ];
 
 export function HeroStage() {

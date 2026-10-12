@@ -8,6 +8,7 @@ import {
   Caveat,
 } from "next/font/google";
 import { siteConfig } from "@/lib/site";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 // Site-wide default fonts (preloaded by default for immediate branding/body text)
@@ -98,6 +99,7 @@ export default function RootLayout({
     >
       <body className="min-h-screen bg-cream text-ink font-body selection:bg-lime selection:text-forest">
         {children}
+        <Analytics />
       </body>
     </html>
   );

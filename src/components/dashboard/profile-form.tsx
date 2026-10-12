@@ -217,30 +217,30 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
 
   return (
     <>
-      <Card className="mb-8">
-        <h2 className="font-heading font-bold text-[22px] sm:text-[24px] text-ink mb-6">
+      <Card className="mb-6 p-4 sm:p-5">
+        <h2 className="font-heading font-bold text-lg sm:text-xl text-ink mb-3 sm:mb-4">
           Profile
         </h2>
 
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-4 sm:gap-5">
           {/* Avatar Row */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5">
             <div className="relative group shrink-0">
               <Avatar
                 src={initialData.avatarUrl}
                 fallback={initialData.displayName || initialData.username}
-                size="xl"
+                size="lg"
                 className={isUploading || isRemoving ? "opacity-50" : ""}
               />
               {(isUploading || isRemoving) && (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <StarSpinner className="w-7 h-7 text-forest" />
+                  <StarSpinner className="w-6 h-6 text-forest" />
                 </div>
               )}
             </div>
 
-            <div className="flex flex-col gap-2">
-              <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-col gap-1.5">
+              <div className="flex flex-wrap items-center gap-2.5">
                 <input
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
@@ -282,8 +282,8 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
             </div>
           </div>
 
-          {/* Inputs */}
-          <div className="space-y-6">
+          {/* Inputs - 2 columns on sm+ to eliminate excessive width and blank space */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 items-start">
             <FormField
               id="displayName"
               label="Display Name"
@@ -298,72 +298,77 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
                 placeholder="Your name"
                 disabled={isSaving}
                 maxLength={50}
+                className="py-2 px-3.5 text-sm sm:text-base"
               />
             </FormField>
 
-            <FormField id="bio" label="Bio" error={fieldErrors.bio?.[0]}>
-              <div className="relative">
-                <Textarea
-                  value={bio}
-                  onChange={(e) => {
-                    setBio(e.target.value);
-                    updateDraftProfile({ bio: e.target.value });
-                  }}
-                  placeholder="A short bio about yourself..."
-                  disabled={isSaving}
-                  rows={3}
-                  className="resize-none pr-16"
-                  maxLength={160}
-                />
-                <div
-                  className={`absolute bottom-3 right-3 text-xs font-bold ${
-                    bioIsMax ? "text-tomato" : "text-ink/40"
+            <FormField
+              id="bio"
+              label="Bio"
+              labelRight={
+                <span
+                  className={`font-semibold ${
+                    bioIsMax ? "text-tomato font-bold" : "text-ink/40"
                   }`}
                 >
                   {bioLength}/160
-                </div>
-              </div>
+                </span>
+              }
+              error={fieldErrors.bio?.[0]}
+            >
+              <Textarea
+                value={bio}
+                onChange={(e) => {
+                  setBio(e.target.value);
+                  updateDraftProfile({ bio: e.target.value });
+                }}
+                placeholder="A short bio about yourself..."
+                disabled={isSaving}
+                rows={2}
+                className="resize-none py-2 px-3.5 text-sm sm:text-base min-h-[46px]"
+                maxLength={160}
+              />
             </FormField>
+          </div>
 
-            {generalError && (
-              <p className="text-sm text-tomato font-bold" aria-live="polite">
-                {generalError}
-              </p>
+          {generalError && (
+            <p className="text-sm text-tomato font-bold" aria-live="polite">
+              {generalError}
+            </p>
+          )}
+
+          <div className="flex items-center gap-3 pt-1">
+            <Button
+              variant="primary"
+              size="40px"
+              type="button"
+              onClick={handleSave}
+              disabled={!hasChanges || isSaving}
+              isLoading={isSaving}
+            >
+              Save changes
+            </Button>
+
+            {hasChanges && !isSaving && (
+              <Button
+                variant="ghost"
+                size="40px"
+                type="button"
+                onClick={handleReset}
+              >
+                Reset
+              </Button>
             )}
 
-            <div className="flex items-center gap-4 pt-2">
-              <Button
-                variant="primary"
-                size="48px"
-                type="button"
-                onClick={handleSave}
-                disabled={!hasChanges || isSaving}
-                isLoading={isSaving}
+            {isSaved && (
+              <div
+                className="inline-flex items-center gap-2 text-forest font-bold text-sm ml-auto animate-in fade-in slide-in-from-left-2"
+                aria-live="polite"
               >
-                Save changes
-              </Button>
-
-              {hasChanges && !isSaving && (
-                <Button
-                  variant="ghost"
-                  size="48px"
-                  type="button"
-                  onClick={handleReset}
-                >
-                  Reset
-                </Button>
-              )}
-
-              {isSaved && (
-                <div
-                  className="inline-flex items-center gap-2 text-forest font-bold text-sm ml-auto animate-in fade-in slide-in-from-left-2"
-                  aria-live="polite"
-                >
-                  <Check className="w-4 h-4 stroke-[3]" />
-                  <span>Saved</span>
-                </div>
-              )}
-            </div>
+                <Check className="w-4 h-4 stroke-[3]" />
+                <span>Saved</span>
+              </div>
+            )}
           </div>
         </div>
       </Card>

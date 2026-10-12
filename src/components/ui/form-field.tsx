@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 interface FormFieldProps {
   id: string;
   label: string;
+  labelRight?: React.ReactNode;
   error?: string;
   hint?: string;
   children: React.ReactNode;
@@ -13,6 +14,7 @@ interface FormFieldProps {
 export function FormField({
   id,
   label,
+  labelRight,
   error,
   hint,
   children,
@@ -26,10 +28,13 @@ export function FormField({
     .join(" ");
 
   return (
-    <div className={cn("space-y-2", className)}>
-      <label htmlFor={id} className="block text-sm font-bold text-ink/70">
-        {label}
-      </label>
+    <div className={cn("space-y-1.5", className)}>
+      <div className="flex items-center justify-between gap-2">
+        <label htmlFor={id} className="block text-sm font-bold text-ink/70">
+          {label}
+        </label>
+        {labelRight}
+      </div>
       
       <div className="relative">
         {React.Children.map(children, (child) => {

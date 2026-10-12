@@ -1,12 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { usePageDraft } from "./PageDraftProvider";
 import { ProfileView } from "@/components/profile/ProfileView";
 import { getPublicUrlDisplay } from "@/lib/urls";
-import { Eye } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Modal } from "@/components/ui/modal";
 
 function PhoneFrame({ scale = 1 }: { scale?: number }) {
   const { draft } = usePageDraft();
@@ -40,53 +36,22 @@ function PhoneFrame({ scale = 1 }: { scale?: number }) {
 
 export function PhonePreview() {
   const { draft } = usePageDraft();
-  const [isOpen, setIsOpen] = useState(false);
-
   const publicUrlDisplay = getPublicUrlDisplay(draft.username);
 
-  const previewFrame = (
-    <div className="flex flex-col items-center">
-      <div className="mb-4 text-center">
-        <h3 className="font-heading font-extrabold text-xl text-ink">
-          Live preview
-        </h3>
-        <p className="text-xs font-bold text-ink/60 truncate max-w-[280px] mt-0.5">
-          {publicUrlDisplay}
-        </p>
-      </div>
-      <PhoneFrame />
-    </div>
-  );
-
   return (
-    <>
-      {/* xl Desktop view (sticky) */}
-      <div className="hidden xl:block sticky top-8">{previewFrame}</div>
-
-      {/* Mobile / Tablet Floating Button - sits above bottom tab bar */}
-      <div className="xl:hidden fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] right-4 sm:right-6 z-30">
-        <Button
-          variant="primary"
-          size="40px"
-          onClick={() => setIsOpen(true)}
-          className="shadow-xl"
-        >
-          <Eye className="w-4 h-4" />
-          <span>Preview</span>
-        </Button>
+    <div className="hidden xl:block sticky top-8">
+      <div className="flex flex-col items-center">
+        <div className="mb-4 text-center">
+          <h3 className="font-heading font-extrabold text-xl text-ink">
+            Live preview
+          </h3>
+          <p className="text-xs font-bold text-ink/60 truncate max-w-[280px] mt-0.5">
+            {publicUrlDisplay}
+          </p>
+        </div>
+        <PhoneFrame />
       </div>
-
-      {/* Mobile / Tablet Modal Preview */}
-      <Modal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        title="Live preview"
-        description={publicUrlDisplay}
-        maxWidth="md"
-      >
-        <div className="flex justify-center py-2">{previewFrame}</div>
-      </Modal>
-    </>
+    </div>
   );
 }
 

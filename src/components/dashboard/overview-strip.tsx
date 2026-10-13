@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MousePointerClick, Eye, Globe, Copy, Check } from "lucide-react";
+import { MousePointerClick, Eye, Globe, Copy, Check, ExternalLink } from "lucide-react";
 import { getPublicUrl, getPublicUrlDisplay } from "@/lib/urls";
 
 interface OverviewStripProps {
@@ -32,49 +32,97 @@ export function OverviewStrip({
 
   return (
     <>
-      {/* Mobile: Compact single-row stat strip */}
-      <div className="flex sm:hidden items-center gap-2 mb-6">
-        {/* Total Clicks */}
-        <div className="flex-1 flex items-center gap-2 bg-cobalt text-white rounded-2xl px-3 py-2.5 min-w-0">
-          <span className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-            <MousePointerClick className="w-3.5 h-3.5 text-white" />
-          </span>
-          <div className="min-w-0">
-            <div className="font-heading font-extrabold text-lg leading-none">
-              {totalClicks.toLocaleString()}
+      {/* Mobile (< sm): 2 Stats in top row + Dedicated High-Visibility "Your Link" Action Bar */}
+      <div className="flex sm:hidden flex-col gap-2.5 mb-6">
+        {/* Row 1: The 2 Stat Pills */}
+        <div className="grid grid-cols-2 gap-2.5">
+          {/* Total Clicks */}
+          <div className="flex items-center gap-2.5 bg-cobalt text-white rounded-2xl px-3.5 py-3 shadow-xs">
+            <span className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+              <MousePointerClick className="w-4 h-4 text-white" />
+            </span>
+            <div className="min-w-0">
+              <div className="font-heading font-extrabold text-xl leading-none">
+                {totalClicks.toLocaleString()}
+              </div>
+              <div className="text-[11px] text-white/80 font-medium mt-1 truncate">
+                Total clicks
+              </div>
             </div>
-            <div className="text-[10px] text-white/70 font-medium truncate">Clicks</div>
+          </div>
+
+          {/* Links Live */}
+          <div className="flex items-center gap-2.5 bg-mint text-forest rounded-2xl px-3.5 py-3 shadow-xs">
+            <span className="w-8 h-8 rounded-full bg-forest/10 flex items-center justify-center shrink-0">
+              <Eye className="w-4 h-4 text-forest" />
+            </span>
+            <div className="min-w-0">
+              <div className="font-heading font-extrabold text-xl leading-none">
+                {visibleLinks} / {totalLinks}
+              </div>
+              <div className="text-[11px] text-forest/80 font-medium mt-1 truncate">
+                Links live
+              </div>
+            </div>
           </div>
         </div>
-        {/* Links Live */}
-        <div className="flex-1 flex items-center gap-2 bg-mint text-forest rounded-2xl px-3 py-2.5 min-w-0">
-          <span className="w-7 h-7 rounded-full bg-forest/10 flex items-center justify-center shrink-0">
-            <Eye className="w-3.5 h-3.5 text-forest" />
-          </span>
-          <div className="min-w-0">
-            <div className="font-heading font-extrabold text-lg leading-none">
-              {visibleLinks}/{totalLinks}
+
+        {/* Row 2: Prominent "Your Link" Card with High-Contrast Copy Button */}
+        <div className="flex items-center justify-between gap-2.5 bg-white border-2 border-forest/20 rounded-2xl p-2.5 shadow-xs">
+          {/* Link info */}
+          <div className="flex items-center gap-2.5 min-w-0 pl-1">
+            <span className="w-8 h-8 rounded-full bg-lime text-forest flex items-center justify-center shrink-0 border border-forest/20 shadow-xs">
+              <Globe className="w-4 h-4 stroke-[2.2]" />
+            </span>
+            <div className="min-w-0">
+              <div className="text-[10px] font-extrabold text-forest uppercase tracking-wider">
+                Your Link
+              </div>
+              <div
+                className="font-heading font-bold text-sm text-ink truncate max-w-[150px]"
+                title={publicUrlDisplay}
+              >
+                {publicUrlDisplay}
+              </div>
             </div>
-            <div className="text-[10px] text-forest/70 font-medium truncate">Live</div>
+          </div>
+
+          {/* Actions: Copy Button + Open Link */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              onClick={handleCopy}
+              className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full font-heading font-extrabold text-xs transition-all cursor-pointer shadow-xs active:scale-95 ${
+                copied
+                  ? "bg-forest text-lime ring-2 ring-forest"
+                  : "bg-forest text-lime hover:bg-[#183d14]"
+              }`}
+            >
+              {copied ? (
+                <>
+                  <Check className="w-3.5 h-3.5 stroke-[3]" />
+                  <span>Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>Copy link</span>
+                </>
+              )}
+            </button>
+
+            <a
+              href={getPublicUrl(username)}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Open public page in new tab"
+              className="w-8 h-8 rounded-full bg-cream text-ink/70 hover:text-forest flex items-center justify-center transition-colors border border-hairline active:scale-95 shrink-0"
+              title="Open public page"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
           </div>
         </div>
-        {/* Your Link */}
-        <button
-          type="button"
-          onClick={handleCopy}
-          className="flex-1 flex items-center gap-2 bg-lime text-forest rounded-2xl px-3 py-2.5 min-w-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest"
-          title={copied ? "Copied!" : `Copy ${publicUrlDisplay}`}
-        >
-          <span className="w-7 h-7 rounded-full bg-forest/10 flex items-center justify-center shrink-0">
-            {copied ? <Check className="w-3.5 h-3.5 text-forest stroke-[3]" /> : <Copy className="w-3.5 h-3.5 text-forest" />}
-          </span>
-          <div className="min-w-0">
-            <div className="font-heading font-extrabold text-sm leading-none truncate">
-              {copied ? "Copied!" : "Copy"}
-            </div>
-            <div className="text-[10px] text-forest/70 font-medium truncate">Your link</div>
-          </div>
-        </button>
       </div>
 
       {/* sm+: Original tall card layout */}

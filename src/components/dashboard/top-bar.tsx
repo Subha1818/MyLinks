@@ -14,7 +14,15 @@ export function TopBar({
       {/* Mobile Top Bar — static, part of the page flow */}
       <div className="flex lg:hidden items-center justify-between px-1 py-4">
         <Logo className="text-2xl" />
-        <UserMenu page={page} />
+        <div className="flex items-center gap-2">
+          <CopyLinkButton
+            username={page.username}
+            variant="secondary"
+            size="40px"
+            className="h-9 px-3 text-xs gap-1.5 shadow-xs"
+          />
+          <UserMenu page={page} />
+        </div>
       </div>
 
       {/* Desktop Top Bar Right Content - aligned with main content max-w */}

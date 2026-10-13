@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useId } from "react";
+import { useState, useTransition, useId, useCallback } from "react";
 import { Plus, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
@@ -116,7 +116,7 @@ export function LinksList({ initialLinks: _initialLinks }: { initialLinks: LinkB
     setIsModalOpen(true);
   };
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
     setTimeout(() => {
       setEditingLink(null);
@@ -125,7 +125,7 @@ export function LinksList({ initialLinks: _initialLinks }: { initialLinks: LinkB
       setError(null);
       setFieldErrors({});
     }, 200);
-  };
+  }, []);
 
   const handleSave = () => {
     setError(null);

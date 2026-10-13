@@ -26,6 +26,11 @@ export function Modal({
   showCloseButton = true,
 }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
 
   useEffect(() => {
     if (!isOpen) return;
@@ -33,7 +38,7 @@ export function Modal({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.stopPropagation();
-        onClose();
+        onCloseRef.current();
         return;
       }
 
@@ -65,13 +70,18 @@ export function Modal({
     document.body.style.overflow = "hidden";
     document.addEventListener("keydown", handleKeyDown);
 
-    // Initial focus into modal
+    // Initial focus into modal ONLY when opened (prioritize autofocus or input over close button)
     const timer = setTimeout(() => {
       if (modalRef.current) {
-        const focusable = modalRef.current.querySelector<HTMLElement>(
+        // If an element inside modal already has focus, do not steal it
+        if (modalRef.current.contains(document.activeElement)) return;
+
+        const autoFocusEl = modalRef.current.querySelector<HTMLElement>("[autofocus]");
+        const firstInput = modalRef.current.querySelector<HTMLElement>("input, textarea, select");
+        const firstFocusable = modalRef.current.querySelector<HTMLElement>(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
         );
-        focusable?.focus();
+        (autoFocusEl || firstInput || firstFocusable)?.focus();
       }
     }, 50);
 
@@ -80,7 +90,7 @@ export function Modal({
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

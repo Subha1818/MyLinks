@@ -21,10 +21,8 @@ export default async function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-cream flex flex-col items-center justify-center p-4">
-      <Suspense fallback={<div className="font-heading font-bold text-lg text-ink">Loading...</div>}>
-        <LoginForm />
-      </Suspense>
-    </main>
+    <Suspense fallback={<div className="font-heading font-bold text-lg text-ink">Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

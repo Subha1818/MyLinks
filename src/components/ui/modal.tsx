@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +28,11 @@ export function Modal({
 }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     onCloseRef.current = onClose;
@@ -92,7 +98,7 @@ export function Modal({
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const maxWidthClasses = {
     sm: "max-w-sm",
@@ -101,7 +107,7 @@ export function Modal({
     xl: "max-w-xl",
   }[maxWidth];
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -126,7 +132,7 @@ export function Modal({
       >
         {/* Title bar (if title provided) */}
         {title && (
-          <div className="px-6 py-5 sm:px-8 sm:py-6 border-b border-hairline flex items-center justify-between gap-4">
+          <div className="px-6 py-5 sm:px-8 sm:py-6 border-b border-hairline flex items-center justify-between gap-4 shrink-0">
             <div>
               <h2
                 id="modal-title"
@@ -145,7 +151,7 @@ export function Modal({
               <button
                 type="button"
                 onClick={onClose}
-                className="p-2 text-ink/50 hover:text-ink hover:bg-cream rounded-full transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest"
+                className="p-2 text-ink/50 hover:text-ink hover:bg-cream rounded-full transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest shrink-0"
                 aria-label="Close dialog"
               >
                 <X className="w-5 h-5" />
@@ -157,6 +163,7 @@ export function Modal({
         {/* Modal content */}
         <div className="p-6 sm:p-8 overflow-y-auto">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

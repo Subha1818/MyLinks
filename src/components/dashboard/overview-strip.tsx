@@ -3,7 +3,7 @@ import { ShareButton } from "@/components/dashboard/share-modal";
 
 import { useState } from "react";
 import { MousePointerClick, Eye, Globe, Copy, Check, ExternalLink } from "lucide-react";
-import { getPublicUrl, getPublicUrlDisplay } from "@/lib/urls";
+import { getPublicUrl } from "@/lib/urls";
 
 interface OverviewStripProps {
   username: string;
@@ -19,7 +19,6 @@ export function OverviewStrip({
   totalLinks,
 }: OverviewStripProps) {
   const [copied, setCopied] = useState(false);
-  const publicUrlDisplay = getPublicUrlDisplay(username);
 
   const handleCopy = async () => {
     try {
@@ -70,38 +69,30 @@ export function OverviewStrip({
 
         {/* Row 2: Prominent "Your Link" Card with High-Contrast Copy Button */}
         <div className="flex items-center justify-between gap-2.5 bg-white border-2 border-forest/20 rounded-2xl p-2.5 shadow-xs">
-          {/* Link info */}
-          <div className="flex items-center gap-2.5 min-w-0 pl-1">
+          {/* Link label */}
+          <div className="flex items-center gap-2 min-w-0 pl-1">
             <span className="w-8 h-8 rounded-full bg-lime text-forest flex items-center justify-center shrink-0 border border-forest/20 shadow-xs">
               <Globe className="w-4 h-4 stroke-[2.2]" />
             </span>
-            <div className="min-w-0">
-              <div className="text-[10px] font-extrabold text-forest uppercase tracking-wider">
-                Your Link
-              </div>
-              <div
-                className="font-heading font-bold text-sm text-ink truncate max-w-[150px]"
-                title={publicUrlDisplay}
-              >
-                {publicUrlDisplay}
-              </div>
-            </div>
+            <span className="text-xs font-heading font-extrabold text-forest uppercase tracking-wider truncate">
+              Your Link
+            </span>
           </div>
 
-          {/* Actions: Copy Button + Open Link */}
+          {/* Actions: QR + Copy Link Button + Open Link */}
           <div className="flex items-center gap-1.5 shrink-0">
             <ShareButton
               username={username}
               variant="secondary"
               size="40px"
               showQrIcon
-              label="Share"
+              label="QR"
               className="h-8 px-2.5 text-xs font-heading font-extrabold"
             />
             <button
               type="button"
               onClick={handleCopy}
-              className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full font-heading font-extrabold text-xs transition-all cursor-pointer shadow-xs active:scale-95 ${
+              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-full font-heading font-extrabold text-xs transition-all cursor-pointer shadow-xs active:scale-95 ${
                 copied
                   ? "bg-forest text-lime ring-2 ring-forest"
                   : "bg-forest text-lime hover:bg-[#183d14]"
@@ -196,17 +187,19 @@ export function OverviewStrip({
             </span>
           </div>
           <div>
-            <p
-              className="font-bold text-sm sm:text-base text-forest truncate"
-              title={publicUrlDisplay}
-            >
-              {publicUrlDisplay}
-            </p>
-            <div className="mt-2.5 flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <ShareButton
+                username={username}
+                variant="secondary"
+                size="40px"
+                showQrIcon
+                label="QR Code"
+                className="h-8 px-3.5 text-xs font-heading font-extrabold bg-white text-forest border-forest/20 shadow-xs hover:bg-cream active:scale-95"
+              />
               <button
                 type="button"
                 onClick={handleCopy}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-forest text-lime font-bold text-xs hover:bg-[#183d14] transition-all cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-forest text-lime font-heading font-extrabold text-xs hover:bg-[#183d14] transition-all cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2 active:scale-95"
               >
                 {copied ? (
                   <Check className="w-3.5 h-3.5 stroke-[3]" />
@@ -215,14 +208,6 @@ export function OverviewStrip({
                 )}
                 <span>{copied ? "Copied!" : "Copy link"}</span>
               </button>
-              <ShareButton
-                username={username}
-                variant="secondary"
-                size="40px"
-                showQrIcon
-                label="Share / QR"
-                className="h-7 px-3 text-xs bg-white text-forest border-forest/20 shadow-xs hover:bg-cream"
-              />
             </div>
           </div>
         </div>

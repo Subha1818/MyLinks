@@ -16,18 +16,6 @@ export function TopBar({
       <div className="flex lg:hidden items-center justify-between px-1 py-4">
         <Logo className="text-2xl" />
         <div className="flex items-center gap-2">
-          <ShareButton
-            username={page.username}
-            variant="secondary"
-            size="40px"
-            className="h-9 px-3 text-xs gap-1.5 shadow-xs"
-          />
-          <CopyLinkButton
-            username={page.username}
-            variant="secondary"
-            size="40px"
-            className="h-9 px-3 text-xs gap-1.5 shadow-xs"
-          />
           <UserMenu page={page} />
         </div>
       </div>

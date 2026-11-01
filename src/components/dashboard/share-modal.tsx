@@ -162,10 +162,10 @@ export function ShareModal({ username, isOpen, onClose }: ShareModalProps) {
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Share your page" maxWidth="lg">
-      <div className="space-y-6">
+      <div className="space-y-5">
         {/* URL Pill + Copy Bar */}
-        <div className="flex items-center justify-between gap-3 bg-[var(--surface-muted)] border border-[var(--border-subtle)] rounded-xl px-4 py-3">
-          <span className="text-sm font-mono text-[var(--text-secondary)] truncate select-all">
+        <div className="flex items-center justify-between gap-3 bg-cream border border-hairline rounded-2xl px-4 py-2.5">
+          <span className="text-xs sm:text-sm font-mono text-ink/70 truncate select-all">
             {publicUrlDisplay}
           </span>
           <Button
@@ -178,8 +178,8 @@ export function ShareModal({ username, isOpen, onClose }: ShareModalProps) {
           >
             {copied ? (
               <>
-                <Check className="h-4 w-4 text-[var(--forest)]" />
-                <span className="text-[var(--forest)]">Copied!</span>
+                <Check className="h-4 w-4 text-forest" />
+                <span className="text-forest">Copied!</span>
               </>
             ) : (
               <>
@@ -194,13 +194,13 @@ export function ShareModal({ username, isOpen, onClose }: ShareModalProps) {
         </div>
 
         {/* QR Code Card */}
-        <div className="flex flex-col sm:flex-row items-center gap-6 bg-[var(--surface-muted)] border border-[var(--border-subtle)] rounded-2xl p-6">
+        <div className="flex flex-col sm:flex-row items-center gap-5 sm:gap-6 bg-cream border border-hairline rounded-2xl p-4 sm:p-5">
           {/* QR Display Tile */}
-          <div className="relative w-56 h-56 bg-white rounded-2xl shadow-sm border border-neutral-200 p-3 flex items-center justify-center flex-shrink-0">
+          <div className="relative w-44 h-44 sm:w-52 sm:h-52 bg-white rounded-2xl shadow-xs border border-hairline p-3 flex items-center justify-center shrink-0">
             {isGenerating ? (
-              <div className="flex flex-col items-center gap-2 text-neutral-400">
+              <div className="flex flex-col items-center gap-2 text-ink/40">
                 <StarSpinner className="w-6 h-6" />
-                <span className="text-xs">Generating QR...</span>
+                <span className="text-xs font-medium">Generating QR...</span>
               </div>
             ) : (
               <div
@@ -235,16 +235,16 @@ export function ShareModal({ username, isOpen, onClose }: ShareModalProps) {
           </div>
 
           {/* QR Customization Options */}
-          <div className="flex-1 space-y-5 w-full">
+          <div className="flex-1 space-y-4 w-full">
             {/* Color Presets */}
             <div>
-              <label className="block text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-2">
+              <label className="block text-[11px] font-extrabold text-ink/70 uppercase tracking-wider mb-2">
                 QR Color (Contrast &gt; 7:1)
               </label>
               <div
                 role="radiogroup"
                 aria-label="QR Code Color Presets"
-                className="flex items-center gap-2.5 flex-wrap"
+                className="flex items-center gap-2 flex-wrap"
               >
                 {QR_COLOR_PRESETS.map((preset) => {
                   const isSelected = selectedColor === preset.hex;
@@ -256,9 +256,9 @@ export function ShareModal({ username, isOpen, onClose }: ShareModalProps) {
                       aria-checked={isSelected}
                       aria-label={preset.label}
                       onClick={() => setSelectedColor(preset.hex)}
-                      className={`w-8 h-8 rounded-full border-2 transition-transform ${
+                      className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 transition-transform cursor-pointer ${
                         isSelected
-                          ? "ring-2 ring-[var(--forest)] ring-offset-2 scale-110 border-white shadow-sm"
+                          ? "ring-2 ring-forest ring-offset-2 scale-110 border-white shadow-sm"
                           : "border-transparent hover:scale-105"
                       }`}
                       style={{ backgroundColor: preset.hex }}
@@ -271,11 +271,11 @@ export function ShareModal({ username, isOpen, onClose }: ShareModalProps) {
             {/* Center Star Toggle */}
             <div className="flex items-center justify-between pt-1">
               <div>
-                <span className="text-sm font-medium text-[var(--text-primary)] block">
+                <span className="text-xs sm:text-sm font-bold text-ink block">
                   Center star logo
                 </span>
-                <span className="text-xs text-[var(--text-muted)]">
-                  Error correction level: {centerStar ? "High (H)" : "Medium (M)"}
+                <span className="text-[11px] text-ink/60">
+                  Correction level: {centerStar ? "High (H)" : "Medium (M)"}
                 </span>
               </div>
               <button
@@ -285,7 +285,7 @@ export function ShareModal({ username, isOpen, onClose }: ShareModalProps) {
                 aria-label="Toggle center star logo in QR code"
                 onClick={() => setCenterStar(!centerStar)}
                 className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 cursor-pointer ${
-                  centerStar ? "bg-[var(--forest)]" : "bg-neutral-300 dark:bg-neutral-700"
+                  centerStar ? "bg-forest" : "bg-neutral-300"
                 }`}
               >
                 <div
@@ -297,17 +297,17 @@ export function ShareModal({ username, isOpen, onClose }: ShareModalProps) {
             </div>
 
             {/* Download Buttons */}
-            <div className="grid grid-cols-2 gap-2.5 pt-2">
+            <div className="grid grid-cols-2 gap-2 pt-1">
               <Button
                 type="button"
                 variant="secondary"
                 size="sm"
                 onClick={handleDownloadPng}
                 disabled={isGenerating}
-                className="w-full flex items-center justify-center gap-1.5"
+                className="w-full flex items-center justify-center gap-1.5 text-xs font-bold"
                 aria-label="Download QR code as PNG"
               >
-                <Download className="h-4 w-4" />
+                <Download className="h-3.5 w-3.5" />
                 <span>PNG (1024)</span>
               </Button>
               <Button
@@ -316,10 +316,10 @@ export function ShareModal({ username, isOpen, onClose }: ShareModalProps) {
                 size="sm"
                 onClick={handleDownloadSvg}
                 disabled={isGenerating}
-                className="w-full flex items-center justify-center gap-1.5"
+                className="w-full flex items-center justify-center gap-1.5 text-xs font-bold"
                 aria-label="Download QR code as SVG"
               >
-                <Download className="h-4 w-4" />
+                <Download className="h-3.5 w-3.5" />
                 <span>SVG Vector</span>
               </Button>
             </div>
@@ -327,8 +327,8 @@ export function ShareModal({ username, isOpen, onClose }: ShareModalProps) {
         </div>
 
         {/* Share Channels */}
-        <div className="space-y-3">
-          <label className="block text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
+        <div className="space-y-2.5">
+          <label className="block text-[11px] font-extrabold text-ink/70 uppercase tracking-wider">
             Share link directly
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -338,7 +338,7 @@ export function ShareModal({ username, isOpen, onClose }: ShareModalProps) {
                 variant="secondary"
                 size="sm"
                 onClick={handleNativeShare}
-                className="col-span-2 sm:col-span-4 flex items-center justify-center gap-2"
+                className="col-span-2 sm:col-span-4 flex items-center justify-center gap-2 font-bold"
                 aria-label="Share via system share menu"
               >
                 <Share2 className="h-4 w-4" />
@@ -353,10 +353,10 @@ export function ShareModal({ username, isOpen, onClose }: ShareModalProps) {
               })}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-default)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl border border-hairline bg-white hover:bg-cream text-ink transition-colors shadow-2xs"
             >
               <span>WhatsApp</span>
-              <ExternalLink className="h-3 w-3 text-[var(--text-muted)]" />
+              <ExternalLink className="h-3 w-3 text-ink/50" />
             </a>
 
             <a
@@ -366,10 +366,10 @@ export function ShareModal({ username, isOpen, onClose }: ShareModalProps) {
               })}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-default)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl border border-hairline bg-white hover:bg-cream text-ink transition-colors shadow-2xs"
             >
               <span>X (Twitter)</span>
-              <ExternalLink className="h-3 w-3 text-[var(--text-muted)]" />
+              <ExternalLink className="h-3 w-3 text-ink/50" />
             </a>
 
             <a
@@ -379,10 +379,10 @@ export function ShareModal({ username, isOpen, onClose }: ShareModalProps) {
               })}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-default)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl border border-hairline bg-white hover:bg-cream text-ink transition-colors shadow-2xs"
             >
               <span>Telegram</span>
-              <ExternalLink className="h-3 w-3 text-[var(--text-muted)]" />
+              <ExternalLink className="h-3 w-3 text-ink/50" />
             </a>
 
             <a
@@ -393,10 +393,10 @@ export function ShareModal({ username, isOpen, onClose }: ShareModalProps) {
               })}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-default)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl border border-hairline bg-white hover:bg-cream text-ink transition-colors shadow-2xs"
             >
               <span>Email</span>
-              <ExternalLink className="h-3 w-3 text-[var(--text-muted)]" />
+              <ExternalLink className="h-3 w-3 text-ink/50" />
             </a>
           </div>
         </div>

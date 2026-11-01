@@ -1,214 +1,179 @@
-# Project: Link-in-Bio SaaS (working name: `MyLinks`)
+# Project Documentation: MyLinks
 
-> This file is the source of truth for the project. Read it fully before writing any code.
-> Follow it strictly. If something here conflicts with a request, ask before deviating.
-> Always check the current official docs for any library before using its API (versions change).
-
----
-
-## 1. What we are building
-
-A Linktree-style SaaS. Anyone can:
-
-1. Sign in with **Continue with Google** (the only auth method for now).
-2. Choose a unique username.
-3. Build a public link-in-bio page at `yourapp.com/username`.
-4. Add, edit, reorder and delete links and social profiles.
-5. Customize profile (avatar, display name, bio) and theme.
-
-### MVP scope (build now)
-- Landing page
-- Authentication: **Google sign-in only** (no passwords, no OTP, no email sending), plus username onboarding
-- Dashboard: profile editor, link CRUD with drag-and-drop ordering, basic theme customization
-- Public profile page at `/{username}` (SSR, SEO, Open Graph tags)
-- Click tracking (record events only; no analytics dashboard yet)
-
-### Later (do NOT build now, but do not block them)
-Analytics dashboard, custom domains, advanced themes, QR codes, paid plans, multiple pages per user, scheduled links, and email + password login with OTP verification (needs a verified domain for Resend first).
+> Source of truth for MyLinks architecture, data models, design tokens, security policies, and roadmap.
+> Last updated: Step 6C Polish Pass (Completed).
 
 ---
 
-## 2. Tech stack
+## 1. What is MyLinks?
 
-| Area | Choice |
-|---|---|
-| Framework | Next.js (latest stable, App Router) with TypeScript |
-| Styling | Tailwind CSS |
-| Backend | Next.js Route Handlers + Server Actions (single app, no separate server for MVP) |
-| Database | PostgreSQL on Neon (use the **pooled** connection string) |
-| ORM | Drizzle ORM + drizzle-kit migrations (Neon serverless driver) |
-| Auth | Better Auth with the Google OAuth provider only. Keep the standard user/account tables so other methods can be added later. Verify against current docs |
-| Image storage | Vercel Blob (Hobby plan, 1 GB). Never store images in Postgres. Access it only through `src/server/storage.ts` so the provider can be swapped later |
-| Validation | Zod (every input, client and server) |
-| Drag and drop | dnd-kit |
-| Icons | lucide-react |
-| Deployment (later) | Vercel |
-
-Keep business logic in `src/server/services/` so it can be moved to a separate service later.
+MyLinks is a high-craft, playful Linktree-style link-in-bio platform for creators. Anyone can:
+1. Sign in with **Continue with Google** in one click.
+2. Claim a distinct, unique username at `mylinkz.vercel.app/<username>`.
+3. Add, edit, toggle visibility, and drag-and-drop reorder links in real time.
+4. Select from 14 curated, accessible theme presets (solids, retro patterns, gradients) with full button shape and font customization.
+5. Track public profile engagement with privacy-first link click recording.
 
 ---
 
-## 3. Folder structure
+## 2. Tech Stack
+
+- **Framework:** Next.js 16 (App Router, Turbopack, Partial Prerendering, Server Actions, Route Handlers)
+- **Language:** TypeScript 5 (Strict mode)
+- **Styling:** Tailwind CSS v4 (Custom brand tokens, zero gradients/glows in app shell, solid bold surfaces)
+- **Fonts:** Bricolage Grotesque (Headings), DM Sans (Body), plus custom theme fonts: Fraunces, DM Mono, Archivo, Caveat
+- **Authentication:** Better Auth with Google OAuth 2.0 provider only
+- **Database:** PostgreSQL on Neon Serverless (Pooled connection)
+- **ORM:** Drizzle ORM + Drizzle Kit (Strict migration workflow)
+- **Storage:** Vercel Blob (`@vercel/blob`) for secure avatar upload and automatic deletion
+- **Validation:** Zod schemas on both client and server boundaries
+- **Interactions:** `@dnd-kit/core` and `@dnd-kit/sortable` for link list ordering
+- **Deployment:** Vercel Global Edge & Serverless network
+
+---
+
+## 3. Folder Structure
 
 ```
 src/
   app/
-    (marketing)/          # landing page, pricing (later)
+    (marketing)/               # Public landing page (static ○), /privacy, /terms
       page.tsx
-    (auth)/               # login page (Continue with Google) and username onboarding
-    (dashboard)/          # protected app: /dashboard, /dashboard/appearance, /dashboard/settings
-    [username]/           # PUBLIC profile page (SSR)
-      page.tsx
+    (auth)/                    # Authentication & Onboarding
+      login/                   # Two-column login with real live ProfileView mockup
+      onboarding/              # Username claim with suggestions and live preview
+    (dashboard)/               # Protected creator dashboard
+      dashboard/               # Links manager with drag & drop
+      dashboard/appearance/    # 14 curated themes & appearance settings
+      dashboard/settings/      # Account settings & logout
+    [username]/                # Public profile page (SSR + tag caching)
+      not-found.tsx            # Branded generic 404
+      opengraph-image.tsx      # Dynamic Open Graph card
     api/
-      auth/[...all]/      # auth handler
-      click/[linkId]/     # click tracking redirect
-      upload/             # Vercel Blob upload handler (validates session, type, size)
+      auth/[...all]/           # Better Auth handler
+      click/[linkId]/          # Privacy-friendly click redirect
+      upload/avatar/           # Vercel Blob avatar upload handler
+    icon.tsx                   # 32x32 Forest Star on Lime Circle
+    apple-icon.tsx             # 180x180 Forest Star on Lime Circle
+    manifest.ts                # PWA install metadata
+    not-found.tsx              # Global 404 page
+    error.tsx                  # Global error boundary with digest
+    global-error.tsx           # Fatal root error boundary
   components/
-    ui/                   # buttons, inputs, modals (reusable)
-    landing/
-    dashboard/
-    profile/              # public profile + theme renderer
+    brand/                     # StarLoader, StarMark, AuthBackground
+    dashboard/                 # OverviewStrip, LinksList, ProfileForm, PhonePreview
+    landing/                   # Navbar, HeroStage, StoryScroll, ThemeTrack, Faq
+    profile/                   # ProfileView (reusable theme renderer)
+    ui/                        # Button, Card, Avatar, Input, Switch, Modal
   server/
     db/
-      schema.ts           # Drizzle schema
-      index.ts            # db client
-    services/             # users, pages, blocks, themes, clicks
-    auth.ts               # auth config
-    storage.ts            # Vercel Blob wrapper (uploadImage, deleteImage)
+      schema.ts                # Drizzle schema definitions
+      index.ts                 # Database client connection
+    services/                  # users, pages, blocks, clicks, reports
+    session.ts                 # Server session verification helpers
+    storage.ts                 # Vercel Blob upload/delete wrapper
   lib/
-    validators/           # Zod schemas
-    reserved-usernames.ts
-    theme.ts              # theme types, defaults, validation
-    utils.ts
-drizzle/                  # generated migrations
+    auth-client.ts             # Better Auth client
+    rate-limit.ts              # In-memory sliding window limiter
+    site.ts                    # Brand metadata & constants
+    theme.ts                   # Theme schemas, validator & CSS generator
+    theme-presets.ts           # 14 WCAG AA verified presets
+    validators/                # Zod schemas (username, links, profile)
+drizzle/                       # Drizzle migration files
 ```
 
 ---
 
-## 4. Database model (Postgres)
+## 4. Data Model (PostgreSQL)
 
-Use `users -> pages -> blocks` even though each user has one page for now.
-
-- **users**: id, email (unique, case-insensitive), email_verified, name, image, created_at (no password column; Google only)
-- **pages**: id, user_id (FK), username (unique, case-insensitive via `lower(username)` unique index), display_name, bio, avatar_url, theme (jsonb), is_published, created_at, updated_at
-- **blocks**: id, page_id (FK), type (`link` for now; keep extensible), title, url, icon, position (fractional index string or gapped integer), is_visible, created_at, updated_at
-- **click_events**: id, block_id (FK), page_id (FK), created_at, referrer, country, device
-- Auth library tables (sessions, accounts, verification) as required by Better Auth
-
-Rules:
-- Index `blocks(page_id, position)` and `click_events(block_id, created_at)`.
-- Usernames: 3-30 chars, lowercase letters, numbers, `_` and `-`, stored lowercase.
-- Block ordering must not rewrite every row on reorder.
+- **`users`**: `id`, `name`, `email`, `email_verified`, `image`, `created_at`, `updated_at`
+- **`sessions`**: `id`, `user_id`, `token`, `expires_at`, `ip_address`, `user_agent`
+- **`accounts`**: `id`, `user_id`, `account_id`, `provider_id`, `access_token`, `refresh_token`, `expires_at`
+- **`verifications`**: `id`, `identifier`, `value`, `expires_at`
+- **`pages`**: `id`, `user_id` (FK), `username` (unique case-insensitive index), `display_name`, `bio`, `avatar_url`, `theme` (JSONB), `is_published`, `created_at`, `updated_at`
+- **`blocks`**: `id`, `page_id` (FK), `type` ('link'), `title`, `url`, `icon`, `position` (integer index), `is_visible`, `click_count`, `created_at`, `updated_at`
+- **`click_events`**: `id`, `block_id` (FK), `page_id` (FK), `referrer`, `country`, `device`, `created_at`
+- **`reports`**: `id`, `page_id` (FK), `reason`, `details`, `status` ('pending', 'reviewed', 'resolved', 'dismissed'), `created_at`
 
 ---
 
-## 5. Authentication flow
+## 5. Privacy & Click Tracking Facts
 
-Google is the **only** sign-in method for the MVP. No passwords, no OTP, no transactional email.
-
-1. **Login / Register (same button)**: "Continue with Google". First login creates the user, later logins reuse it.
-2. **Email trust**: only accept the Google account if the provider reports the email as verified.
-3. **Onboarding**: after the first login, if the user has no page, force a "choose username" step (validate format, reserved list, uniqueness) before reaching the dashboard.
-4. **Profile prefill**: use the Google name and photo as defaults for display name and avatar (the user can change them).
-5. **Logout** and **delete account** in settings.
-
-Security requirements:
-- Sessions in httpOnly, secure, sameSite cookies. No tokens in localStorage.
-- Never roll custom crypto or custom OAuth code; use the auth library.
-- Rate-limit the username-availability check and all mutations.
-- Protect all dashboard routes and mutations with a server-side session check. Always check that the resource belongs to the logged-in user.
-
-Google Cloud setup (manual, done by the developer):
-- Create a project in Google Cloud Console and an OAuth 2.0 Web client.
-- Authorized redirect URIs: `http://localhost:3000/api/auth/callback/google` and the production URL equivalent (confirm the exact path in the auth library docs).
-- While the consent screen is in "Testing", only added test users can log in. Switch to "In production" before sharing the site publicly.
+When a visitor clicks a link on a public `/[username]` profile:
+- **What is recorded:** Block ID, Page ID, ISO timestamp, Referrer domain, Device type (Mobile, Tablet, Desktop via User-Agent hint), Country code (from GeoIP header).
+- **What is NOT recorded:** Personal names, exact IP addresses (never saved), raw user agents, browser fingerprinting, or tracking cookies.
+- **Redirect mechanism:** `/api/click/[linkId]` logs the event asynchronously and redirects to destination via HTTP 307.
 
 ---
 
-## 6. Public profile page (`/[username]`)
+## 6. Caching & Revalidation Tags
 
-- Server-rendered. Fast first load, SEO-friendly.
-- `generateMetadata` for title, description and Open Graph / Twitter image.
-- 404 for unknown or unpublished usernames.
-- Cache and revalidate on edit (use `revalidatePath` / tags).
-- Link clicks go through `/api/click/[linkId]`, which records the event and redirects to the destination.
-- Reserved usernames (never allowed): `admin, api, app, dashboard, login, register, signup, logout, settings, pricing, about, help, support, terms, privacy, verify-email, forgot-password, reset-password, _next, static, public, assets, www, me, null, undefined`.
-
----
-
-## 7. Themes
-
-- Theme is a **validated JSON config**, not CSS. Never accept raw custom CSS.
-- Shape (extendable): `{ background: {type, value}, textColor, buttonStyle: {shape, fill, color}, font, layout }`
-- Zod schema in `lib/theme.ts`, plus a few default presets.
-- One `ThemeRenderer` converts the JSON into CSS variables / Tailwind classes.
+- Public profile pages use Next.js Cache with tag: `page:<username_lowercase>`.
+- When links or profile settings change in the dashboard, the server action invalidates the cache immediately:
+  ```ts
+  revalidateTag(`page:${username.toLowerCase()}`, { expire: 0 });
+  ```
+- Static marketing pages (`/`, `/privacy`, `/terms`) are fully prerendered as static HTML (`○`).
 
 ---
 
-## 8. Security checklist (apply everywhere)
+## 7. Design System & Theme Presets
 
-- Validate and sanitize all URLs: only `http:` and `https:`. Block `javascript:`, `data:` and similar.
-- Validate uploads: allowed types (jpeg, png, webp), max size (e.g. 2 MB). Upload to Vercel Blob through an authenticated server handler that checks the session, type and size. Use generated file names, never trust the original name. Delete the old avatar when a new one is uploaded.
-- Zod validation on every server action and route handler.
-- No secrets in client code. Only `NEXT_PUBLIC_*` variables are exposed.
-- Escape all user content. No `dangerouslySetInnerHTML` with user data.
-- Add a "Report this page" mechanism later in the roadmap.
-
----
-
-## 9. Environment variables
-
-Create `.env.local` (never commit it) and a committed `.env.example` with empty values:
-
-```
-DATABASE_URL=            # Neon pooled connection string
-BETTER_AUTH_SECRET=      # long random string
-BETTER_AUTH_URL=http://localhost:3000
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-BLOB_READ_WRITE_TOKEN=   # Vercel Blob store token
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
+- **Core Palette:**
+  - Lime: `#D4E83A`
+  - Forest: `#1F4D1A`
+  - Ink: `#14181F`
+  - Cream: `#F5F4EF`
+  - Lilac: `#EBC4EE`
+  - Mustard: `#E0A92E`
+  - Mint: `#BFEBD6`
+  - Tomato: `#FF5A36`
+  - Hairline: `#E7E5DC`
+- **14 Curated Presets:**
+  - Sunrise, Lilac, Forest, Classic Minimal, Bubblegum, Citrus, Blueprint, Midnight Neon, Matcha, Peach, Espresso, Lavender Dream, Cyber Grid, Neo Memphis.
+  - All 14 presets pass automated WCAG AA contrast ratio checks (>= 4.5:1 for body and button text).
+- **Primitives:** `Button`, `Card`, `StarLoader`, `StarMark`, `Avatar`, `Input`, `Switch`, `Modal`. Flat solid surfaces only; no glow, blur blobs, or synthetic glassmorphism.
 
 ---
 
-## 10. Setup steps (Phase 0)
+## 8. Security Headers
 
-1. Create the Next.js app: TypeScript, Tailwind, App Router, `src/` directory, ESLint.
-2. Install: `drizzle-orm`, `drizzle-kit`, `@neondatabase/serverless`, `zod`, `better-auth`, `@vercel/blob`, `@dnd-kit/core`, `@dnd-kit/sortable`, `lucide-react`.
-3. Create the folder structure from section 3.
-4. Add `.env.example` and make sure `.env*` is in `.gitignore`.
-5. Configure Drizzle (`drizzle.config.ts`) and the Neon client in `src/server/db/index.ts`.
-6. Add npm scripts: `db:generate`, `db:migrate`, `db:studio`.
-7. Initialize git and make the first commit.
-
----
-
-## 11. Build phases (we do ONE phase at a time)
-
-- **Phase 1: Landing page.** Hero, features, how it works, footer, responsive, with a sample profile mockup. No backend yet.
-- **Phase 2: Authentication.** Continue with Google, session handling, username onboarding, route protection, logout.
-- **Phase 3: Dashboard.** Profile editor, link CRUD, drag-and-drop reorder, avatar upload (Vercel Blob), live preview.
-- **Phase 4: Public profile page.** SSR page, metadata, click tracking, caching.
-- **Phase 5: Themes.** Theme editor with live preview, presets.
-- **Later:** analytics, QR codes, custom domains, paid plans.
-
-Do not start the next phase until told. Do not build features outside the current phase.
+Configured in `next.config.ts`:
+- `X-Frame-Options: DENY`
+- `X-Content-Type-Options: nosniff`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()`
+- `Content-Security-Policy: frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'`
 
 ---
 
-## 12. Coding rules
+## 9. Completed Phases
 
-- TypeScript strict mode. No `any` unless unavoidable and commented.
-- Server Components by default; add `"use client"` only when needed.
-- Small, reusable components. Keep files focused.
-- Mobile-first, accessible UI (labels, focus states, contrast, keyboard support).
-- Handle loading, empty and error states in every screen.
-- Meaningful commit after each completed task.
-- After each phase: summarize what was built, list files changed, and note anything needing manual setup (keys, dashboards, DNS).
+- **Phase 0:** Setup, tooling, TypeScript, Tailwind v4, Neon DB connection
+- **Phase 1:** Core models, Drizzle migrations, Better Auth Google integration
+- **Phase 2:** Dashboard link CRUD, drag-and-drop reordering, Vercel Blob avatar uploads
+- **Phase 3:** Public profile SSR, Open Graph image generation, click tracking
+- **Phase 4:** Theme engine, 14 presets, WCAG AA contrast testing, tag revalidation
+- **Phase 5:** Marketing landing page, interactive story scroll, privacy receipt demo
+- **Phase 6A & 6B:** Dashboard & marketing visual polish, branded StarLoader, mobile overview card
+- **Phase 6C (Final Polish):**
+  - Two-column login page with live ProfileView preset rotation and friendly OAuth alerts
+  - Two-column onboarding page with live preview phone, username suggestions, and true copy
+  - Custom branded 404, profile 404, global error, and dashboard error pages
+  - PWA Web Manifest, 32x32 star icon, 180x180 Apple touch icon, and light color scheme
+  - Accessibility skip links, landmarks, full test suite (50 passing tests), and complete docs
 
 ---
 
-## 13. Design direction
+## 10. Next Features Roadmap (Future Phases)
 
-Clean, modern and minimal. Neutral base with one strong accent color, generous spacing, rounded corners, subtle motion. The public profile page should feel fast and polished on mobile first, since most visitors arrive from Instagram or WhatsApp.
+1. **Analytics Dashboard:** Visual charts for daily clicks, referrers, and country breakdown.
+2. **Social Icon Row:** Quick-tap social link buttons (X, GitHub, Instagram, YouTube, etc.).
+3. **QR Code Generator:** Downloadable vector & raster QR code for public profile link.
+4. **Rich Block Types:** Headers, text callouts, music player embeds, video embeds.
+5. **Distributed Rate Limiting:** Centralized Redis / Upstash rate limiting for multi-instance serverless scale.
+6. **Custom Domains:** Connect custom apex/subdomains via Vercel Domains API.
+7. **Email + Magic Link Login:** Resend / transactional email auth when verified custom domain is attached.
+8. **Username Modification:** Safe handle migration with legacy redirect aliases.
+9. **Account Deletion & Data Export:** Self-service profile purge and JSON data download.
+10. **Admin Reports Portal:** Protected back-office view to resolve flagged profile reports.

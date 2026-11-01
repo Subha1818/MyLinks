@@ -27,7 +27,7 @@ export default async function Image({ params }: { params: Promise<{ username: st
       const buffer = fs.readFileSync(fontPath);
       fontData = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer;
     }
-  } catch (err) {
+  } catch (_err) {
     // ignore
   }
 
@@ -98,7 +98,7 @@ export default async function Image({ params }: { params: Promise<{ username: st
           }
         }
       }
-    } catch (e) {
+    } catch (_e) {
       // Fallback to initials if anything fails
     }
   }

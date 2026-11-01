@@ -53,7 +53,7 @@ export default function MarketingPage() {
       </div>
 
       {/* Alternating Solid Color Main Content Sections */}
-      <main>
+      <main id="main-content" tabIndex={-1} className="outline-none">
         {/* Features Bento (Cream) */}
         <FeaturesBento />
 

@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
         .resize(512, 512, { fit: "cover" }) // Center crop to square
         .webp({ quality: 85 })
         .toBuffer();
-    } catch (err) {
+    } catch (error) {
       return NextResponse.json(
         { ok: false, message: "Invalid image file. Please upload a valid JPEG, PNG, or WebP." },
         { status: 400 }

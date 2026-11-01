@@ -1,6 +1,6 @@
 import { db } from "../db";
 import { blocks } from "../db/schema";
-import { eq, and, asc, count, sql, desc } from "drizzle-orm";
+import { eq, and, asc, count, sql } from "drizzle-orm";
 import { MAX_LINKS_PER_PAGE } from "@/lib/limits";
 
 export async function listBlocks(pageId: string) {

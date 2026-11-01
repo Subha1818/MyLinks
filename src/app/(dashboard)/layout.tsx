@@ -53,13 +53,19 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-cream lg:flex text-ink">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-ink focus:text-cream focus:rounded-full focus:font-bold focus:shadow-md outline-none focus-visible:ring-2 focus-visible:ring-forest"
+      >
+        Skip to main content
+      </a>
       <SessionRefresher />
       <Sidebar page={page} />
       
       <div className="flex-1 lg:ml-64 flex flex-col min-h-screen pb-20 lg:pb-0">
         <TopBar page={page} />
         
-        <main className="flex-1 w-full max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-0">
+        <main id="main-content" tabIndex={-1} className="flex-1 w-full max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-0 outline-none">
           <PageDraftProvider initialState={draftState}>
             {children}
           </PageDraftProvider>

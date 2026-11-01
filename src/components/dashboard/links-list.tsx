@@ -34,7 +34,7 @@ import {
 import { useRouter } from "next/navigation";
 import { usePageDraft } from "./PageDraftProvider";
 
-export function LinksList({ initialLinks: _initialLinks }: { initialLinks: LinkBlock[] }) {
+export function LinksList({ initialLinks: _ignored }: { initialLinks: LinkBlock[] }) {
   const { draft, updateBlocks } = usePageDraft();
   const links = draft.blocks;
   const [isModalOpen, setIsModalOpen] = useState(false);

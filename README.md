@@ -1,60 +1,120 @@
 # MyLinks
 
-A bold, playful Linktree-style link-in-bio SaaS built with Next.js App Router, Tailwind CSS, and TypeScript.
+A bold, playful Linktree-style link-in-bio SaaS built with Next.js App Router, Tailwind CSS, TypeScript, Better Auth, and PostgreSQL on Neon.
 
-## Tech Stack
-- **Framework:** Next.js (App Router)
-- **Styling:** Tailwind CSS (Custom solid-color design system)
-- **Fonts:** Bricolage Grotesque & DM Sans
-- **Icons:** Lucide React
-- **Validation:** Zod
-- **Database (Phase 2):** PostgreSQL on Neon with Drizzle ORM
-- **Auth (Phase 2):** Better Auth (Google OAuth)
+## What is MyLinks?
 
-## Getting Started
+MyLinks gives creators, designers, and developers a clean, ultra-fast public link-in-bio page at `mylinkz.vercel.app/<username>`. Sign in in one click with Google, claim a unique username, customize themes across 14 curated presets (flat solids, retro patterns, subtle gradients), and share links with privacy-respecting click tracking.
 
-1. Install dependencies:
-```bash
-npm install
+---
+
+## Tech Stack (Current Reality)
+
+| Layer | Technology | Details |
+|---|---|---|
+| **Framework** | Next.js 16 (App Router + Turbopack) | Fast Server Components, Route Handlers, Server Actions, Partial Prerendering |
+| **Language** | TypeScript | Strict mode, zero `any` types |
+| **Styling** | Tailwind CSS v4 | Flat solid color tokens, Bricolage Grotesque & DM Sans typography |
+| **Authentication** | Better Auth (Google OAuth only) | 30-day session cookies, 1-day sliding refresh, secure httpOnly cookies |
+| **Database** | PostgreSQL on Neon | Serverless pooled connection (`@neondatabase/serverless`) |
+| **ORM** | Drizzle ORM | Type-safe queries and migration history (`drizzle-kit`) |
+| **Asset Storage** | Vercel Blob | Authenticated avatar uploads (`@vercel/blob`) |
+| **Drag & Drop** | @dnd-kit/core & @dnd-kit/sortable | Smooth keyboard & pointer link reordering with fractional/index keys |
+| **Icons & Brand** | Lucide React + Custom StarMark & StarLoader | Accessible SVG primitives and micro-animations |
+| **Hosting** | Vercel | Edge routing, global CDN, serverless functions |
+
+---
+
+## Project Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Starts the Next.js development server on `http://localhost:3000` |
+| `npm run build` | Runs TypeScript validation and creates an optimized production bundle |
+| `npm run start` | Runs the compiled production server locally |
+| `npm run lint` | Runs ESLint 9 checks across all source files |
+| `npm test` | Runs Node test runner with `tsx` on all `src/**/*.test.ts` suites |
+| `npm run db:generate` | Generates new SQL migration files in `drizzle/` from schema changes |
+| `npm run db:migrate` | Runs pending database migrations against the configured Neon database |
+| `npm run db:push` | Pushes schema directly (development use only; never in production) |
+| `npm run db:studio` | Launches Drizzle Studio GUI for inspecting database rows and reports |
+
+---
+
+## Environment Variables
+
+Copy `.env.example` to `.env.local` and populate the values:
+
+```env
+# Database (Neon PostgreSQL pooled connection)
+DATABASE_URL=
+
+# Better Auth
+BETTER_AUTH_SECRET=
+BETTER_AUTH_URL=http://localhost:3000
+
+# Google OAuth
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+# Image Storage (Vercel Blob)
+BLOB_READ_WRITE_TOKEN=
+
+# App URL
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-2. Run the development server:
-```bash
-npm run dev
-```
-
-3. Open [http://localhost:3000](http://localhost:3000) with your browser.
+---
 
 ## Database Workflow
-Because we use Drizzle ORM, schema changes must be done carefully to maintain a correct migration history:
-1. Modify `src/server/db/schema.ts` to add or change tables.
-2. Run `npm run db:generate` to create a new migration file in `drizzle/`.
-3. Review the generated SQL.
-4. Run `npm run db:migrate` to safely apply the changes to the live database.
-**NEVER use `drizzle-kit push` for production schema changes**, as it bypasses the migration history.
+
+Because we use Drizzle ORM with Neon serverless PostgreSQL, production schema stability requires maintaining a strict migration record:
+1. Edit table definitions in `src/server/db/schema.ts`.
+2. Generate migration SQL files:
+   ```bash
+   npm run db:generate
+   ```
+3. Review the generated SQL in `drizzle/`.
+4. Apply migrations:
+   ```bash
+   npm run db:migrate
+   ```
+> **WARNING:** Never use `drizzle-kit push` for production databases; always use `db:generate` and `db:migrate` to preserve revision history and prevent data loss.
+
+---
+
+## Deployment to Vercel
+
+1. **Repository Setup**: Push repository to GitHub and import the project into Vercel.
+2. **Environment Configuration**: In Vercel Project Settings > Environment Variables, configure:
+   - `DATABASE_URL` (Neon pooled connection string)
+   - `BETTER_AUTH_SECRET` (cryptographically random 64-char hex string)
+   - `BETTER_AUTH_URL` (`https://mylinkz.vercel.app`)
+   - `NEXT_PUBLIC_APP_URL` (`https://mylinkz.vercel.app`)
+   - `GOOGLE_CLIENT_ID` & `GOOGLE_CLIENT_SECRET`
+   - `BLOB_READ_WRITE_TOKEN` (from Vercel Blob store)
+3. **Google Cloud Console OAuth**: In Google Auth Platform > Credentials, add your authorized redirect URIs:
+   - `http://localhost:3000/api/auth/callback/google` (local dev)
+   - `https://mylinkz.vercel.app/api/auth/callback/google` (production)
+4. **Deploy**: Trigger a production deployment.
+
+---
 
 ## Reviewing Reports
-User reports (spam, inappropriate, etc.) are stored in the `reports` table. Since there is no admin dashboard yet, you must review these manually using Drizzle Studio:
-1. Run `npm run db:studio`.
-2. Open the browser link provided by the studio.
-3. Open the `reports` table to review user-submitted reports and take action on the `status` field.
 
-## Deployment
+Users can flag offensive or spam public profiles via the "Report this page" modal. Reports are captured in the `reports` database table.
+To review submitted reports:
+1. Run `npm run db:studio` locally or open Neon Console SQL Editor.
+2. Query pending reports:
+   ```sql
+   SELECT * FROM reports WHERE status = 'pending' ORDER BY created_at DESC;
+   ```
+3. Review reason and details, and update status (`reviewed`, `resolved`, or `dismissed`).
 
-1. **Environment Variables**: Configure all variables from `.env.example` in your Vercel project settings. Ensure `NEXT_PUBLIC_APP_URL` and `BETTER_AUTH_URL` point to your production URL (e.g., `https://mylinks.vercel.app`).
-2. **Database Migrations**: Migrations do **not** run automatically on build. You must manually apply them against your production database using your local machine:
-   - Temporarily set your local `.env.local`'s `DATABASE_URL` to your production database URL (use the direct connection string if the pooled one causes errors).
-   - Run `npm run db:migrate`.
-   - Revert your `.env.local` to the local development database URL immediately.
-3. **Google OAuth**: Add your production redirect URI (e.g., `https://mylinks.vercel.app/api/auth/callback/google`) to your Google Cloud Console OAuth 2.0 Web Client authorized redirect URIs.
-
-## Authentication & Sessions
-
-- **`BETTER_AUTH_SECRET` Stability:** `BETTER_AUTH_SECRET` is used to cryptographically sign session cookies. It must **never** be changed within a running environment; changing it invalidates the signatures on all issued session cookies, immediately logging out every user.
-- **Environment Isolation:** Development and production environments must each use distinct, randomly generated `BETTER_AUTH_SECRET` values.
-- **Database Session Storage:** Sessions are stored directly in the PostgreSQL database (`sessions` table). Therefore, switching databases or connecting to a different database instance will invalidate active sessions and log users out.
-- **Session Duration & Sliding Refresh:** Sessions persist for 30 days (`expiresIn`). A sliding refresh window of 1 day (`updateAge`) automatically extends the session whenever the user active on the application.
+---
 
 ## Known Limitations
 
-- **Rate Limiting**: The current rate limiters (for username checks, uploads, mutations, clicks, and reports) use an in-memory `Map`. On serverless platforms like Vercel, this state is isolated per serverless instance and lost when the instance spins down. For a true global rate limit in production, these should be moved to a centralized store like Redis or Upstash.
+- **Rate Limiting**: Rate limiters for username availability checks, avatar uploads, link click recording, and mutations currently use an in-memory sliding window (`Map`). Under serverless scale with multiple instances, migrate to a distributed Redis / Upstash key-value store.
+- **Username Modification**: Usernames are permanently locked upon initial onboarding. Changing usernames is not yet implemented.
+- **Google OAuth Only**: Google sign-in is currently the sole supported authentication method (no passwords or email magic links).

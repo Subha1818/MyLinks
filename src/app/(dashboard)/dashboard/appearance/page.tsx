@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
 import { Palette } from "lucide-react";
 
 export const metadata = {
-  title: "Appearance | Dashboard",
+  title: "Appearance",
 };
 
 export default async function AppearancePage() {

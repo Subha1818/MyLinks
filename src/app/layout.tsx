@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import {
   Bricolage_Grotesque,
   DM_Sans,
@@ -55,6 +55,11 @@ const caveat = Caveat({
   display: "swap",
   preload: false,
 });
+
+export const viewport: Viewport = {
+  themeColor: "#D4E83A",
+  colorScheme: "light",
+};
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 

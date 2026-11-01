@@ -50,3 +50,14 @@ test("All 14 theme presets pass WCAG AA contrast ratio (>= 4.5:1)", () => {
     }
   }
 });
+
+test("Core Brand Color Pairs meet WCAG AA / AAA contrast ratios", () => {
+  const forestOnLime = contrastRatio("#1F4D1A", "#D4E83A");
+  assert.ok(forestOnLime >= 7.0, "Forest on Lime was " + forestOnLime.toFixed(2) + ", expected >= 7.0");
+
+  const inkOnCream = contrastRatio("#14181F", "#F5F4EF");
+  assert.ok(inkOnCream >= 14.0, "Ink on Cream was " + inkOnCream.toFixed(2) + ", expected >= 14.0");
+
+  const forestOnCream = contrastRatio("#1F4D1A", "#F5F4EF");
+  assert.ok(forestOnCream >= 8.0, "Forest on Cream was " + forestOnCream.toFixed(2) + ", expected >= 8.0");
+});

@@ -11,7 +11,7 @@ import { redirect } from "next/navigation";
 import { LayoutDashboard } from "lucide-react";
 
 export const metadata = {
-  title: "Links | Dashboard",
+  title: "Links",
 };
 
 export default async function LinksPage() {

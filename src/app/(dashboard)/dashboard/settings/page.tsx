@@ -10,7 +10,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Globe, Lock, ExternalLink, ShieldCheck } from "lucide-react";
 
 export const metadata = {
-  title: "Settings | Dashboard",
+  title: "Settings",
 };
 
 export default async function SettingsPage() {

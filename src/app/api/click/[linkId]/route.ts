@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/server/db";
 import { blocks, pages, clickEvents } from "@/server/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { after } from "next/server";
 import { isBot, parseDevice, sanitizeCountry } from "@/lib/analytics";
 import { isSafeHttpUrl } from "@/lib/safe-url";
@@ -107,7 +107,7 @@ export async function GET(
         "Cache-Control": "no-store",
       },
     });
-  } catch (error) {
+  } catch (_error) {
     // 8. Never reveal why a 404 happened
     return new NextResponse("Not Found", { status: 404 });
   }

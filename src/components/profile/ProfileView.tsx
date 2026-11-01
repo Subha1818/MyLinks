@@ -2,6 +2,8 @@ import { resolveTheme, FontOption, getThemeBackgroundStyle } from "@/lib/theme";
 import { Avatar } from "@/components/ui/avatar";
 import { isSafeHttpUrl } from "@/lib/safe-url";
 import { siteConfig } from "@/lib/site";
+import { StarMark } from "@/components/brand/StarMark";
+import { readableTextOn } from "@/lib/color";
 import Link from "next/link";
 import React from "react";
 
@@ -12,6 +14,7 @@ type ProfileViewProps = {
   links: { id: string; title: string; url: string }[];
   theme?: unknown;
   mode: "preview" | "public";
+  footer?: React.ReactNode;
 };
 
 export function getFontFamily(font: FontOption): string {
@@ -40,6 +43,7 @@ export function ProfileView({
   links,
   theme,
   mode,
+  footer,
 }: ProfileViewProps) {
   const resolvedTheme = resolveTheme(theme);
   const bgStyle = getThemeBackgroundStyle(resolvedTheme.background);
@@ -48,6 +52,7 @@ export function ProfileView({
     ...bgStyle,
     color: resolvedTheme.textColor,
     fontFamily: getFontFamily(resolvedTheme.font),
+    paddingBottom: "max(2.5rem, env(safe-area-inset-bottom))",
   };
 
   const isLeftAlign = resolvedTheme.layout.align === "left";
@@ -93,10 +98,13 @@ export function ProfileView({
     resolvedTheme.button.style === "solid" ? "shadow-sm" : ""
   } ${buttonRadiusClass} truncate focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-2`;
 
+  // Determine readable text color on the CTA pill (pill bg = theme's textColor)
+  const ctaTextColor = readableTextOn(resolvedTheme.textColor);
+
   return (
     <div
       style={containerStyle}
-      className="flex-1 min-h-full w-full flex flex-col items-center px-4 py-12"
+      className="flex-1 min-h-full w-full flex flex-col items-center px-4 pt-12"
     >
       <div
         className={`w-full max-w-[480px] flex flex-col ${
@@ -127,6 +135,7 @@ export function ProfileView({
           </p>
         )}
 
+        {/* Links list */}
         <div className={`w-full flex flex-col ${spacingClass}`}>
           {links.length === 0 ? (
             <div className="text-center text-sm font-bold opacity-70 py-8">
@@ -134,21 +143,8 @@ export function ProfileView({
             </div>
           ) : (
             links.map((link) => {
-              const safeUrl = isSafeHttpUrl(link.url) ? link.url : undefined;
-
-              if (!safeUrl) {
-                if (mode === "public") return null;
-                // In preview mode, render as disabled
-                return (
-                  <div
-                    key={link.id}
-                    className={btnClass}
-                    style={buttonStyleCSS}
-                    aria-disabled="true"
-                  >
-                    {link.title}
-                  </div>
-                );
+              if (!isSafeHttpUrl(link.url)) {
+                return null;
               }
 
               if (mode === "preview") {
@@ -180,10 +176,70 @@ export function ProfileView({
           )}
         </div>
 
-        <div className="mt-12 text-xs font-bold opacity-60 uppercase tracking-widest">
-          <Link href="/" className="hover:underline">
-            Made with {siteConfig.name}
-          </Link>
+        {/* Call to action & footer (anchored horizontally centered regardless of layout.align) */}
+        <div className="mt-14 w-full flex flex-col items-center select-none">
+          {mode === "public" ? (
+            <Link
+              href="/"
+              className="group w-full max-w-[320px] h-[52px] px-4 rounded-full flex items-center justify-center gap-3 transition-transform duration-150 hover:-translate-y-[1px] active:translate-y-0 motion-reduce:transform-none shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-2 cursor-pointer"
+              style={{
+                backgroundColor: resolvedTheme.textColor,
+                color: ctaTextColor,
+              }}
+              aria-label={`${siteConfig.ctaLabel} - ${siteConfig.ctaSubtext}`}
+            >
+              <div className="shrink-0 transition-transform duration-500 group-hover:rotate-180 motion-reduce:transition-none motion-reduce:transform-none">
+                <StarMark className="w-5 h-5" />
+              </div>
+              <div className="flex flex-col items-start justify-center leading-none text-left">
+                <span className="font-heading font-extrabold text-sm tracking-tight">
+                  {siteConfig.ctaLabel}
+                </span>
+                <span className="text-[11px] font-medium opacity-80 mt-1">
+                  {siteConfig.ctaSubtext}
+                </span>
+              </div>
+            </Link>
+          ) : (
+            <div
+              aria-hidden="true"
+              className="w-full max-w-[320px] h-[52px] px-4 rounded-full flex items-center justify-center gap-3 shadow-xs pointer-events-none"
+              style={{
+                backgroundColor: resolvedTheme.textColor,
+                color: ctaTextColor,
+              }}
+            >
+              <div className="shrink-0">
+                <StarMark className="w-5 h-5" />
+              </div>
+              <div className="flex flex-col items-start justify-center leading-none text-left">
+                <span className="font-heading font-extrabold text-sm tracking-tight">
+                  {siteConfig.ctaLabel}
+                </span>
+                <span className="text-[11px] font-medium opacity-80 mt-1">
+                  {siteConfig.ctaSubtext}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Footer Slot */}
+          <div className="mt-3.5 w-full flex items-center justify-center">
+            {footer ? (
+              footer
+            ) : (
+              <div
+                className="text-xs font-semibold flex items-center justify-center gap-2 select-none opacity-70"
+                style={{ color: resolvedTheme.textColor }}
+              >
+                <span>Report</span>
+                <span className="opacity-40">·</span>
+                <span>Privacy</span>
+                <span className="opacity-40">·</span>
+                <span>Terms</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

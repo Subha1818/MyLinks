@@ -1,16 +1,23 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Flag, X, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
+import { X, CheckCircle2 } from "lucide-react";
 import { StarSpinner } from "@/components/brand/StarLoader";
 import { submitReportAction } from "@/server/actions/report";
 
-export function ReportButton({ username }: { username: string }) {
+export function PublicProfileFooter({
+  username,
+  textColor,
+}: {
+  username: string;
+  textColor?: string;
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
-  
+
   const [reason, setReason] = useState("");
   const [details, setDetails] = useState("");
   const [honeypot, setHoneypot] = useState("");
@@ -55,24 +62,42 @@ export function ReportButton({ username }: { username: string }) {
 
   return (
     <>
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 p-3 bg-white/80 backdrop-blur text-ink/50 hover:text-ink hover:bg-white border border-ink/10 rounded-full shadow-lg transition-all group focus:outline-none focus:ring-2 focus:ring-ink"
-        aria-label="Report this page"
-        title="Report this page"
+      <div
+        className="text-xs font-semibold flex items-center justify-center gap-2 select-none"
+        style={{ color: textColor || "inherit" }}
       >
-        <Flag className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
-      </button>
+        <button
+          type="button"
+          onClick={() => setIsOpen(true)}
+          className="hover:underline opacity-80 hover:opacity-100 transition-opacity cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-current rounded"
+        >
+          Report
+        </button>
+        <span className="opacity-40 select-none">·</span>
+        <Link
+          href="/privacy"
+          className="hover:underline opacity-80 hover:opacity-100 transition-opacity focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-current rounded"
+        >
+          Privacy
+        </Link>
+        <span className="opacity-40 select-none">·</span>
+        <Link
+          href="/terms"
+          className="hover:underline opacity-80 hover:opacity-100 transition-opacity focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-current rounded"
+        >
+          Terms
+        </Link>
+      </div>
 
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div 
-            className="absolute inset-0 bg-ink/30 backdrop-blur-sm transition-opacity"
+          <div
+            className="absolute inset-0 bg-ink/30 transition-opacity"
             onClick={handleClose}
           />
-          
-          <div 
-            className="relative bg-white w-full max-w-md rounded-[32px] p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+
+          <div
+            className="relative bg-white w-full max-w-md rounded-[32px] p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200 border border-hairline"
             role="dialog"
             aria-modal="true"
             aria-labelledby="report-title"
@@ -82,8 +107,9 @@ export function ReportButton({ username }: { username: string }) {
                 Report Page
               </h2>
               <button
+                type="button"
                 onClick={handleClose}
-                className="p-2 text-ink/50 hover:text-ink hover:bg-ink/5 rounded-full transition-colors"
+                className="p-2 text-ink/50 hover:text-ink hover:bg-ink/5 rounded-full transition-colors cursor-pointer"
                 aria-label="Close"
               >
                 <X className="w-5 h-5" />
@@ -97,8 +123,9 @@ export function ReportButton({ username }: { username: string }) {
                 </div>
                 <p className="font-bold text-lg text-ink">{message}</p>
                 <button
+                  type="button"
                   onClick={handleClose}
-                  className="mt-6 w-full py-3 bg-ink text-white font-bold rounded-xl hover:bg-ink/90 transition-colors"
+                  className="mt-6 w-full py-3 bg-ink text-white font-bold rounded-full hover:bg-black transition-colors cursor-pointer"
                 >
                   Close
                 </button>
@@ -106,7 +133,9 @@ export function ReportButton({ username }: { username: string }) {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-3">
-                  <label className="block text-sm font-bold text-ink">Why are you reporting this page?</label>
+                  <label className="block text-sm font-bold text-ink">
+                    Why are you reporting this page?
+                  </label>
                   <div className="flex flex-col gap-2">
                     {[
                       { value: "spam", label: "Spam or misleading" },
@@ -115,7 +144,10 @@ export function ReportButton({ username }: { username: string }) {
                       { value: "inappropriate", label: "Inappropriate content" },
                       { value: "other", label: "Other" },
                     ].map((opt) => (
-                      <label key={opt.value} className="flex items-center gap-3 p-3 rounded-xl border border-ink/10 hover:bg-ink/5 cursor-pointer transition-colors has-[:checked]:border-ink has-[:checked]:bg-ink/5">
+                      <label
+                        key={opt.value}
+                        className="flex items-center gap-3 p-3 rounded-2xl border border-hairline hover:bg-cream cursor-pointer transition-colors has-[:checked]:border-ink has-[:checked]:bg-cream"
+                      >
                         <input
                           type="radio"
                           name="reason"
@@ -143,7 +175,7 @@ export function ReportButton({ username }: { username: string }) {
                     maxLength={500}
                     value={details}
                     onChange={(e) => setDetails(e.target.value)}
-                    className="w-full p-3 bg-cream border border-ink/10 rounded-xl text-sm text-ink placeholder:text-ink/30 focus:outline-none focus:ring-2 focus:ring-ink/20 resize-none"
+                    className="w-full p-3 bg-cream border border-hairline rounded-2xl text-sm text-ink placeholder:text-ink/30 focus:outline-none focus:ring-2 focus:ring-ink/20 resize-none"
                     placeholder="Provide additional context..."
                   />
                 </div>
@@ -160,7 +192,7 @@ export function ReportButton({ username }: { username: string }) {
                 </div>
 
                 {status === "error" && (
-                  <p className="text-sm font-bold text-coral">{message}</p>
+                  <p className="text-sm font-bold text-tomato">{message}</p>
                 )}
 
                 <div className="flex gap-3 pt-2">
@@ -168,16 +200,16 @@ export function ReportButton({ username }: { username: string }) {
                     type="button"
                     onClick={handleClose}
                     disabled={isPending}
-                    className="flex-1 py-3 px-4 font-bold text-ink hover:bg-ink/5 rounded-xl transition-colors"
+                    className="flex-1 py-3 px-4 font-bold text-ink hover:bg-ink/5 rounded-full transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isPending}
-                    className="flex-1 py-3 px-4 bg-ink text-white font-bold rounded-xl hover:bg-ink/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                    className="flex-1 py-3 px-4 bg-ink text-white font-bold rounded-full hover:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer shadow-xs"
                   >
-                    {isPending ? <StarSpinner className="w-5 h-5" /> : "Submit"}
+                    {isPending ? <StarSpinner className="w-5 h-5 text-white" /> : "Submit"}
                   </button>
                 </div>
               </form>

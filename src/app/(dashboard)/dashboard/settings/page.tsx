@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { Card } from "@/components/dashboard/card";
 import { SignOutButton, SignOutAllButton } from "@/components/dashboard/sign-out-button";
 import { CopyLinkButton } from "@/components/dashboard/copy-link-button";
+import { ShareButton } from "@/components/dashboard/share-modal";
 import { requireUser } from "@/server/session";
 import { getPageByUserId } from "@/server/services/pages";
 import { redirect } from "next/navigation";
@@ -111,6 +112,7 @@ export default async function SettingsPage() {
               </span>
             </div>
             <div className="flex items-center gap-2 shrink-0">
+              <ShareButton username={page.username} variant="secondary" />
               <CopyLinkButton username={page.username} variant="primary" />
               <a
                 href={`/${page.username}`}

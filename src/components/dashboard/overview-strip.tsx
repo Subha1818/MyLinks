@@ -1,4 +1,5 @@
 "use client";
+import { ShareButton } from "@/components/dashboard/share-modal";
 
 import { useState } from "react";
 import { MousePointerClick, Eye, Globe, Copy, Check, ExternalLink } from "lucide-react";
@@ -89,6 +90,14 @@ export function OverviewStrip({
 
           {/* Actions: Copy Button + Open Link */}
           <div className="flex items-center gap-1.5 shrink-0">
+            <ShareButton
+              username={username}
+              variant="secondary"
+              size="40px"
+              showQrIcon
+              label="Share"
+              className="h-8 px-2.5 text-xs font-heading font-extrabold"
+            />
             <button
               type="button"
               onClick={handleCopy}
@@ -193,18 +202,28 @@ export function OverviewStrip({
             >
               {publicUrlDisplay}
             </p>
-            <button
-              type="button"
-              onClick={handleCopy}
-              className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-forest text-lime font-bold text-xs hover:bg-[#183d14] transition-all cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2"
-            >
-              {copied ? (
-                <Check className="w-3.5 h-3.5 stroke-[3]" />
-              ) : (
-                <Copy className="w-3.5 h-3.5" />
-              )}
-              <span>{copied ? "Copied!" : "Copy link"}</span>
-            </button>
+            <div className="mt-2.5 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-forest text-lime font-bold text-xs hover:bg-[#183d14] transition-all cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2"
+              >
+                {copied ? (
+                  <Check className="w-3.5 h-3.5 stroke-[3]" />
+                ) : (
+                  <Copy className="w-3.5 h-3.5" />
+                )}
+                <span>{copied ? "Copied!" : "Copy link"}</span>
+              </button>
+              <ShareButton
+                username={username}
+                variant="secondary"
+                size="40px"
+                showQrIcon
+                label="Share / QR"
+                className="h-7 px-3 text-xs bg-white text-forest border-forest/20 shadow-xs hover:bg-cream"
+              />
+            </div>
           </div>
         </div>
       </div>

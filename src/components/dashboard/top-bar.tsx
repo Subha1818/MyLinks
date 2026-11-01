@@ -1,6 +1,7 @@
 import { Logo } from "@/components/landing/logo";
 import { UserMenu } from "./user-menu";
 import { CopyLinkButton } from "./copy-link-button";
+import { ShareButton } from "./share-modal";
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 
@@ -11,10 +12,16 @@ export function TopBar({
 }) {
   return (
     <header className="w-full lg:bg-transparent lg:mb-8">
-      {/* Mobile Top Bar — static, part of the page flow */}
+      {/* Mobile Top Bar */}
       <div className="flex lg:hidden items-center justify-between px-1 py-4">
         <Logo className="text-2xl" />
         <div className="flex items-center gap-2">
+          <ShareButton
+            username={page.username}
+            variant="secondary"
+            size="40px"
+            className="h-9 px-3 text-xs gap-1.5 shadow-xs"
+          />
           <CopyLinkButton
             username={page.username}
             variant="secondary"
@@ -25,7 +32,7 @@ export function TopBar({
         </div>
       </div>
 
-      {/* Desktop Top Bar Right Content - aligned with main content max-w */}
+      {/* Desktop Top Bar Right Content */}
       <div className="hidden lg:flex items-center justify-end h-16 w-full max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 gap-3">
         <Link
           href={`/${page.username}`}
@@ -35,6 +42,11 @@ export function TopBar({
           <ExternalLink className="w-4 h-4 shrink-0" />
           <span>View my page</span>
         </Link>
+        <ShareButton
+          username={page.username}
+          variant="secondary"
+          size="40px"
+        />
         <CopyLinkButton username={page.username} variant="primary" size="40px" />
       </div>
     </header>

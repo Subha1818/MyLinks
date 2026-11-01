@@ -6,6 +6,8 @@ export const siteConfig = {
   name: "MyLinks",
   tagline: "Your link in bio, built your way.",
   domain,
+  ctaLabel: "Create your own MyLinks",
+  ctaSubtext: "Free. Ready in a minute.",
   description:
     "Join the new wave of creators. Claim your link in bio, customize your page in seconds, and share everything you create without the clutter.",
   links: {

@@ -1,19 +1,14 @@
 import { getCachedPublicPage } from "@/server/services/public-page";
 import { notFound, permanentRedirect } from "next/navigation";
 import { ProfileView } from "@/components/profile/ProfileView";
-import { ReportButton } from "./ReportButton";
+import { PublicProfileFooter } from "./ReportButton";
+import { Metadata } from "next";
+import { siteConfig } from "@/lib/site";
+import { resolveTheme } from "@/lib/theme";
 
 type PageProps = {
   params: Promise<{ username: string }>;
 };
-
-// Disable standard Next.js layouts for this route by just rendering the view
-// But wait, the root layout applies to all pages! We need to make sure the root layout doesn't interfere.
-// The root layout usually just has <html> and <body> and maybe some shared providers.
-// Let's assume the root layout is fine (it usually is).
-
-import { Metadata } from "next";
-import { siteConfig } from "@/lib/site";
 
 export const instant = false;
 
@@ -31,12 +26,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const displayName = page.displayName || cleanUsername;
   const title = `${displayName} (@${cleanUsername})`;
-  
+
   let description = `Check out ${displayName}'s links on ${siteConfig.name}.`;
   if (page.bio) {
     const plain = page.bio.replace(/[\x00-\x09\x0B-\x1F\x7F-\x9F]/g, "").replace(/\s+/g, " ").trim();
     if (plain.length > 155) {
-      description = plain.slice(0, 154).trim() + "…";
+      description = plain.slice(0, 154).trim() + "...";
     } else {
       description = plain;
     }
@@ -72,7 +67,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function PublicProfilePage({ params }: PageProps) {
   const { username } = await params;
 
-  // If the parameter isn't lowercase, redirect permanently to lowercase
   if (username !== username.toLowerCase()) {
     permanentRedirect(`/${username.toLowerCase()}`);
   }
@@ -83,7 +77,8 @@ export default async function PublicProfilePage({ params }: PageProps) {
     notFound();
   }
 
-  // We wrap ProfileView in a container that acts as the "screen"
+  const resolvedTheme = resolveTheme(page.theme);
+
   return (
     <main className="min-h-dvh flex flex-col items-stretch relative">
       <ProfileView
@@ -93,8 +88,13 @@ export default async function PublicProfilePage({ params }: PageProps) {
         avatarUrl={page.avatarUrl}
         links={page.links}
         theme={page.theme}
+        footer={
+          <PublicProfileFooter
+            username={username}
+            textColor={resolvedTheme.textColor}
+          />
+        }
       />
-      <ReportButton username={username} />
     </main>
   );
 }

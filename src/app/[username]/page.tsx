@@ -86,6 +86,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
         displayName={page.displayName || ""}
         bio={page.bio}
         avatarUrl={page.avatarUrl}
+        items={page.items}
         links={page.links}
         socials={page.socials}
         theme={page.theme}

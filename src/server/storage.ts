@@ -46,3 +46,47 @@ export async function deleteAvatarIfOwned({
     console.error("[deleteAvatarIfOwned] Error deleting blob:", error);
   }
 }
+
+export async function uploadThumbnail({
+  userId,
+  data,
+  contentType,
+}: {
+  userId: string;
+  data: Buffer;
+  contentType: string;
+}): Promise<{ url: string }> {
+  const filename = `thumbnails/${userId}/${generateId(12)}.webp`;
+  
+  const blob = await put(filename, data, {
+    access: "public",
+    contentType,
+    token: process.env.BLOB_READ_WRITE_TOKEN,
+  });
+
+  return { url: blob.url };
+}
+
+export async function deleteThumbnailIfOwned({
+  userId,
+  url,
+}: {
+  userId: string;
+  url: string;
+}) {
+  try {
+    if (url.includes(".blob.vercel-storage.com/")) {
+      const parsedUrl = new URL(url);
+      const path = parsedUrl.pathname.slice(1);
+      
+      if (path.startsWith(`thumbnails/${userId}/`)) {
+        await del(url, { token: process.env.BLOB_READ_WRITE_TOKEN });
+      }
+    }
+  } catch (error) {
+    console.error("[deleteThumbnailIfOwned] Error deleting blob:", error);
+  }
+}
+
+export { isTrustedImageUrl } from "@/lib/urls";
+

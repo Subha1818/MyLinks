@@ -15,6 +15,10 @@ const FAQ_ITEMS = [
     a: "Yes! You can choose from 14 ready-made theme presets or customize individual colors, button shapes (pill, rounded, square), button styles (solid, outline, hard-shadow), 6 Google fonts, and CSS pattern backgrounds.",
   },
   {
+    q: "Can I add photos or section headers to my links?",
+    a: "Yes! You can organize your links with bold section headers, choose Thumbnail or Featured card layouts with custom photos (up to 3 per page, stored securely on Vercel Blob), and spotlight up to 2 links with a gentle attention animation.",
+  },
+  {
     q: "How many links can I add?",
     a: "You can add up to 50 links to your profile. You can reorder them anytime using drag-and-drop handles, and easily hide or show links without deleting them.",
   },

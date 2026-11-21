@@ -18,7 +18,7 @@ MyLinks gives creators, designers, and developers a clean, ultra-fast public lin
 | **Authentication** | Better Auth (Google OAuth only) | 30-day session cookies, 1-day sliding refresh, secure httpOnly cookies |
 | **Database** | PostgreSQL on Neon | Serverless pooled connection (`@neondatabase/serverless`) |
 | **ORM** | Drizzle ORM | Type-safe queries and migration history (`drizzle-kit`) |
-| **Asset Storage** | Vercel Blob | Authenticated avatar uploads (`@vercel/blob`) |
+| **Asset Storage** | Vercel Blob | Authenticated avatar & link photo uploads (`@vercel/blob`) |
 | **Drag & Drop** | @dnd-kit/core & @dnd-kit/sortable | Smooth keyboard & pointer link reordering with fractional/index keys |
 | **Icons & Brand** | Lucide React + Custom StarMark & StarLoader | Accessible SVG primitives and micro-animations |
 | **Hosting** | Vercel | Edge routing, global CDN, serverless functions |

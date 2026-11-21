@@ -35,14 +35,20 @@ export default async function DashboardLayout({
   const allBlocks = await getBlocksWithClicks(page.id);
 
   const linkBlocks = allBlocks
-    .filter((b) => b.type === "link")
+    .filter((b) => b.type === "link" || b.type === "header")
     .map((b) => ({
       id: b.id,
+      type: b.type as "link" | "header",
       title: b.title,
-      url: b.url,
+      url: b.url || "",
       position: b.position,
       isVisible: b.isVisible,
       clickCount: b.clickCount,
+      platform: b.platform,
+      layout: b.layout,
+      thumbnailUrl: b.thumbnailUrl,
+      thumbnailAlt: b.thumbnailAlt,
+      isHighlighted: b.isHighlighted,
     }));
 
   const socialBlocks = allBlocks
@@ -51,7 +57,7 @@ export default async function DashboardLayout({
       id: b.id,
       platform: b.platform || "website",
       title: b.title,
-      url: b.url,
+      url: b.url || "",
       position: b.position,
       isVisible: b.isVisible,
     }));

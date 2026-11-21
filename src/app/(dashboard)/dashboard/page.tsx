@@ -25,16 +25,22 @@ export default async function LinksPage() {
 
   const allBlocks = await getBlocksWithClicks(page.id);
 
-  // Link blocks only
-  const linkBlocks = allBlocks
-    .filter((b) => b.type === "link")
+  // Link and header stream for the links list
+  const streamBlocks = allBlocks
+    .filter((b) => b.type === "link" || b.type === "header")
     .map((b) => ({
       id: b.id,
+      type: b.type as "link" | "header",
       title: b.title,
-      url: b.url,
+      url: b.url || "",
       position: b.position,
       isVisible: b.isVisible,
       clickCount: b.clickCount,
+      platform: b.platform,
+      layout: b.layout,
+      thumbnailUrl: b.thumbnailUrl,
+      thumbnailAlt: b.thumbnailAlt,
+      isHighlighted: b.isHighlighted,
     }));
 
   // Total clicks from ALL the page's blocks (link + social)
@@ -43,9 +49,10 @@ export default async function LinksPage() {
     0
   );
 
-  // "Links live" counts links only
-  const visibleLinks = linkBlocks.filter((b) => b.isVisible).length;
-  const totalLinks = linkBlocks.length;
+  // "Links live" and 50-link limit count ONLY links (not headers)
+  const onlyLinks = allBlocks.filter((b) => b.type === "link");
+  const visibleLinks = onlyLinks.filter((b) => b.isVisible).length;
+  const totalLinks = onlyLinks.length;
 
   return (
     <div className="w-full max-w-6xl pb-24 xl:grid xl:grid-cols-[1fr_320px] xl:gap-12">
@@ -79,7 +86,7 @@ export default async function LinksPage() {
         <SocialIconsCard />
 
         {/* Links Card */}
-        <LinksList initialLinks={linkBlocks} />
+        <LinksList initialLinks={streamBlocks} />
       </div>
 
       <div>

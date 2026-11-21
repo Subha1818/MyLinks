@@ -23,3 +23,19 @@ export function getPublicUrlDisplay(username: string): string {
     return `${base.replace(/^https?:\/\//, "").replace(/\/+$/, "")}/${username}`;
   }
 }
+
+export function isTrustedImageUrl(url: string | null | undefined): boolean {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "https:") return false;
+    const host = parsed.hostname.toLowerCase();
+    return (
+      host === "blob.vercel-storage.com" ||
+      host.endsWith(".blob.vercel-storage.com")
+    );
+  } catch {
+    return false;
+  }
+}
+

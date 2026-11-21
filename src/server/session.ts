@@ -7,9 +7,14 @@ import { auth } from "@/server/auth";
  * Safe to call in Server Components, layouts, and route handlers.
  */
 export async function getSession() {
-  return auth.api.getSession({
-    headers: await headers(),
-  });
+  try {
+    return await auth.api.getSession({
+      headers: await headers(),
+    });
+  } catch (error) {
+    console.error("[getSession] Session retrieval error, safely falling back to null:", error);
+    return null;
+  }
 }
 
 /**

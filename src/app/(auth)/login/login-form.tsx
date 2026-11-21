@@ -78,9 +78,7 @@ export function LoginForm() {
     <div className="w-full max-w-md mx-auto">
       <Card className="w-full p-8 sm:p-10 shadow-sm border border-hairline flex flex-col justify-center text-center">
         <div className="flex justify-center mb-6">
-          <Link href="/" aria-label={`${siteConfig.name} Home`}>
-            <Logo />
-          </Link>
+          <Logo />
         </div>
 
         {validUsername && (

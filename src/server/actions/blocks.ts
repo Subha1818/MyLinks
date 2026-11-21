@@ -10,9 +10,19 @@ import {
   reorderBlocks,
   createSocialBlock,
   updateSocialBlock,
+  createHeaderBlock,
+  updateHeaderBlock,
+  removeThumbnail,
   type BlockGroup,
 } from "@/server/services/blocks";
-import { BlockSchema, type BlockInput } from "@/lib/validators/block";
+import {
+  BlockSchema,
+  EditBlockSchema,
+  HeaderSchema,
+  type BlockInput,
+  type EditBlockInput,
+  type HeaderInput,
+} from "@/lib/validators/block";
 import { SocialBlockSchema, type SocialBlockInput } from "@/lib/validators/social";
 import { z } from "zod";
 import { MAX_LINKS_PER_PAGE, MAX_SOCIALS_PER_PAGE } from "@/lib/limits";
@@ -53,15 +63,15 @@ export async function addBlockAction(data: BlockInput) {
       return { ok: false, message: "Page not found" };
     }
 
-    await createBlock(page.id, parsed.data);
+    const created = await createBlock(page.id, parsed.data);
 
     revalidatePath("/dashboard", "layout");
     revalidatePath(`/${page.username}`, "page");
     revalidateTag(`page:${page.username.toLowerCase()}`, { expire: 0 });
 
-    return { ok: true };
+    return { ok: true, id: created.id };
   } catch (err) {
-    if (err instanceof Error && err.message?.includes("Limit of")) {
+    if (err instanceof Error && (err.message?.includes("Limit of") || err.message?.includes("spotlight at most"))) {
       return { ok: false, message: err.message };
     }
     console.error("[addBlockAction] Error:", err);
@@ -69,7 +79,7 @@ export async function addBlockAction(data: BlockInput) {
   }
 }
 
-export async function editBlockAction(blockId: string, data: BlockInput) {
+export async function editBlockAction(blockId: string, data: EditBlockInput) {
   try {
     const session = await getSession();
     if (!session) {
@@ -84,7 +94,7 @@ export async function editBlockAction(blockId: string, data: BlockInput) {
     }
 
     // Validate
-    const parsed = BlockSchema.safeParse(data);
+    const parsed = EditBlockSchema.safeParse(data);
     if (!parsed.success) {
       return {
         ok: false,
@@ -99,7 +109,7 @@ export async function editBlockAction(blockId: string, data: BlockInput) {
       return { ok: false, message: "Page not found" };
     }
 
-    const updated = await updateBlock(blockId, page.id, parsed.data);
+    const updated = await updateBlock(blockId, page.id, parsed.data, userId);
     if (!updated) {
       return { ok: false, message: "Link not found or not yours" };
     }
@@ -110,6 +120,9 @@ export async function editBlockAction(blockId: string, data: BlockInput) {
 
     return { ok: true };
   } catch (err) {
+    if (err instanceof Error && (err.message?.includes("spotlight at most") || err.message?.includes("Thumbnail image is required"))) {
+      return { ok: false, message: err.message };
+    }
     console.error("[editBlockAction] Error:", err);
     return { ok: false, message: "Failed to update link" };
   }
@@ -135,9 +148,9 @@ export async function removeBlockAction(blockId: string) {
       return { ok: false, message: "Page not found" };
     }
 
-    const deleted = await deleteBlock(blockId, page.id, "link");
+    const deleted = await deleteBlock(blockId, page.id, "link", userId);
     if (!deleted) {
-      return { ok: false, message: "Link not found or not yours" };
+      return { ok: false, message: "Item not found or not yours" };
     }
 
     revalidatePath("/dashboard", "layout");
@@ -147,7 +160,126 @@ export async function removeBlockAction(blockId: string) {
     return { ok: true };
   } catch (err) {
     console.error("[removeBlockAction] Error:", err);
-    return { ok: false, message: "Failed to delete link" };
+    return { ok: false, message: "Failed to delete item" };
+  }
+}
+
+export async function removeThumbnailAction(blockId: string) {
+  try {
+    const session = await getSession();
+    if (!session) {
+      return { ok: false, message: "Unauthorized" };
+    }
+    const userId = session.user.id;
+
+    const page = await getPageByUserId(userId);
+    if (!page) {
+      return { ok: false, message: "Page not found" };
+    }
+
+    const removed = await removeThumbnail(blockId, page.id, userId);
+    if (!removed) {
+      return { ok: false, message: "Link not found or not yours" };
+    }
+
+    revalidatePath("/dashboard", "layout");
+    revalidatePath(`/${page.username}`, "page");
+    revalidateTag(`page:${page.username.toLowerCase()}`, { expire: 0 });
+
+    return { ok: true };
+  } catch (err) {
+    console.error("[removeThumbnailAction] Error:", err);
+    return { ok: false, message: "Failed to remove image" };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Header Blocks Actions
+// ---------------------------------------------------------------------------
+
+export async function addHeaderAction(data: HeaderInput) {
+  try {
+    const session = await getSession();
+    if (!session) {
+      return { ok: false, message: "Unauthorized" };
+    }
+    const userId = session.user.id;
+
+    const { success } = rateLimit(`add-header:${userId}`, 60, 60 * 1000);
+    if (!success) {
+      return { ok: false, message: "Too many requests. Please try again later." };
+    }
+
+    const parsed = HeaderSchema.safeParse(data);
+    if (!parsed.success) {
+      return {
+        ok: false,
+        message: "Invalid input",
+        fieldErrors: parsed.error.flatten().fieldErrors,
+      };
+    }
+
+    const page = await getPageByUserId(userId);
+    if (!page) {
+      return { ok: false, message: "Page not found" };
+    }
+
+    await createHeaderBlock(page.id, parsed.data);
+
+    revalidatePath("/dashboard", "layout");
+    revalidatePath(`/${page.username}`, "page");
+    revalidateTag(`page:${page.username.toLowerCase()}`, { expire: 0 });
+
+    return { ok: true };
+  } catch (err) {
+    if (err instanceof Error && err.message?.includes("Limit of")) {
+      return { ok: false, message: err.message };
+    }
+    console.error("[addHeaderAction] Error:", err);
+    return { ok: false, message: "Failed to add header" };
+  }
+}
+
+export async function editHeaderAction(blockId: string, data: HeaderInput) {
+  try {
+    const session = await getSession();
+    if (!session) {
+      return { ok: false, message: "Unauthorized" };
+    }
+    const userId = session.user.id;
+
+    const { success } = rateLimit(`edit-header:${userId}`, 60, 60 * 1000);
+    if (!success) {
+      return { ok: false, message: "Too many requests. Please try again later." };
+    }
+
+    const parsed = HeaderSchema.safeParse(data);
+    if (!parsed.success) {
+      return {
+        ok: false,
+        message: "Invalid input",
+        fieldErrors: parsed.error.flatten().fieldErrors,
+      };
+    }
+
+    const page = await getPageByUserId(userId);
+    if (!page) {
+      return { ok: false, message: "Page not found" };
+    }
+
+    const updated = await updateHeaderBlock(blockId, page.id, parsed.data);
+    if (!updated) {
+      return { ok: false, message: "Header not found or not yours" };
+    }
+
+    revalidatePath("/dashboard", "layout");
+    revalidatePath(`/${page.username}`, "page");
+    revalidateTag(`page:${page.username.toLowerCase()}`, { expire: 0 });
+
+    return { ok: true };
+  } catch (err) {
+    console.error("[editHeaderAction] Error:", err);
+    return { ok: false, message: "Failed to update header" };
   }
 }
 

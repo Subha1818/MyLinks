@@ -77,8 +77,10 @@ export default function PrivacyPage() {
                 theme customization preferences.
               </li>
               <li>
-                <strong>Link Data:</strong> The titles, destination URLs, positions,
-                and visibility settings of up to 50 links you add to your profile.
+                <strong>Link &amp; Content Data:</strong> The titles, destination URLs, positions,
+                section header titles, and visibility settings of up to 50 links you add to your profile.
+                If you choose Thumbnail or Featured layouts, you may upload up to 3 link photos (stored securely
+                in Vercel Blob and displayed on your public page).
               </li>
               <li>
                 <strong>Authentication Sessions:</strong> An encrypted httpOnly
@@ -136,7 +138,7 @@ export default function PrivacyPage() {
               </li>
               <li>
                 <strong>Vercel:</strong> Provides web hosting and Vercel Blob storage
-                for user-uploaded avatar image files.
+                for user-uploaded avatar and link photo files.
               </li>
             </ul>
           </section>

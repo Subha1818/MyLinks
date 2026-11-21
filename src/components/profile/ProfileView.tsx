@@ -1,6 +1,7 @@
 import { resolveTheme, FontOption, getThemeBackgroundStyle } from "@/lib/theme";
 import { Avatar } from "@/components/ui/avatar";
 import { isSafeHttpUrl } from "@/lib/safe-url";
+import { isTrustedImageUrl } from "@/lib/urls";
 import { siteConfig } from "@/lib/site";
 import { StarMark } from "@/components/brand/StarMark";
 import { readableTextOn } from "@/lib/color";
@@ -8,11 +9,35 @@ import { PlatformIcon } from "@/components/ui/PlatformIcon";
 import Link from "next/link";
 import React from "react";
 
+export type ProfileViewLinkItem = {
+  kind: "link";
+  id: string;
+  title: string;
+  url: string;
+  platform?: string | null;
+  layout?: "classic" | "thumb" | "featured";
+  thumbnailUrl?: string | null;
+  thumbnailAlt?: string | null;
+  highlighted?: boolean;
+};
+
+export type ProfileViewHeaderItem = {
+  kind: "header";
+  id: string;
+  title: string;
+};
+
+export type ProfileViewItem = ProfileViewLinkItem | ProfileViewHeaderItem;
+
 export type ProfileViewLink = {
   id: string;
   title: string;
   url: string;
   platform?: string | null;
+  layout?: "classic" | "thumb" | "featured";
+  thumbnailUrl?: string | null;
+  thumbnailAlt?: string | null;
+  highlighted?: boolean;
 };
 
 export type ProfileViewSocial = {
@@ -25,7 +50,8 @@ type ProfileViewProps = {
   displayName: string;
   bio: string | null;
   avatarUrl: string | null;
-  links: ProfileViewLink[];
+  items?: ProfileViewItem[];
+  links?: ProfileViewLink[];
   socials?: ProfileViewSocial[];
   theme?: unknown;
   mode: "preview" | "public";
@@ -55,6 +81,7 @@ export function ProfileView({
   displayName,
   bio,
   avatarUrl,
+  items,
   links,
   socials = [],
   theme,
@@ -82,9 +109,23 @@ export function ProfileView({
 
   const buttonRadiusClass =
     resolvedTheme.button.shape === "pill"
+      ? "rounded-[28px]"
+      : resolvedTheme.button.shape === "rounded"
+      ? "rounded-2xl"
+      : "rounded-none";
+
+  const thumbImgRadiusClass =
+    resolvedTheme.button.shape === "pill"
       ? "rounded-full"
       : resolvedTheme.button.shape === "rounded"
       ? "rounded-xl"
+      : "rounded-none";
+
+  const featuredImgRadiusClass =
+    resolvedTheme.button.shape === "pill"
+      ? "rounded-t-[26px]"
+      : resolvedTheme.button.shape === "rounded"
+      ? "rounded-t-2xl"
       : "rounded-none";
 
   const buttonStyleCSS: React.CSSProperties =
@@ -110,7 +151,7 @@ export function ProfileView({
           color: resolvedTheme.button.textColor,
         };
 
-  const btnClass = `relative flex items-center justify-center w-full px-5 py-4 font-bold transition-transform hover:scale-[1.02] ${
+  const baseBtnClass = `relative w-full font-bold transition-transform hover:scale-[1.02] active:scale-[0.99] ${
     resolvedTheme.button.style === "solid" ? "shadow-sm" : ""
   } ${buttonRadiusClass} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-2`;
 
@@ -119,6 +160,21 @@ export function ProfileView({
 
   // Social icon filled glyph readable color
   const socialFilledGlyphColor = readableTextOn(resolvedTheme.textColor);
+
+  // Resolve display items
+  const displayItems: ProfileViewItem[] =
+    items ||
+    (links || []).map((l) => ({
+      kind: "link" as const,
+      id: l.id,
+      title: l.title,
+      url: l.url,
+      platform: l.platform,
+      layout: l.layout || "classic",
+      thumbnailUrl: l.thumbnailUrl,
+      thumbnailAlt: l.thumbnailAlt,
+      highlighted: l.highlighted,
+    }));
 
   return (
     <div
@@ -208,61 +264,129 @@ export function ProfileView({
           </div>
         )}
 
-        {/* Links list */}
+        {/* Items list (links & headers) */}
         <div className={`w-full flex flex-col ${spacingClass} ${socials.length === 0 ? "mt-4" : ""}`}>
-          {links.length === 0 ? (
+          {displayItems.length === 0 ? (
             <div className="text-center text-sm font-bold opacity-70 py-8">
               Your links will appear here
             </div>
           ) : (
-            links.map((link) => {
-              if (!isSafeHttpUrl(link.url)) {
+            displayItems.map((item) => {
+              if (item.kind === "header") {
+                return (
+                  <h2
+                    key={item.id}
+                    className={`w-full text-lg sm:text-xl font-heading font-extrabold pt-4 pb-1 select-none ${
+                      isLeftAlign ? "text-left" : "text-center"
+                    }`}
+                    style={{ color: resolvedTheme.textColor }}
+                  >
+                    {item.title}
+                  </h2>
+                );
+              }
+
+              if (!isSafeHttpUrl(item.url)) {
                 return null;
               }
 
-              const showIcon =
-                resolvedTheme.layout.linkIcons === "auto" && !!link.platform;
+              const spotlightClass = item.highlighted ? "animate-spotlight" : "";
+              const layout = item.layout || "classic";
+              const hasTrustedImg = isTrustedImageUrl(item.thumbnailUrl);
 
-              const content = (
-                <>
-                  {showIcon && (
-                    <div className="absolute left-4 w-6 h-6 flex items-center justify-center shrink-0">
-                      <PlatformIcon platformKey={link.platform!} size={20} />
+              let cardContent: React.ReactNode = null;
+              let cardLayoutClass = "";
+
+              if (layout === "featured" && hasTrustedImg) {
+                cardLayoutClass = "flex flex-col overflow-hidden group";
+                cardContent = (
+                  <>
+                    <div className="w-full aspect-[16/10] overflow-hidden shrink-0 bg-black/5">
+                      <img
+                        src={item.thumbnailUrl!}
+                        alt={item.thumbnailAlt || ""}
+                        width={1000}
+                        height={625}
+                        loading="lazy"
+                        decoding="async"
+                        className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03] motion-reduce:transform-none ${featuredImgRadiusClass}`}
+                      />
                     </div>
-                  )}
-                  <span
-                    className={`truncate ${
-                      showIcon ? "px-8" : ""
-                    }`}
-                  >
-                    {link.title}
-                  </span>
-                </>
-              );
+                    <div
+                      className={`w-full px-5 py-4 ${
+                        isLeftAlign ? "text-left" : "text-center"
+                      }`}
+                    >
+                      <span className="block truncate text-base">{item.title}</span>
+                    </div>
+                  </>
+                );
+              } else if (layout === "thumb" && hasTrustedImg) {
+                cardLayoutClass = "flex items-center p-2.5 sm:p-3 min-h-[80px] gap-3.5";
+                cardContent = (
+                  <>
+                    <img
+                      src={item.thumbnailUrl!}
+                      alt={item.thumbnailAlt || ""}
+                      width={64}
+                      height={64}
+                      loading="lazy"
+                      decoding="async"
+                      className={`w-16 h-16 shrink-0 object-cover ${thumbImgRadiusClass}`}
+                    />
+                    <div
+                      className={`flex-1 min-w-0 flex items-center ${
+                        isLeftAlign ? "justify-start text-left" : "justify-center text-center"
+                      }`}
+                    >
+                      <span className="truncate text-base">{item.title}</span>
+                    </div>
+                  </>
+                );
+              } else {
+                // Classic layout (or fallback if no image)
+                cardLayoutClass = "flex items-center justify-center px-5 py-4";
+                const showIcon =
+                  resolvedTheme.layout.linkIcons === "auto" && !!item.platform;
+                cardContent = (
+                  <>
+                    {showIcon && (
+                      <div className="absolute left-4 w-6 h-6 flex items-center justify-center shrink-0">
+                        <PlatformIcon platformKey={item.platform!} size={20} />
+                      </div>
+                    )}
+                    <span className={`truncate ${showIcon ? "px-8" : ""}`}>
+                      {item.title}
+                    </span>
+                  </>
+                );
+              }
+
+              const combinedBtnClass = `${baseBtnClass} ${cardLayoutClass} ${spotlightClass}`;
 
               if (mode === "preview") {
                 return (
                   <div
-                    key={link.id}
-                    className={btnClass}
+                    key={item.id}
+                    className={combinedBtnClass}
                     style={buttonStyleCSS}
                     aria-disabled="true"
                   >
-                    {content}
+                    {cardContent}
                   </div>
                 );
               }
 
               return (
                 <a
-                  key={link.id}
-                  href={`/api/click/${link.id}`}
+                  key={item.id}
+                  href={`/api/click/${item.id}`}
                   target="_blank"
                   rel="noopener noreferrer nofollow ugc"
-                  className={btnClass}
+                  className={combinedBtnClass}
                   style={buttonStyleCSS}
                 >
-                  {content}
+                  {cardContent}
                 </a>
               );
             })

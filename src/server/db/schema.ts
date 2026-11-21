@@ -107,7 +107,11 @@ export const blocks = pgTable(
     type: text("type").default("link").notNull(),
     platform: text("platform"),
     title: text("title").notNull(),
-    url: text("url").notNull(),
+    url: text("url"),
+    thumbnailUrl: text("thumbnail_url"),
+    thumbnailAlt: text("thumbnail_alt"),
+    layout: text("layout").default("classic").notNull(),
+    isHighlighted: boolean("is_highlighted").default(false).notNull(),
     position: integer("position").notNull(),
     isVisible: boolean("is_visible").default(true).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
@@ -115,8 +119,12 @@ export const blocks = pgTable(
   },
   (table) => [
     index("blocks_page_position_idx").on(table.pageId, table.position),
-    check("blocks_type_check", sql`type IN ('link', 'social')`),
+    check("blocks_type_check", sql`type IN ('link', 'social', 'header')`),
     check("blocks_social_platform_check", sql`type <> 'social' OR platform IS NOT NULL`),
+    check("blocks_layout_check", sql`layout IN ('classic', 'thumb', 'featured')`),
+    check("blocks_url_required_check", sql`type = 'header' OR url IS NOT NULL`),
+    check("blocks_media_check", sql`type = 'link' OR (thumbnail_url IS NULL AND layout = 'classic' AND is_highlighted = false)`),
+    check("blocks_layout_image_check", sql`layout = 'classic' OR thumbnail_url IS NOT NULL`),
   ]
 );// -------------------------------------------------------------
 // Click Events table (Analytics tracking)

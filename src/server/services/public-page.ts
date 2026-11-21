@@ -3,6 +3,7 @@ import { pages, blocks } from "@/server/db/schema";
 import { eq, and, sql, asc } from "drizzle-orm";
 import { usernameSchema } from "@/lib/validators/username";
 import { detectPlatform } from "@/lib/platforms";
+import { isTrustedImageUrl } from "@/server/storage";
 import { unstable_cache } from "next/cache";
 
 export const getPublicPageByUsername = unstable_cache(
@@ -53,27 +54,60 @@ export async function getPublicPageByUsernameUncached(username: string) {
 
   if (!page) return null;
 
-  // 1. Fetch visible link blocks
-  const linkBlocks = await db.query.blocks.findMany({
+  // 1. Fetch visible link and header blocks
+  const visibleBlocks = await db.query.blocks.findMany({
     where: and(
       eq(blocks.pageId, page.id),
       eq(blocks.isVisible, true),
-      eq(blocks.type, "link")
+      sql`${blocks.type} IN ('link', 'header')`
     ),
     columns: {
       id: true,
+      type: true,
       title: true,
       url: true,
+      layout: true,
+      thumbnailUrl: true,
+      thumbnailAlt: true,
+      isHighlighted: true,
     },
     orderBy: [asc(blocks.position), asc(blocks.createdAt)],
   });
 
-  const formattedLinks = linkBlocks.map((b) => ({
-    id: b.id,
-    title: b.title,
-    url: b.url,
-    platform: detectPlatform(b.url),
-  }));
+  const formattedItems = visibleBlocks.map((b) => {
+    if (b.type === "header") {
+      return {
+        kind: "header" as const,
+        id: b.id,
+        title: b.title,
+      };
+    }
+    return {
+      kind: "link" as const,
+      id: b.id,
+      title: b.title,
+      url: b.url || "",
+      platform: detectPlatform(b.url || ""),
+      layout: (b.layout as "classic" | "thumb" | "featured") || "classic",
+      thumbnailUrl: isTrustedImageUrl(b.thumbnailUrl) ? b.thumbnailUrl : null,
+      thumbnailAlt: b.thumbnailAlt || "",
+      highlighted: Boolean(b.isHighlighted),
+    };
+  });
+
+  // Backward compatible links array (links only)
+  const formattedLinks = formattedItems
+    .filter((item) => item.kind === "link")
+    .map((item) => ({
+      id: item.id,
+      title: item.title,
+      url: item.url,
+      platform: item.platform,
+      layout: item.layout,
+      thumbnailUrl: item.thumbnailUrl,
+      thumbnailAlt: item.thumbnailAlt,
+      highlighted: item.highlighted,
+    }));
 
   // 2. Fetch visible social blocks
   const socialBlocks = await db.query.blocks.findMany({
@@ -102,6 +136,7 @@ export async function getPublicPageByUsernameUncached(username: string) {
     bio: page.bio,
     avatarUrl: page.avatarUrl,
     theme: page.theme,
+    items: formattedItems,
     links: formattedLinks,
     socials: formattedSocials,
   };

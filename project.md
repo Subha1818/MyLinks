@@ -91,7 +91,7 @@ drizzle/                       # Drizzle migration files
 - **`accounts`**: `id`, `user_id`, `account_id`, `provider_id`, `access_token`, `refresh_token`, `expires_at`
 - **`verifications`**: `id`, `identifier`, `value`, `expires_at`
 - **`pages`**: `id`, `user_id` (FK), `username` (unique case-insensitive index), `display_name`, `bio`, `avatar_url`, `theme` (JSONB), `is_published`, `created_at`, `updated_at`
-- **`blocks`**: `id`, `page_id` (FK), `type` ('link'), `title`, `url`, `icon`, `position` (integer index), `is_visible`, `click_count`, `created_at`, `updated_at`
+- **`blocks`**: `id`, `page_id` (FK), `type` ('link' | 'social' | 'header'), `platform` (nullable), `title`, `url` (nullable), `thumbnail_url` (nullable), `thumbnail_alt` (nullable), `layout` ('classic' | 'thumb' | 'featured'), `is_highlighted` (boolean), `position` (integer index), `is_visible`, `created_at`, `updated_at`
 - **`click_events`**: `id`, `block_id` (FK), `page_id` (FK), `referrer`, `country`, `device`, `created_at`
 - **`reports`**: `id`, `page_id` (FK), `reason`, `details`, `status` ('pending', 'reviewed', 'resolved', 'dismissed'), `created_at`
 
@@ -162,6 +162,21 @@ Configured in `next.config.ts`:
   - Custom branded 404, profile 404, global error, and dashboard error pages
   - PWA Web Manifest, 32x32 star icon, 180x180 Apple touch icon, and light color scheme
   - Accessibility skip links, landmarks, full test suite (50 passing tests), and complete docs
+- **Phase 7A (Share & QR Code):**
+  - Native Web Share API + clipboard link copy modal
+  - Downloadable scannable QR code generator with 5 WCAG AAA contrast presets
+  - Branded header integration and responsive layout polish
+- **Phase 7B (Brand Platforms & Socials):**
+  - Platform detection engine with exact dot-boundary matching for 20 apex domains
+  - Social icon row directly under bio in ProfileView (44px hit target, 24px glyph, plain/filled contrast modes)
+  - Automatic platform icons on link rows in classic layout
+  - Group-scoped reordering with `@dnd-kit`
+- **Phase 7C (Media Layouts, Headers & Spotlight):**
+  - Three link card layouts: Classic, Thumbnail (64px left image), Featured (16:10 top card)
+  - Section headers (`type = 'header'`) integrated into same drag-and-drop link stream
+  - Spotlight attention effect: gentle 5-second CSS pulse/wiggle, strictly respect reduced-motion
+  - Server-side sharp WebP re-encoding (1000x625, quality 82) and secure Vercel Blob storage
+  - Strict limits: max 3 photos per page, max 2 spotlight links, max 10 headers, 50 links limit counting links only
 
 ---
 

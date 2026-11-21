@@ -362,5 +362,34 @@ h1, h2, h3, h4, h5, h6 {
   display: none;
 }
 
+@keyframes spotlight-wiggle {
+  0%, 82%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  86% {
+    transform: translateY(-2px) scale(1.015);
+  }
+  90% {
+    transform: translateY(1px) scale(0.995);
+  }
+  94% {
+    transform: translateY(-1px) scale(1.01);
+  }
+  97% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-spotlight {
+  animation: spotlight-wiggle 5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-spotlight {
+    animation: none !important;
+  }
+}
+
+
 
 

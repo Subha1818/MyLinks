@@ -18,6 +18,9 @@ for (const env of requiredEnvs) {
 
 const nextConfig: NextConfig = {
   /* config options here */
+  experimental: {
+    agentUpgrade: "security" as any,
+  },
   cacheComponents: true,
   partialPrefetching: true,
   images: {

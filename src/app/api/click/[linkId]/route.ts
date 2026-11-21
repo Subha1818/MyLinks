@@ -41,7 +41,7 @@ export async function GET(
 
     const block = blockData[0];
 
-    if (!block.isVisible || !block.isPublished) {
+    if (!block.isVisible || !block.isPublished || !block.url) {
       return new NextResponse("Not Found", { status: 404 });
     }
 

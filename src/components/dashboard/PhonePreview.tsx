@@ -6,7 +6,29 @@ import { getPublicUrlDisplay } from "@/lib/urls";
 
 function PhoneFrame({ scale = 1 }: { scale?: number }) {
   const { draft } = usePageDraft();
-  const visibleLinks = draft.blocks.filter((b) => b.isVisible);
+  const visibleItems = (draft.blocks || [])
+    .filter((b) => b.isVisible)
+    .map((b) => {
+      if (b.type === "header") {
+        return {
+          kind: "header" as const,
+          id: b.id,
+          title: b.title,
+        };
+      }
+      return {
+        kind: "link" as const,
+        id: b.id,
+        title: b.title,
+        url: b.url || "",
+        platform: b.platform,
+        layout: b.layout || "classic",
+        thumbnailUrl: b.thumbnailUrl,
+        thumbnailAlt: b.thumbnailAlt,
+        highlighted: b.isHighlighted,
+      };
+    });
+
   const visibleSocials = (draft.socials || [])
     .filter((s) => s.isVisible)
     .map((s) => ({
@@ -34,7 +56,7 @@ function PhoneFrame({ scale = 1 }: { scale?: number }) {
           displayName={draft.displayName}
           bio={draft.bio}
           avatarUrl={draft.avatarUrl}
-          links={visibleLinks}
+          items={visibleItems}
           socials={visibleSocials}
           theme={draft.theme}
         />

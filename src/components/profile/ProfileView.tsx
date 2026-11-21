@@ -6,6 +6,7 @@ import { siteConfig } from "@/lib/site";
 import { StarMark } from "@/components/brand/StarMark";
 import { readableTextOn } from "@/lib/color";
 import { PlatformIcon } from "@/components/ui/PlatformIcon";
+import { detectPlatform } from "@/lib/platforms";
 import Link from "next/link";
 import React from "react";
 
@@ -345,17 +346,27 @@ export function ProfileView({
                 );
               } else {
                 // Classic layout (or fallback if no image)
-                cardLayoutClass = "flex items-center justify-center px-5 py-4";
+                const platformKey =
+                  item.platform || (item.url ? detectPlatform(item.url) : null);
                 const showIcon =
-                  resolvedTheme.layout.linkIcons === "auto" && !!item.platform;
+                  resolvedTheme.layout.linkIcons !== "off" && !!platformKey;
+
+                cardLayoutClass = "flex items-center justify-center px-4 py-3.5 min-h-[52px]";
                 cardContent = (
                   <>
                     {showIcon && (
-                      <div className="absolute left-4 w-6 h-6 flex items-center justify-center shrink-0">
-                        <PlatformIcon platformKey={item.platform!} size={20} />
+                      <div
+                        className={`absolute left-2.5 sm:left-3.5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center shrink-0 border border-current/20 bg-current/[0.06] ${thumbImgRadiusClass}`}
+                        aria-hidden="true"
+                      >
+                        <PlatformIcon platformKey={platformKey} size={20} />
                       </div>
                     )}
-                    <span className={`truncate ${showIcon ? "px-8" : ""}`}>
+                    <span
+                      className={`truncate text-base font-semibold ${
+                        showIcon ? (isLeftAlign ? "pl-12 sm:pl-14 pr-4" : "px-12 sm:px-14") : "px-4"
+                      }`}
+                    >
                       {item.title}
                     </span>
                   </>

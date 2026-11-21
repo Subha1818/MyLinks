@@ -3,6 +3,7 @@
 import { usePageDraft } from "./PageDraftProvider";
 import { ProfileView } from "@/components/profile/ProfileView";
 import { getPublicUrlDisplay } from "@/lib/urls";
+import { detectPlatform } from "@/lib/platforms";
 
 function PhoneFrame({ scale = 1 }: { scale?: number }) {
   const { draft } = usePageDraft();
@@ -21,7 +22,7 @@ function PhoneFrame({ scale = 1 }: { scale?: number }) {
         id: b.id,
         title: b.title,
         url: b.url || "",
-        platform: b.platform,
+        platform: b.platform || (b.url ? detectPlatform(b.url) : null) || undefined,
         layout: b.layout || "classic",
         thumbnailUrl: b.thumbnailUrl,
         thumbnailAlt: b.thumbnailAlt,

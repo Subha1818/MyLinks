@@ -4,14 +4,29 @@ import { isSafeHttpUrl } from "@/lib/safe-url";
 import { siteConfig } from "@/lib/site";
 import { StarMark } from "@/components/brand/StarMark";
 import { readableTextOn } from "@/lib/color";
+import { PlatformIcon } from "@/components/ui/PlatformIcon";
 import Link from "next/link";
 import React from "react";
+
+export type ProfileViewLink = {
+  id: string;
+  title: string;
+  url: string;
+  platform?: string | null;
+};
+
+export type ProfileViewSocial = {
+  id: string;
+  platform: string;
+  label: string;
+};
 
 type ProfileViewProps = {
   displayName: string;
   bio: string | null;
   avatarUrl: string | null;
-  links: { id: string; title: string; url: string }[];
+  links: ProfileViewLink[];
+  socials?: ProfileViewSocial[];
   theme?: unknown;
   mode: "preview" | "public";
   footer?: React.ReactNode;
@@ -41,6 +56,7 @@ export function ProfileView({
   bio,
   avatarUrl,
   links,
+  socials = [],
   theme,
   mode,
   footer,
@@ -94,12 +110,15 @@ export function ProfileView({
           color: resolvedTheme.button.textColor,
         };
 
-  const btnClass = `block w-full text-center px-6 py-4 font-bold transition-transform hover:scale-[1.02] ${
+  const btnClass = `relative flex items-center justify-center w-full px-5 py-4 font-bold transition-transform hover:scale-[1.02] ${
     resolvedTheme.button.style === "solid" ? "shadow-sm" : ""
-  } ${buttonRadiusClass} truncate focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-2`;
+  } ${buttonRadiusClass} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-2`;
 
-  // Determine readable text color on the CTA pill (pill bg = theme's textColor)
+  // CTA readable color
   const ctaTextColor = readableTextOn(resolvedTheme.textColor);
+
+  // Social icon filled glyph readable color
+  const socialFilledGlyphColor = readableTextOn(resolvedTheme.textColor);
 
   return (
     <div
@@ -127,7 +146,7 @@ export function ProfileView({
         </h1>
         {bio && (
           <p
-            className={`text-sm mb-8 opacity-90 whitespace-pre-wrap max-w-full break-words ${
+            className={`text-sm mb-4 opacity-90 whitespace-pre-wrap max-w-full break-words ${
               isLeftAlign ? "text-left" : "text-center"
             }`}
           >
@@ -135,8 +154,62 @@ export function ProfileView({
           </p>
         )}
 
+        {/* Social Icons Row (under bio, before link list) */}
+        {socials.length > 0 && (
+          <div
+            className={`w-full flex flex-wrap gap-2.5 mb-8 ${
+              isLeftAlign ? "justify-start" : "justify-center"
+            }`}
+          >
+            {socials.map((social) => {
+              const isFilled = resolvedTheme.layout.socialIcons === "filled";
+              const itemClass = `w-11 h-11 rounded-full flex items-center justify-center transition-transform hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-2 shrink-0 ${
+                isFilled ? "shadow-2xs" : ""
+              }`;
+
+              const itemStyle: React.CSSProperties = isFilled
+                ? {
+                    backgroundColor: resolvedTheme.textColor,
+                    color: socialFilledGlyphColor,
+                  }
+                : {
+                    color: resolvedTheme.textColor,
+                  };
+
+              if (mode === "public") {
+                return (
+                  <a
+                    key={social.id}
+                    href={`/api/click/${social.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow ugc"
+                    className={itemClass}
+                    style={itemStyle}
+                    aria-label={social.label}
+                    title={social.label}
+                  >
+                    <PlatformIcon platformKey={social.platform} size={24} />
+                  </a>
+                );
+              }
+
+              return (
+                <div
+                  key={social.id}
+                  className={itemClass}
+                  style={itemStyle}
+                  aria-label={social.label}
+                  title={social.label}
+                >
+                  <PlatformIcon platformKey={social.platform} size={24} />
+                </div>
+              );
+            })}
+          </div>
+        )}
+
         {/* Links list */}
-        <div className={`w-full flex flex-col ${spacingClass}`}>
+        <div className={`w-full flex flex-col ${spacingClass} ${socials.length === 0 ? "mt-4" : ""}`}>
           {links.length === 0 ? (
             <div className="text-center text-sm font-bold opacity-70 py-8">
               Your links will appear here
@@ -147,6 +220,26 @@ export function ProfileView({
                 return null;
               }
 
+              const showIcon =
+                resolvedTheme.layout.linkIcons === "auto" && !!link.platform;
+
+              const content = (
+                <>
+                  {showIcon && (
+                    <div className="absolute left-4 w-6 h-6 flex items-center justify-center shrink-0">
+                      <PlatformIcon platformKey={link.platform!} size={20} />
+                    </div>
+                  )}
+                  <span
+                    className={`truncate ${
+                      showIcon ? "px-8" : ""
+                    }`}
+                  >
+                    {link.title}
+                  </span>
+                </>
+              );
+
               if (mode === "preview") {
                 return (
                   <div
@@ -155,7 +248,7 @@ export function ProfileView({
                     style={buttonStyleCSS}
                     aria-disabled="true"
                   >
-                    {link.title}
+                    {content}
                   </div>
                 );
               }
@@ -169,7 +262,7 @@ export function ProfileView({
                   className={btnClass}
                   style={buttonStyleCSS}
                 >
-                  {link.title}
+                  {content}
                 </a>
               );
             })

@@ -2,12 +2,26 @@
 
 import { getSession } from "@/server/session";
 import { getPageByUserId } from "@/server/services/pages";
-import { createBlock, updateBlock, deleteBlock, setBlockVisibility, reorderBlocks } from "@/server/services/blocks";
+import {
+  createBlock,
+  updateBlock,
+  deleteBlock,
+  setBlockVisibility,
+  reorderBlocks,
+  createSocialBlock,
+  updateSocialBlock,
+  type BlockGroup,
+} from "@/server/services/blocks";
 import { BlockSchema, type BlockInput } from "@/lib/validators/block";
+import { SocialBlockSchema, type SocialBlockInput } from "@/lib/validators/social";
 import { z } from "zod";
-import { MAX_LINKS_PER_PAGE } from "@/lib/limits";
+import { MAX_LINKS_PER_PAGE, MAX_SOCIALS_PER_PAGE } from "@/lib/limits";
 import { rateLimit } from "@/lib/rate-limit";
 import { revalidatePath, revalidateTag } from "next/cache";
+
+// ---------------------------------------------------------------------------
+// Link Blocks Actions
+// ---------------------------------------------------------------------------
 
 export async function addBlockAction(data: BlockInput) {
   try {
@@ -121,7 +135,7 @@ export async function removeBlockAction(blockId: string) {
       return { ok: false, message: "Page not found" };
     }
 
-    const deleted = await deleteBlock(blockId, page.id);
+    const deleted = await deleteBlock(blockId, page.id, "link");
     if (!deleted) {
       return { ok: false, message: "Link not found or not yours" };
     }
@@ -155,7 +169,7 @@ export async function setBlockVisibilityAction(blockId: string, isVisible: boole
       return { ok: false, message: "Page not found" };
     }
 
-    const updated = await setBlockVisibility(blockId, page.id, isVisible);
+    const updated = await setBlockVisibility(blockId, page.id, isVisible, "link");
     if (!updated) {
       return { ok: false, message: "Link not found or not yours" };
     }
@@ -171,7 +185,11 @@ export async function setBlockVisibilityAction(blockId: string, isVisible: boole
   }
 }
 
-export async function reorderBlocksAction(orderedIds: string[]) {
+// ---------------------------------------------------------------------------
+// Social Blocks Actions
+// ---------------------------------------------------------------------------
+
+export async function addSocialBlockAction(data: SocialBlockInput) {
   try {
     const session = await getSession();
     if (!session) {
@@ -179,17 +197,193 @@ export async function reorderBlocksAction(orderedIds: string[]) {
     }
     const userId = session.user.id;
 
-    const { success } = rateLimit(`reorder-blocks:${userId}`, 60, 60 * 1000);
+    const { success } = rateLimit(`add-social:${userId}`, 60, 60 * 1000);
     if (!success) {
       return { ok: false, message: "Too many requests. Please try again later." };
     }
 
-    const parsed = z.array(z.string().uuid()).max(MAX_LINKS_PER_PAGE).safeParse(orderedIds);
+    const parsed = SocialBlockSchema.safeParse(data);
+    if (!parsed.success) {
+      return {
+        ok: false,
+        message: parsed.error.issues[0]?.message || "Invalid social icon input",
+        fieldErrors: parsed.error.flatten().fieldErrors,
+      };
+    }
+
+    const page = await getPageByUserId(userId);
+    if (!page) {
+      return { ok: false, message: "Page not found" };
+    }
+
+    await createSocialBlock(page.id, parsed.data);
+
+    revalidatePath("/dashboard", "layout");
+    revalidatePath(`/${page.username}`, "page");
+    revalidateTag(`page:${page.username.toLowerCase()}`, { expire: 0 });
+
+    return { ok: true };
+  } catch (err) {
+    if (err instanceof Error) {
+      return { ok: false, message: err.message };
+    }
+    console.error("[addSocialBlockAction] Error:", err);
+    return { ok: false, message: "Failed to add social icon" };
+  }
+}
+
+export async function editSocialBlockAction(blockId: string, data: SocialBlockInput) {
+  try {
+    const session = await getSession();
+    if (!session) {
+      return { ok: false, message: "Unauthorized" };
+    }
+    const userId = session.user.id;
+
+    const { success } = rateLimit(`edit-social:${userId}`, 60, 60 * 1000);
+    if (!success) {
+      return { ok: false, message: "Too many requests. Please try again later." };
+    }
+
+    const parsed = SocialBlockSchema.safeParse(data);
+    if (!parsed.success) {
+      return {
+        ok: false,
+        message: parsed.error.issues[0]?.message || "Invalid social icon input",
+        fieldErrors: parsed.error.flatten().fieldErrors,
+      };
+    }
+
+    const page = await getPageByUserId(userId);
+    if (!page) {
+      return { ok: false, message: "Page not found" };
+    }
+
+    const updated = await updateSocialBlock(blockId, page.id, {
+      url: parsed.data.url,
+      title: parsed.data.title,
+    });
+
+    if (!updated) {
+      return { ok: false, message: "Social block not found or not yours" };
+    }
+
+    revalidatePath("/dashboard", "layout");
+    revalidatePath(`/${page.username}`, "page");
+    revalidateTag(`page:${page.username.toLowerCase()}`, { expire: 0 });
+
+    return { ok: true };
+  } catch (err) {
+    console.error("[editSocialBlockAction] Error:", err);
+    return { ok: false, message: "Failed to update social icon" };
+  }
+}
+
+export async function removeSocialBlockAction(blockId: string) {
+  try {
+    const session = await getSession();
+    if (!session) {
+      return { ok: false, message: "Unauthorized" };
+    }
+    const userId = session.user.id;
+
+    const { success } = rateLimit(`del-social:${userId}`, 60, 60 * 1000);
+    if (!success) {
+      return { ok: false, message: "Too many requests. Please try again later." };
+    }
+
+    const page = await getPageByUserId(userId);
+    if (!page) {
+      return { ok: false, message: "Page not found" };
+    }
+
+    const deleted = await deleteBlock(blockId, page.id, "social");
+    if (!deleted) {
+      return { ok: false, message: "Social block not found or not yours" };
+    }
+
+    revalidatePath("/dashboard", "layout");
+    revalidatePath(`/${page.username}`, "page");
+    revalidateTag(`page:${page.username.toLowerCase()}`, { expire: 0 });
+
+    return { ok: true };
+  } catch (err) {
+    console.error("[removeSocialBlockAction] Error:", err);
+    return { ok: false, message: "Failed to delete social icon" };
+  }
+}
+
+export async function setSocialVisibilityAction(blockId: string, isVisible: boolean) {
+  try {
+    const session = await getSession();
+    if (!session) {
+      return { ok: false, message: "Unauthorized" };
+    }
+    const userId = session.user.id;
+
+    const { success } = rateLimit(`vis-social:${userId}`, 60, 60 * 1000);
+    if (!success) {
+      return { ok: false, message: "Too many requests. Please try again later." };
+    }
+
+    const page = await getPageByUserId(userId);
+    if (!page) {
+      return { ok: false, message: "Page not found" };
+    }
+
+    const updated = await setBlockVisibility(blockId, page.id, isVisible, "social");
+    if (!updated) {
+      return { ok: false, message: "Social block not found or not yours" };
+    }
+
+    revalidatePath("/dashboard", "layout");
+    revalidatePath(`/${page.username}`, "page");
+    revalidateTag(`page:${page.username.toLowerCase()}`, { expire: 0 });
+
+    return { ok: true };
+  } catch (err) {
+    console.error("[setSocialVisibilityAction] Error:", err);
+    return { ok: false, message: "Failed to update visibility" };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Grouped Reordering Action
+// ---------------------------------------------------------------------------
+
+export async function reorderBlocksAction(params: {
+  group: BlockGroup;
+  orderedIds: string[];
+}) {
+  try {
+    const session = await getSession();
+    if (!session) {
+      return { ok: false, message: "Unauthorized" };
+    }
+    const userId = session.user.id;
+
+    const { group, orderedIds } = params;
+
+    const { success } = rateLimit(
+      `reorder-${group}:${userId}`,
+      60,
+      60 * 1000
+    );
+    if (!success) {
+      return { ok: false, message: "Too many requests. Please try again later." };
+    }
+
+    const maxLimit = group === "social" ? MAX_SOCIALS_PER_PAGE : MAX_LINKS_PER_PAGE;
+    const parsed = z
+      .array(z.string().uuid())
+      .max(maxLimit)
+      .safeParse(orderedIds);
+
     if (!parsed.success) {
       return { ok: false, message: "Invalid input" };
     }
-    
-    // check for duplicates
+
+    // Check for duplicates
     const uniqueIds = new Set(parsed.data);
     if (uniqueIds.size !== parsed.data.length) {
       return { ok: false, message: "Duplicate ids" };
@@ -200,7 +394,7 @@ export async function reorderBlocksAction(orderedIds: string[]) {
       return { ok: false, message: "Page not found" };
     }
 
-    const result = await reorderBlocks(page.id, parsed.data);
+    const result = await reorderBlocks(page.id, group, parsed.data);
     if (!result.ok) {
       return result; // contains ok: false, code: "stale", message: ...
     }
@@ -212,6 +406,6 @@ export async function reorderBlocksAction(orderedIds: string[]) {
     return { ok: true };
   } catch (err) {
     console.error("[reorderBlocksAction] Error:", err);
-    return { ok: false, message: "Failed to reorder links" };
+    return { ok: false, message: `Failed to reorder ${params.group}s` };
   }
 }

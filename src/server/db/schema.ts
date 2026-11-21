@@ -105,6 +105,7 @@ export const blocks = pgTable(
       .notNull()
       .references(() => pages.id, { onDelete: "cascade" }),
     type: text("type").default("link").notNull(),
+    platform: text("platform"),
     title: text("title").notNull(),
     url: text("url").notNull(),
     position: integer("position").notNull(),
@@ -114,6 +115,8 @@ export const blocks = pgTable(
   },
   (table) => [
     index("blocks_page_position_idx").on(table.pageId, table.position),
+    check("blocks_type_check", sql`type IN ('link', 'social')`),
+    check("blocks_social_platform_check", sql`type <> 'social' OR platform IS NOT NULL`),
   ]
 );// -------------------------------------------------------------
 // Click Events table (Analytics tracking)

@@ -20,7 +20,7 @@ export const THEME_PRESETS: ThemePreset[] = [
         textColor: "#14181F",
       },
       font: "bricolage",
-      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
+      layout: { align: "center", avatarShape: "circle", spacing: "normal", socialIcons: "plain", linkIcons: "auto" },
     },
   },
   {
@@ -36,7 +36,7 @@ export const THEME_PRESETS: ThemePreset[] = [
         textColor: "#14181F",
       },
       font: "bricolage",
-      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
+      layout: { align: "center", avatarShape: "circle", spacing: "normal", socialIcons: "plain", linkIcons: "auto" },
     },
   },
   {
@@ -52,7 +52,7 @@ export const THEME_PRESETS: ThemePreset[] = [
         textColor: "#3B0A14",
       },
       font: "bricolage",
-      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
+      layout: { align: "center", avatarShape: "circle", spacing: "normal", socialIcons: "plain", linkIcons: "auto" },
     },
   },
   {
@@ -68,7 +68,7 @@ export const THEME_PRESETS: ThemePreset[] = [
         textColor: "#FFFFFF",
       },
       font: "dm-sans",
-      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
+      layout: { align: "center", avatarShape: "circle", spacing: "normal", socialIcons: "plain", linkIcons: "auto" },
     },
   },
   {
@@ -84,7 +84,7 @@ export const THEME_PRESETS: ThemePreset[] = [
         textColor: "#FFF4D6",
       },
       font: "bricolage",
-      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
+      layout: { align: "center", avatarShape: "circle", spacing: "normal", socialIcons: "plain", linkIcons: "auto" },
     },
   },
   {
@@ -100,7 +100,7 @@ export const THEME_PRESETS: ThemePreset[] = [
         textColor: "#14181F",
       },
       font: "dm-sans",
-      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
+      layout: { align: "center", avatarShape: "circle", spacing: "normal", socialIcons: "plain", linkIcons: "auto" },
     },
   },
   {
@@ -116,7 +116,7 @@ export const THEME_PRESETS: ThemePreset[] = [
         textColor: "#1F4D1A",
       },
       font: "bricolage",
-      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
+      layout: { align: "center", avatarShape: "circle", spacing: "normal", socialIcons: "plain", linkIcons: "auto" },
     },
   },
   {
@@ -132,7 +132,7 @@ export const THEME_PRESETS: ThemePreset[] = [
         textColor: "#14181F",
       },
       font: "bricolage",
-      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
+      layout: { align: "center", avatarShape: "circle", spacing: "normal", socialIcons: "plain", linkIcons: "auto" },
     },
   },
   {
@@ -148,7 +148,7 @@ export const THEME_PRESETS: ThemePreset[] = [
         textColor: "#FFFFFF",
       },
       font: "dm-sans",
-      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
+      layout: { align: "center", avatarShape: "circle", spacing: "normal", socialIcons: "plain", linkIcons: "auto" },
     },
   },
   {
@@ -164,7 +164,7 @@ export const THEME_PRESETS: ThemePreset[] = [
         textColor: "#14181F",
       },
       font: "bricolage",
-      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
+      layout: { align: "center", avatarShape: "circle", spacing: "normal", socialIcons: "plain", linkIcons: "auto" },
     },
   },
   // Step 5C new presets:
@@ -187,7 +187,7 @@ export const THEME_PRESETS: ThemePreset[] = [
         textColor: "#FFFFFF",
       },
       font: "dm-sans",
-      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
+      layout: { align: "center", avatarShape: "circle", spacing: "normal", socialIcons: "plain", linkIcons: "auto" },
     },
   },
   {
@@ -209,7 +209,7 @@ export const THEME_PRESETS: ThemePreset[] = [
         textColor: "#14181F",
       },
       font: "archivo",
-      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
+      layout: { align: "center", avatarShape: "circle", spacing: "normal", socialIcons: "plain", linkIcons: "auto" },
     },
   },
   {
@@ -231,7 +231,7 @@ export const THEME_PRESETS: ThemePreset[] = [
         textColor: "#14181F",
       },
       font: "dm-mono",
-      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
+      layout: { align: "center", avatarShape: "circle", spacing: "normal", socialIcons: "plain", linkIcons: "auto" },
     },
   },
   {
@@ -252,7 +252,7 @@ export const THEME_PRESETS: ThemePreset[] = [
         textColor: "#14181F",
       },
       font: "bricolage",
-      layout: { align: "center", avatarShape: "circle", spacing: "normal" },
+      layout: { align: "center", avatarShape: "circle", spacing: "normal", socialIcons: "plain", linkIcons: "auto" },
     },
   },
 ];

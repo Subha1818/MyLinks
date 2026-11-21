@@ -18,6 +18,8 @@ import {
   LayoutAlign,
   AvatarShape,
   Spacing,
+  SocialIconStyle,
+  LinkIconStyle,
   getThemeBackgroundStyle,
 } from "@/lib/theme";
 import {
@@ -82,7 +84,9 @@ function isThemeEqual(a: ThemeConfig, b: ThemeConfig): boolean {
   if (
     a.layout.align !== b.layout.align ||
     a.layout.avatarShape !== b.layout.avatarShape ||
-    a.layout.spacing !== b.layout.spacing
+    a.layout.spacing !== b.layout.spacing ||
+    a.layout.socialIcons !== b.layout.socialIcons ||
+    a.layout.linkIcons !== b.layout.linkIcons
   ) {
     return false;
   }
@@ -480,6 +484,30 @@ export function ThemeSelector({ initialTheme }: ThemeSelectorProps) {
       layout: {
         ...resolvedDraftTheme.layout,
         spacing,
+      },
+    });
+  };
+
+  const handleUpdateSocialIcons = (socialIcons: SocialIconStyle) => {
+    setIsSuccess(false);
+    setGeneralError(null);
+    updateTheme({
+      ...resolvedDraftTheme,
+      layout: {
+        ...resolvedDraftTheme.layout,
+        socialIcons,
+      },
+    });
+  };
+
+  const handleUpdateLinkIcons = (linkIcons: LinkIconStyle) => {
+    setIsSuccess(false);
+    setGeneralError(null);
+    updateTheme({
+      ...resolvedDraftTheme,
+      layout: {
+        ...resolvedDraftTheme.layout,
+        linkIcons,
       },
     });
   };
@@ -1084,6 +1112,78 @@ export function ThemeSelector({ initialTheme }: ThemeSelectorProps) {
                       role="radio"
                       aria-checked={isSelected}
                       onClick={() => handleUpdateSpacing(opt.id)}
+                      className={`py-2.5 px-3 rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${isSelected
+                          ? "bg-white text-ink shadow-xs"
+                          : "text-ink/60 hover:text-ink"
+                        }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Social Icon Style */}
+            <div className="space-y-2">
+              <span id="social-icons-label" className="text-xs font-bold uppercase tracking-wider text-ink/60">
+                Social icon style
+              </span>
+              <div
+                role="radiogroup"
+                aria-labelledby="social-icons-label"
+                className="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-ink/[0.04] border border-ink/5"
+              >
+                {(
+                  [
+                    { id: "plain", label: "Plain" },
+                    { id: "filled", label: "Filled" },
+                  ] as const
+                ).map((opt) => {
+                  const isSelected = resolvedDraftTheme.layout.socialIcons === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      onClick={() => handleUpdateSocialIcons(opt.id)}
+                      className={`py-2.5 px-3 rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${isSelected
+                          ? "bg-white text-ink shadow-xs"
+                          : "text-ink/60 hover:text-ink"
+                        }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Icons on links */}
+            <div className="space-y-2">
+              <span id="link-icons-label" className="text-xs font-bold uppercase tracking-wider text-ink/60">
+                Icons on links
+              </span>
+              <div
+                role="radiogroup"
+                aria-labelledby="link-icons-label"
+                className="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-ink/[0.04] border border-ink/5"
+              >
+                {(
+                  [
+                    { id: "auto", label: "Auto" },
+                    { id: "off", label: "Off" },
+                  ] as const
+                ).map((opt) => {
+                  const isSelected = resolvedDraftTheme.layout.linkIcons === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      onClick={() => handleUpdateLinkIcons(opt.id)}
                       className={`py-2.5 px-3 rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest ${isSelected
                           ? "bg-white text-ink shadow-xs"
                           : "text-ink/60 hover:text-ink"

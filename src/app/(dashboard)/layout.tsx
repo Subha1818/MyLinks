@@ -32,15 +32,29 @@ export default async function DashboardLayout({
     redirect("/onboarding");
   }
 
-  const blocks = await getBlocksWithClicks(page.id);
-  const formattedBlocks = blocks.map((b) => ({
-    id: b.id,
-    title: b.title,
-    url: b.url,
-    position: b.position,
-    isVisible: b.isVisible,
-    clickCount: b.clickCount,
-  }));
+  const allBlocks = await getBlocksWithClicks(page.id);
+
+  const linkBlocks = allBlocks
+    .filter((b) => b.type === "link")
+    .map((b) => ({
+      id: b.id,
+      title: b.title,
+      url: b.url,
+      position: b.position,
+      isVisible: b.isVisible,
+      clickCount: b.clickCount,
+    }));
+
+  const socialBlocks = allBlocks
+    .filter((b) => b.type === "social")
+    .map((b) => ({
+      id: b.id,
+      platform: b.platform || "website",
+      title: b.title,
+      url: b.url,
+      position: b.position,
+      isVisible: b.isVisible,
+    }));
 
   const draftState = {
     displayName: page.displayName || "",
@@ -48,7 +62,8 @@ export default async function DashboardLayout({
     avatarUrl: page.avatarUrl,
     username: page.username,
     theme: page.theme,
-    blocks: formattedBlocks,
+    blocks: linkBlocks,
+    socials: socialBlocks,
   };
 
   return (

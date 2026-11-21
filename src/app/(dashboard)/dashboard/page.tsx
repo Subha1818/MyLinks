@@ -2,6 +2,7 @@ export const instant = false;
 import { PageHeader } from "@/components/ui/page-header";
 import { OverviewStrip } from "@/components/dashboard/overview-strip";
 import { ProfileForm } from "@/components/dashboard/profile-form";
+import { SocialIconsCard } from "@/components/dashboard/social-icons-card";
 import { LinksList } from "@/components/dashboard/links-list";
 import { PhonePreview } from "@/components/dashboard/PhonePreview";
 import { requireUser } from "@/server/session";
@@ -22,22 +23,29 @@ export default async function LinksPage() {
     redirect("/onboarding");
   }
 
-  const blocks = await getBlocksWithClicks(page.id);
-  const formattedBlocks = blocks.map((b) => ({
-    id: b.id,
-    title: b.title,
-    url: b.url,
-    position: b.position,
-    isVisible: b.isVisible,
-    clickCount: b.clickCount,
-  }));
+  const allBlocks = await getBlocksWithClicks(page.id);
 
-  const totalClicks = formattedBlocks.reduce(
+  // Link blocks only
+  const linkBlocks = allBlocks
+    .filter((b) => b.type === "link")
+    .map((b) => ({
+      id: b.id,
+      title: b.title,
+      url: b.url,
+      position: b.position,
+      isVisible: b.isVisible,
+      clickCount: b.clickCount,
+    }));
+
+  // Total clicks from ALL the page's blocks (link + social)
+  const totalClicks = allBlocks.reduce(
     (acc, b) => acc + (b.clickCount || 0),
     0
   );
-  const visibleLinks = formattedBlocks.filter((b) => b.isVisible).length;
-  const totalLinks = formattedBlocks.length;
+
+  // "Links live" counts links only
+  const visibleLinks = linkBlocks.filter((b) => b.isVisible).length;
+  const totalLinks = linkBlocks.length;
 
   return (
     <div className="w-full max-w-6xl pb-24 xl:grid xl:grid-cols-[1fr_320px] xl:gap-12">
@@ -67,7 +75,11 @@ export default async function LinksPage() {
           }}
         />
 
-        <LinksList initialLinks={formattedBlocks} />
+        {/* Social Icons Card (between Profile card and Links card) */}
+        <SocialIconsCard />
+
+        {/* Links Card */}
+        <LinksList initialLinks={linkBlocks} />
       </div>
 
       <div>

@@ -87,6 +87,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
         bio={page.bio}
         avatarUrl={page.avatarUrl}
         links={page.links}
+        socials={page.socials}
         theme={page.theme}
         footer={
           <PublicProfileFooter

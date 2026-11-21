@@ -2,11 +2,13 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Pencil, Trash2, MousePointerClick, Link2 } from "lucide-react";
+import { GripVertical, Pencil, Trash2, MousePointerClick } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import { PlatformIcon } from "@/components/ui/PlatformIcon";
+import { detectPlatform } from "@/lib/platforms";
 
 export type LinkBlock = {
   id: string;
@@ -15,6 +17,7 @@ export type LinkBlock = {
   position: number;
   isVisible: boolean;
   clickCount?: number;
+  platform?: string | null;
 };
 
 interface LinkRowProps {
@@ -72,12 +75,15 @@ export function LinkRow({
         <GripVertical className="w-5 h-5" />
       </button>
 
-      {/* Colored icon chip */}
+      {/* Platform icon chip */}
       <div
-        className="w-10 h-10 rounded-2xl bg-cobalt/10 text-cobalt flex items-center justify-center shrink-0 border border-cobalt/10 shadow-2xs"
+        className="w-10 h-10 rounded-2xl bg-ink/[0.04] text-ink/70 flex items-center justify-center shrink-0 border border-hairline shadow-2xs"
         aria-hidden="true"
       >
-        <Link2 className="w-4 h-4 stroke-[2.5]" />
+        <PlatformIcon
+          platformKey={link.platform || detectPlatform(link.url) || "website"}
+          size={20}
+        />
       </div>
 
       {/* Title & URL */}

@@ -2,6 +2,7 @@ import { db } from "@/server/db";
 import { pages, blocks } from "@/server/db/schema";
 import { eq, and, sql, asc } from "drizzle-orm";
 import { usernameSchema } from "@/lib/validators/username";
+import { detectPlatform } from "@/lib/platforms";
 import { unstable_cache } from "next/cache";
 
 export const getPublicPageByUsername = unstable_cache(
@@ -52,7 +53,8 @@ export async function getPublicPageByUsernameUncached(username: string) {
 
   if (!page) return null;
 
-  const pageBlocks = await db.query.blocks.findMany({
+  // 1. Fetch visible link blocks
+  const linkBlocks = await db.query.blocks.findMany({
     where: and(
       eq(blocks.pageId, page.id),
       eq(blocks.isVisible, true),
@@ -66,12 +68,41 @@ export async function getPublicPageByUsernameUncached(username: string) {
     orderBy: [asc(blocks.position), asc(blocks.createdAt)],
   });
 
+  const formattedLinks = linkBlocks.map((b) => ({
+    id: b.id,
+    title: b.title,
+    url: b.url,
+    platform: detectPlatform(b.url),
+  }));
+
+  // 2. Fetch visible social blocks
+  const socialBlocks = await db.query.blocks.findMany({
+    where: and(
+      eq(blocks.pageId, page.id),
+      eq(blocks.isVisible, true),
+      eq(blocks.type, "social")
+    ),
+    columns: {
+      id: true,
+      platform: true,
+      title: true,
+    },
+    orderBy: [asc(blocks.position), asc(blocks.createdAt)],
+  });
+
+  const formattedSocials = socialBlocks.map((s) => ({
+    id: s.id,
+    platform: s.platform || "website",
+    label: s.title,
+  }));
+
   return {
     username: page.username,
     displayName: page.displayName,
     bio: page.bio,
     avatarUrl: page.avatarUrl,
     theme: page.theme,
-    links: pageBlocks,
+    links: formattedLinks,
+    socials: formattedSocials,
   };
 }

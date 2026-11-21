@@ -72,7 +72,10 @@ export function LinksList({ initialLinks: _ignored }: { initialLinks: LinkBlock[
       updateBlocks(newLinks); // Optimistic update
 
       startTransition(async () => {
-        const res = await reorderBlocksAction(newLinks.map((l) => l.id));
+        const res = await reorderBlocksAction({
+          group: "link",
+          orderedIds: newLinks.map((l) => l.id),
+        });
         if (!res.ok) {
           // Revert on error
           updateBlocks(links);

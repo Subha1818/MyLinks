@@ -7,6 +7,14 @@ import { getPublicUrlDisplay } from "@/lib/urls";
 function PhoneFrame({ scale = 1 }: { scale?: number }) {
   const { draft } = usePageDraft();
   const visibleLinks = draft.blocks.filter((b) => b.isVisible);
+  const visibleSocials = (draft.socials || [])
+    .filter((s) => s.isVisible)
+    .map((s) => ({
+      id: s.id,
+      platform: s.platform,
+      label: s.title,
+    }));
+
   return (
     <div
       className="relative w-[320px] h-[640px] rounded-[48px] bg-ink border-[8px] border-ink shadow-2xl shrink-0 overflow-hidden"
@@ -27,6 +35,7 @@ function PhoneFrame({ scale = 1 }: { scale?: number }) {
           bio={draft.bio}
           avatarUrl={draft.avatarUrl}
           links={visibleLinks}
+          socials={visibleSocials}
           theme={draft.theme}
         />
       </div>

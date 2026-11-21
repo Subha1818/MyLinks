@@ -88,11 +88,19 @@ export type AvatarShape = z.infer<typeof AvatarShapeSchema>;
 export const SpacingSchema = z.enum(["compact", "normal", "relaxed"]);
 export type Spacing = z.infer<typeof SpacingSchema>;
 
+export const SocialIconStyleSchema = z.enum(["plain", "filled"]);
+export type SocialIconStyle = z.infer<typeof SocialIconStyleSchema>;
+
+export const LinkIconStyleSchema = z.enum(["auto", "off"]);
+export type LinkIconStyle = z.infer<typeof LinkIconStyleSchema>;
+
 export const LayoutSchema = z
   .object({
     align: LayoutAlignSchema.default("center"),
     avatarShape: AvatarShapeSchema.default("circle"),
     spacing: SpacingSchema.default("normal"),
+    socialIcons: SocialIconStyleSchema.default("plain"),
+    linkIcons: LinkIconStyleSchema.default("auto"),
   })
   .strict();
 export type LayoutConfig = z.infer<typeof LayoutSchema>;
@@ -101,6 +109,8 @@ export const DEFAULT_LAYOUT: LayoutConfig = {
   align: "center",
   avatarShape: "circle",
   spacing: "normal",
+  socialIcons: "plain",
+  linkIcons: "auto",
 };
 
 // -------------------------------------------------------------

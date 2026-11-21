@@ -323,25 +323,25 @@ export function ProfileView({
                   </>
                 );
               } else if (layout === "thumb" && hasTrustedImg) {
-                cardLayoutClass = "flex items-center p-2.5 sm:p-3 min-h-[80px] gap-3.5";
+                cardLayoutClass = "flex items-center justify-center px-4 py-3.5 min-h-[56px] sm:min-h-[60px]";
                 cardContent = (
                   <>
                     <img
                       src={item.thumbnailUrl!}
-                      alt={item.thumbnailAlt || ""}
+                      alt={item.thumbnailAlt || item.title || ""}
                       width={64}
                       height={64}
                       loading="lazy"
                       decoding="async"
-                      className={`w-16 h-16 shrink-0 object-cover ${thumbImgRadiusClass}`}
+                      className={`w-10 h-10 sm:w-11 sm:h-11 shrink-0 object-cover absolute left-2.5 sm:left-3.5 top-1/2 -translate-y-1/2 ${thumbImgRadiusClass}`}
                     />
-                    <div
-                      className={`flex-1 min-w-0 flex items-center ${
-                        isLeftAlign ? "justify-start text-left" : "justify-center text-center"
+                    <span
+                      className={`truncate text-base font-semibold ${
+                        isLeftAlign ? "pl-12 sm:pl-14 pr-4" : "px-12 sm:px-14"
                       }`}
                     >
-                      <span className="truncate text-base">{item.title}</span>
-                    </div>
+                      {item.title}
+                    </span>
                   </>
                 );
               } else {
@@ -356,7 +356,7 @@ export function ProfileView({
                   <>
                     {showIcon && (
                       <div
-                        className={`absolute left-2.5 sm:left-3.5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center shrink-0 border border-current/20 bg-current/[0.06] ${thumbImgRadiusClass}`}
+                        className={`absolute left-2.5 sm:left-3.5 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center shrink-0 border border-current/20 bg-current/[0.06] ${thumbImgRadiusClass}`}
                         aria-hidden="true"
                       >
                         <PlatformIcon platformKey={platformKey} size={20} />
